@@ -1,9 +1,9 @@
 package cc.jinhx.process.result;
 
+import cc.jinhx.process.enums.ResultEnums;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * BaseResult
@@ -22,17 +22,19 @@ public class BaseResult<T> implements Serializable {
 
     private String msg;
 
+    public BaseResult(T data){
+        this.data = data;
+        this.code = ResultEnums.SUCCESS.getCode();
+        this.msg = ResultEnums.SUCCESS.getMsg();
+    }
+
     public BaseResult(Integer code, String msg){
         this.code = code;
         this.msg = msg;
     }
 
-    public BaseResult(T data){
-        this.data = data;
-    }
-
     public boolean isSuccess(){
-        return Objects.isNull(code) && Objects.isNull(msg);
+        return ResultEnums.SUCCESS.getCode().equals(this.code);
     }
 
     public boolean isFail(){

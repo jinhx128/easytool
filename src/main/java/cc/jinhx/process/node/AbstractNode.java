@@ -67,6 +67,12 @@ public abstract class AbstractNode<T> {
     }
 
     /**
+     * 参数校验
+     */
+    protected void checkParams(){
+    }
+
+    /**
      * 节点执行方法
      *
      * @param nodeChainContext nodeChainContext
@@ -98,8 +104,28 @@ public abstract class AbstractNode<T> {
             if (isSkip(nodeChainContext)) {
                 buildLogInfo(logInfo, Lists.newArrayList(LOG_SKIP, TRUE), logLevel, NodeLogLevelEnums.BASE.getCode(), false);
             } else {
+                try {
+                    this.checkParams();
+//            log.info(logStr + " checkParams success");
+                } catch (BusinessException e) {
+                    log.error(logStr + " checkParams business fail msg={}", ExceptionUtils.getStackTrace(e));
+                    throw e;
+                } catch (Exception e) {
+                    log.error(logStr + " checkParams fail msg={}", ExceptionUtils.getStackTrace(e));
+                    throw e;
+                }
+
                 buildLogInfo(logInfo, Lists.newArrayList(LOG_SKIP, FALSE), logLevel, NodeLogLevelEnums.BASE.getCode(), false);
-                process(nodeChainContext);
+
+                try {
+                    process(nodeChainContext);
+                } catch (BusinessException e) {
+                    log.error(logStr + " execute business fail nodeName={} msg={}", nodeName, ExceptionUtils.getStackTrace(e));
+                    throw e;
+                } catch (Exception e) {
+                    log.error(logStr + " execute fail nodeName={} msg={}", nodeName, ExceptionUtils.getStackTrace(e));
+                    throw e;
+                }
             }
 
             afterLog();

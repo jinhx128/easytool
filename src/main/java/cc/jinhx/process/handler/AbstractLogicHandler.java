@@ -130,6 +130,20 @@ public abstract class AbstractLogicHandler<T> {
     }
 
     /**
+     * 构建成功结果
+     */
+    protected BaseResult<T> builSuccessResult(T data) {
+        return new BaseResult<>(data);
+    }
+
+    /**
+     * 构建失败结果
+     */
+    protected BaseResult<T> builFailResult(Integer code, String msg) {
+        return new BaseResult<>(code, msg);
+    }
+
+    /**
      * 成功时执行
      */
     protected void onSuccess() {
@@ -151,7 +165,7 @@ public abstract class AbstractLogicHandler<T> {
             log.info("handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectToJson(logicHandlerBaseInfo));
         } catch (BusinessException e) {
             log.error("handlerLog {} checkParams business fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectToJson(logicHandlerBaseInfo), ExceptionUtils.getStackTrace(e));
-            return new BaseResult<>(e.getCode(), e.getMsg());
+            return builFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
             log.error("handlerLog {} checkParams fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectToJson(logicHandlerBaseInfo), ExceptionUtils.getStackTrace(e));
             throw e;
@@ -171,7 +185,7 @@ public abstract class AbstractLogicHandler<T> {
         }catch (BusinessException e) {
             this.onFail();
             log.error("handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), ExceptionUtils.getStackTrace(e));
-            return new BaseResult<>(e.getCode(), e.getMsg());
+            return builFailResult(e.getCode(), e.getMsg());
         } catch (Throwable e) {
             this.onFail();
             log.error("handlerLog {} execute fail msg={}", logicHandlerBaseInfo.getLogStr(), ExceptionUtils.getStackTrace(e));
