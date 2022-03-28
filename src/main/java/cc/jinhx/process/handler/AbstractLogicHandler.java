@@ -1,14 +1,18 @@
-package com.jinhx.process.handler;
+package cc.jinhx.process.handler;
 
-import com.jinhx.process.enums.ExceptionEnums;
-import com.jinhx.process.exception.ProcessException;
-import com.jinhx.process.util.JsonUtils;
+import cc.jinhx.process.chain.AbstractNodeChain;
+import cc.jinhx.process.enums.ExceptionEnums;
+import cc.jinhx.process.manager.NodeChainManager;
+import cc.jinhx.process.util.JsonUtils;
+import cc.jinhx.process.chain.NodeChainContext;
+import cc.jinhx.process.exception.ProcessException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang.time.StopWatch;
 
 import java.util.Objects;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * 抽象逻辑处理器
@@ -21,12 +25,16 @@ public abstract class AbstractLogicHandler<T> {
 
     private LogicHandlerBaseInfo logicHandlerBaseInfo;
 
+    protected AbstractLogicHandler() {
+        init(new LogicHandlerBaseInfo(), null);
+    }
+
     protected AbstractLogicHandler(LogicHandlerBaseInfo logicHandlerBaseInfo) {
         if (Objects.isNull(logicHandlerBaseInfo)){
             throw new ProcessException(ExceptionEnums.LOGIC_HANDLER_BASE_INFO_NOT_NULL);
         }
 
-        init(logicHandlerBaseInfo, "act=" + Thread.currentThread().getStackTrace()[3].getMethodName());
+        init(logicHandlerBaseInfo, null);
     }
 
     protected AbstractLogicHandler(LogicHandlerBaseInfo logicHandlerBaseInfo, String logStr) {
@@ -42,8 +50,58 @@ public abstract class AbstractLogicHandler<T> {
     }
 
     private void init(LogicHandlerBaseInfo logicHandlerBaseInfo, String logStr){
-        logicHandlerBaseInfo.setLogStr(logStr + " act=" + Thread.currentThread().getStackTrace()[3].getMethodName());
         this.logicHandlerBaseInfo = logicHandlerBaseInfo;
+        if (StringUtils.isEmpty(logStr)){
+            logicHandlerBaseInfo.setLogStr("act=" + Thread.currentThread().getStackTrace()[4].getMethodName());
+        }else {
+            logicHandlerBaseInfo.setLogStr(logStr + " act=" + Thread.currentThread().getStackTrace()[4].getMethodName());
+        }
+    }
+
+    protected void executeNodeChain(Class<? extends AbstractNodeChain> clazz, NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor) {
+        executeNodeChain(clazz, null, nodeChainContext, threadPoolExecutor);
+    }
+
+    protected void executeNodeChain(Class<? extends AbstractNodeChain> clazz, NodeChainContext<?> nodeChainContext) {
+        executeNodeChain(clazz, null, nodeChainContext);
+    }
+
+    /**
+     * 执行指定节点链
+     *
+     * @param clazz clazz
+     * @param logLevel logLevel
+     * @param nodeChainContext nodeChainContext
+     * @param threadPoolExecutor threadPoolExecutor
+     */
+    protected void executeNodeChain(Class<? extends AbstractNodeChain> clazz, Integer logLevel, NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor) {
+        getNodeChain(clazz, logLevel).execute(nodeChainContext, threadPoolExecutor);
+    }
+
+    /**
+     * 执行指定节点链
+     *
+     * @param clazz clazz
+     * @param logLevel logLevel
+     * @param nodeChainContext nodeChainContext
+     */
+    protected void executeNodeChain(Class<? extends AbstractNodeChain> clazz, Integer logLevel, NodeChainContext<?> nodeChainContext) {
+        getNodeChain(clazz, logLevel).execute(nodeChainContext);
+    }
+
+    /**
+     * 获取指定节点链
+     *
+     * @param clazz clazz
+     * @param logLevel logLevel
+     */
+    private AbstractNodeChain getNodeChain(Class<? extends AbstractNodeChain> clazz, Integer logLevel) {
+        AbstractNodeChain abstractNodeChain = NodeChainManager.getNodeChain(clazz, logLevel);
+        if (Objects.isNull(abstractNodeChain)){
+            throw new ProcessException(ExceptionEnums.NODE_CHAIN_UNREGISTERED.getMsg() + "=" + clazz.getName());
+        }
+
+        return abstractNodeChain;
     }
 
     /**

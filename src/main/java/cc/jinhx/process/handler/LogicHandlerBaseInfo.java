@@ -1,4 +1,4 @@
-package com.jinhx.process.handler;
+package cc.jinhx.process.handler;
 
 import lombok.Data;
 import org.apache.commons.lang.StringUtils;

@@ -1,4 +1,4 @@
-package com.jinhx.process.enums;
+package cc.jinhx.process.enums;
 
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;

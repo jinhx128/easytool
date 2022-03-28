@@ -1,4 +1,4 @@
-package com.jinhx.process.annotation;
+package cc.jinhx.process.annotation;
 
 import java.lang.annotation.*;
 

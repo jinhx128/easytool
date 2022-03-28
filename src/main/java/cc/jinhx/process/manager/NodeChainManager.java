@@ -1,8 +1,8 @@
-package com.jinhx.process.manager;
+package cc.jinhx.process.manager;
 
-import com.jinhx.process.annotation.NodeChain;
-import com.jinhx.process.chain.AbstractNodeChain;
-import com.jinhx.process.enums.NodeChainLogLevelEnums;
+import cc.jinhx.process.chain.AbstractNodeChain;
+import cc.jinhx.process.annotation.NodeChain;
+import cc.jinhx.process.enums.NodeChainLogLevelEnums;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Constructor;

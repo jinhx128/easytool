@@ -1,4 +1,4 @@
-package com.jinhx.process.util;
+package cc.jinhx.process.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;

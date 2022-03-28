@@ -1,12 +1,12 @@
-package com.jinhx.process.node;
+package cc.jinhx.process.node;
 
+import cc.jinhx.process.annotation.Node;
+import cc.jinhx.process.chain.NodeChainContext;
+import cc.jinhx.process.enums.NodeFailHandleEnums;
+import cc.jinhx.process.enums.NodeLogLevelEnums;
+import cc.jinhx.process.enums.NodeTimeoutEnums;
+import cc.jinhx.process.util.JsonUtils;
 import com.google.common.collect.Lists;
-import com.jinhx.process.annotation.Node;
-import com.jinhx.process.chain.NodeChainContext;
-import com.jinhx.process.enums.NodeFailHandleEnums;
-import com.jinhx.process.enums.NodeLogLevelEnums;
-import com.jinhx.process.enums.NodeTimeoutEnums;
-import com.jinhx.process.util.JsonUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -70,7 +70,7 @@ public abstract class AbstractNode<T> {
      */
     public void execute(NodeChainContext<T> nodeChainContext, Integer logLevel, String nodeChainName) {
         String logStr = NODE_LOG + nodeChainContext.getLogStr();
-        String nodeName = this.getClass().getSimpleName();
+        String nodeName = this.getClass().getName();
         try {
             // 日志
             StringBuilder logInfo = new StringBuilder(logStr);

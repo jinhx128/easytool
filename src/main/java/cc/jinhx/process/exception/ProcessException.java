@@ -1,6 +1,6 @@
-package com.jinhx.process.exception;
+package cc.jinhx.process.exception;
 
-import com.jinhx.process.enums.ExceptionEnums;
+import cc.jinhx.process.enums.ExceptionEnums;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -20,11 +20,15 @@ public class ProcessException extends RuntimeException {
 
     public ProcessException(ExceptionEnums responseEnums, Throwable e){
         super(responseEnums.getMsg(), e);
-        msg = responseEnums.getMsg();
+        msg = responseEnums.getMsg() + "=" + responseEnums.getMsg();
     }
 
     public ProcessException(ExceptionEnums responseEnums){
         msg = responseEnums.getMsg();
+    }
+
+    public ProcessException(String msg){
+        this.msg = msg;
     }
 
 }

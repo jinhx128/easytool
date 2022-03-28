@@ -1,4 +1,4 @@
-package com.jinhx.process.enums;
+package cc.jinhx.process.enums;
 
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
@@ -10,28 +10,27 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * NodeLogLevelEnums
+ * NodeFailHandleEnums
  *
  * @author jinhx
  * @since 2018-08-06
  */
 @AllArgsConstructor
 @Getter
-public enum NodeLogLevelEnums {
+public enum NodeFailHandleEnums {
 
-    NO(1, "不打印"),
-    BASE(2, "打印基本信息"),
-    BASE_AND_TIME(3, "打印基本信息和耗时"),
-    BASE_AND_TIME_AND_PARAMS(4, "打印基本信息和耗时和参数"),
+    INTERRUPT(1, "中断链路"),
+    ABANDON(2, "抛弃节点"),
+//    RETRY(3, "重试节点"),
     ;
 
     private Integer code;
     private String msg;
 
-    private static final Map<Integer, NodeLogLevelEnums> MAP;
+    private static final Map<Integer, NodeFailHandleEnums> MAP;
 
     static {
-        MAP = Arrays.stream(NodeLogLevelEnums.values()).collect(Collectors.toMap(NodeLogLevelEnums::getCode, obj -> obj));
+        MAP = Arrays.stream(NodeFailHandleEnums.values()).collect(Collectors.toMap(NodeFailHandleEnums::getCode, obj -> obj));
     }
 
     public static Boolean containsCode(Integer code) {
@@ -46,7 +45,7 @@ public enum NodeLogLevelEnums {
         return MAP.get(code).getMsg();
     }
 
-    public static NodeLogLevelEnums getEnum(Integer code) {
+    public static NodeFailHandleEnums getEnum(Integer code) {
         if (!MAP.containsKey(code)) {
             return null;
         }
@@ -54,7 +53,7 @@ public enum NodeLogLevelEnums {
         return MAP.get(code);
     }
 
-    public static List<NodeLogLevelEnums> getEnums() {
+    public static List<NodeFailHandleEnums> getEnums() {
         return Lists.newArrayList(MAP.values());
     }
 

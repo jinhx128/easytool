@@ -1,10 +1,10 @@
-package com.jinhx.process.manager;
+package cc.jinhx.process.manager;
 
-import com.jinhx.process.annotation.Node;
-import com.jinhx.process.enums.NodeFailHandleEnums;
-import com.jinhx.process.enums.NodeTimeoutEnums;
-import com.jinhx.process.node.AbstractNode;
-import com.jinhx.process.util.SpringUtils;
+import cc.jinhx.process.annotation.Node;
+import cc.jinhx.process.enums.NodeFailHandleEnums;
+import cc.jinhx.process.enums.NodeTimeoutEnums;
+import cc.jinhx.process.node.AbstractNode;
+import cc.jinhx.process.util.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 

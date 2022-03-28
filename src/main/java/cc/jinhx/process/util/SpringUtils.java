@@ -1,4 +1,4 @@
-package com.jinhx.process.util;
+package cc.jinhx.process.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;

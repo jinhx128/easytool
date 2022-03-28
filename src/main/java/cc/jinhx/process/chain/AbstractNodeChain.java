@@ -1,15 +1,15 @@
-package com.jinhx.process.chain;
+package cc.jinhx.process.chain;
 
+import cc.jinhx.process.enums.ExceptionEnums;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.jinhx.process.annotation.NodeChain;
-import com.jinhx.process.enums.ExceptionEnums;
-import com.jinhx.process.enums.NodeChainLogLevelEnums;
-import com.jinhx.process.enums.NodeFailHandleEnums;
-import com.jinhx.process.enums.NodeLogLevelEnums;
-import com.jinhx.process.exception.ProcessException;
-import com.jinhx.process.manager.NodeManager;
-import com.jinhx.process.node.AbstractNode;
+import cc.jinhx.process.annotation.NodeChain;
+import cc.jinhx.process.enums.NodeChainLogLevelEnums;
+import cc.jinhx.process.enums.NodeFailHandleEnums;
+import cc.jinhx.process.enums.NodeLogLevelEnums;
+import cc.jinhx.process.exception.ProcessException;
+import cc.jinhx.process.manager.NodeManager;
+import cc.jinhx.process.node.AbstractNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -38,19 +38,19 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     private Integer logLevel = NodeChainLogLevelEnums.BASE_AND_TIME_AND_FIRST_AND_LAST_NODES_PARAMS.getCode();
 
     public void add(Class<? extends AbstractNode> node) {
-        add(node.getSimpleName(), node, null, null);
+        add(node.getName(), node, null, null);
     }
 
     public void add(Class<? extends AbstractNode> node, Integer failHandle) {
-        add(node.getSimpleName(), node, failHandle, null);
+        add(node.getName(), node, failHandle, null);
     }
 
     public void add(Class<? extends AbstractNode> node, Long timeout) {
-        add(node.getSimpleName(), node, null, timeout);
+        add(node.getName(), node, null, timeout);
     }
 
     public void add(Class<? extends AbstractNode> node, Integer failHandle, Long timeout) {
-        add(node.getSimpleName(), node, failHandle, timeout);
+        add(node.getName(), node, failHandle, timeout);
     }
 
     public void add(String groupName, Class<? extends AbstractNode> node) {
@@ -72,6 +72,21 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
         }
     }
 
+    public void addGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle) {
+        addGroup(nodes, failHandle, null);
+    }
+
+    public void addGroup(List<Class<? extends AbstractNode>> nodes, Long timeout) {
+        addGroup(nodes, null, timeout);
+    }
+
+    public void addGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle, Long timeout) {
+        int i = nodes.hashCode();
+        for (Class<? extends AbstractNode> node : nodes) {
+            add(String.valueOf(i), node, failHandle, timeout);
+        }
+    }
+
     /**
      * 添加指定组节点，一个链路按理说只有一类型的节点，如果有多个，默认覆盖前面的，使用最后一个
      *
@@ -81,10 +96,15 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
      * @param timeout timeout
      */
     public void add(String groupName, Class<? extends AbstractNode> node, Integer failHandle, Long timeout) {
+        AbstractNode abstractNode = NodeManager.getNode(node, failHandle, timeout);
+        if (Objects.isNull(abstractNode)){
+            throw new ProcessException(ExceptionEnums.NODE_UNREGISTERED.getMsg() + "=" + node.getName());
+        }
+
         if (this.containsKey(groupName)) {
-            this.get(groupName).add(NodeManager.getNode(node, failHandle, timeout));
+            this.get(groupName).add(abstractNode);
         } else {
-            this.put(groupName, Lists.newArrayList(NodeManager.getNode(node, failHandle, timeout)));
+            this.put(groupName, Lists.newArrayList(abstractNode));
         }
     }
 
@@ -149,19 +169,19 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
 //                    return null;
 //                }));
                 Integer finalLogLevel = logLevel;
-
+                String nodeChainName = this.getClass().getName();
                 if (Objects.nonNull(threadPoolExecutor)){
                     futureMap.put(CompletableFuture.supplyAsync(() -> {
-                        abstractNode.execute(nodeChainContext, finalLogLevel, this.getClass().getSimpleName());
+                        abstractNode.execute(nodeChainContext, finalLogLevel, nodeChainName);
                         return null;
                     }, threadPoolExecutor), abstractNode);
                 } else if (Objects.nonNull(getThreadPoolExecutor())) {
                     futureMap.put(CompletableFuture.supplyAsync(() -> {
-                        abstractNode.execute(nodeChainContext, finalLogLevel, this.getClass().getSimpleName());
+                        abstractNode.execute(nodeChainContext, finalLogLevel, nodeChainName);
                         return null;
                     }, getThreadPoolExecutor()), abstractNode);
                 } else {
-                    throw new ProcessException(ExceptionEnums.NODE_CHAIN_THREAD_POOL_EXECUTOR_NOT_NULL);
+                    throw new ProcessException(ExceptionEnums.NODE_CHAIN_THREAD_POOL_EXECUTOR_NOT_NULL.getMsg() + "=" + nodeChainName);
                 }
             }
 
@@ -171,20 +191,20 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                 AbstractNode abstractNode = futureEntry.getValue();
                 Long timeout = abstractNode.getTimeout();
                 Integer failHandle = abstractNode.getFailHandle();
-                String nodeName = abstractNode.getClass().getSimpleName();
+                String nodeName = abstractNode.getClass().getName();
                 try {
                     future.get(timeout, TimeUnit.MILLISECONDS);
                 } catch (TimeoutException e) {
                     // 中断超时线程，不一定成功
                     boolean cancel = future.cancel(true);
                     log.error("nodeChainLog {} execute timeout nodeName={} timeout={} cancel={}", nodeChainContext.getLogStr(), nodeName, timeout, cancel);
-                    processException = new ProcessException(ExceptionEnums.NODE_TIMEOUT);
+                    processException = new ProcessException(ExceptionEnums.NODE_TIMEOUT.getMsg() + "=" + nodeName);
                 } catch (ProcessException e) {
                     log.error("nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, ExceptionUtils.getStackTrace(e));
                     processException = e;
                 } catch (Exception e) {
                     log.error("nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, ExceptionUtils.getStackTrace(e));
-                    processException = new ProcessException(ExceptionEnums.NODE_UNKNOWN);
+                    processException = new ProcessException(ExceptionEnums.NODE_UNKNOWN.getMsg() + "=" + nodeName);
                 }
 
                 // 降级处理

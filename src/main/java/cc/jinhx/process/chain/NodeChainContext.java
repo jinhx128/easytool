@@ -1,7 +1,7 @@
-package com.jinhx.process.chain;
+package cc.jinhx.process.chain;
 
-import com.jinhx.process.enums.ExceptionEnums;
-import com.jinhx.process.exception.ProcessException;
+import cc.jinhx.process.enums.ExceptionEnums;
+import cc.jinhx.process.exception.ProcessException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
