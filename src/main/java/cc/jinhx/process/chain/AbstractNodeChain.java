@@ -1,6 +1,7 @@
 package cc.jinhx.process.chain;
 
 import cc.jinhx.process.enums.ExceptionEnums;
+import cc.jinhx.process.exception.BusinessException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import cc.jinhx.process.annotation.NodeChain;
@@ -202,6 +203,9 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                 } catch (ProcessException e) {
                     log.error("nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, ExceptionUtils.getStackTrace(e));
                     processException = e;
+                } catch (BusinessException e) {
+                    log.error("nodeChainLog {} execute business fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, ExceptionUtils.getStackTrace(e));
+                    throw e;
                 } catch (Exception e) {
                     log.error("nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, ExceptionUtils.getStackTrace(e));
                     processException = new ProcessException(ExceptionEnums.NODE_UNKNOWN.getMsg() + "=" + nodeName);

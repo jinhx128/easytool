@@ -5,6 +5,7 @@ import cc.jinhx.process.chain.NodeChainContext;
 import cc.jinhx.process.enums.NodeFailHandleEnums;
 import cc.jinhx.process.enums.NodeLogLevelEnums;
 import cc.jinhx.process.enums.NodeTimeoutEnums;
+import cc.jinhx.process.exception.BusinessException;
 import cc.jinhx.process.util.JsonUtils;
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -56,6 +57,27 @@ public abstract class AbstractNode<T> {
     }
 
     /**
+     * 业务失败
+     *
+     * @param data data
+     * @param code code
+     * @param msg msg
+     */
+    protected void businessFail(Object data, Integer code, String msg){
+        throw new BusinessException(data, code, msg);
+    }
+
+    /**
+     * 业务失败
+     *
+     * @param code code
+     * @param msg msg
+     */
+    protected void businessFail(Integer code, String msg){
+        throw new BusinessException(code, msg);
+    }
+
+    /**
      * 节点执行方法
      *
      * @param nodeChainContext nodeChainContext
@@ -99,6 +121,9 @@ public abstract class AbstractNode<T> {
             long time = stopWatch.getTime();
 
             buildLogInfo(logInfo, Lists.newArrayList(LOG_TIME, time), logLevel, NodeLogLevelEnums.BASE_AND_TIME.getCode(), true);
+        } catch (BusinessException e) {
+            log.error(logStr + " execute business fail nodeName={} msg={}", nodeName, ExceptionUtils.getStackTrace(e));
+            throw e;
         } catch (Exception e) {
             log.error(logStr + " execute fail nodeName={} msg={}", nodeName, ExceptionUtils.getStackTrace(e));
             throw e;
