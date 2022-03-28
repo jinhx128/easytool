@@ -3,6 +3,7 @@ package cc.jinhx.process.result;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * BaseResult
@@ -26,10 +27,16 @@ public class BaseResult<T> implements Serializable {
         this.msg = msg;
     }
 
-    public BaseResult(T data, Integer code, String msg){
+    public BaseResult(T data){
         this.data = data;
-        this.code = code;
-        this.msg = msg;
+    }
+
+    public boolean isSuccess(){
+        return Objects.isNull(code) && Objects.isNull(msg);
+    }
+
+    public boolean isFail(){
+        return !isSuccess();
     }
 
 }

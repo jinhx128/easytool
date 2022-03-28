@@ -59,17 +59,6 @@ public abstract class AbstractNode<T> {
     /**
      * 业务失败
      *
-     * @param data data
-     * @param code code
-     * @param msg msg
-     */
-    protected void businessFail(Object data, Integer code, String msg){
-        throw new BusinessException(data, code, msg);
-    }
-
-    /**
-     * 业务失败
-     *
      * @param code code
      * @param msg msg
      */

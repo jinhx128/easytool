@@ -1,13 +1,13 @@
 package cc.jinhx.process.handler;
 
 import cc.jinhx.process.chain.AbstractNodeChain;
+import cc.jinhx.process.chain.NodeChainContext;
 import cc.jinhx.process.enums.ExceptionEnums;
 import cc.jinhx.process.exception.BusinessException;
+import cc.jinhx.process.exception.ProcessException;
 import cc.jinhx.process.manager.NodeChainManager;
 import cc.jinhx.process.result.BaseResult;
 import cc.jinhx.process.util.JsonUtils;
-import cc.jinhx.process.chain.NodeChainContext;
-import cc.jinhx.process.exception.ProcessException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -111,6 +111,16 @@ public abstract class AbstractLogicHandler<T> {
      */
     protected abstract void checkParams();
 
+    /**
+     * 业务失败
+     *
+     * @param code code
+     * @param msg msg
+     */
+    protected void businessFail(Integer code, String msg){
+        throw new BusinessException(code, msg);
+    }
+
     protected abstract BaseResult<T> process();
 
     /**
@@ -141,7 +151,7 @@ public abstract class AbstractLogicHandler<T> {
             log.info("handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectToJson(logicHandlerBaseInfo));
         } catch (BusinessException e) {
             log.error("handlerLog {} checkParams business fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectToJson(logicHandlerBaseInfo), ExceptionUtils.getStackTrace(e));
-            return new BaseResult(e.getData(), e.getCode(), e.getMsg());
+            return new BaseResult<>(e.getCode(), e.getMsg());
         } catch (Exception e) {
             log.error("handlerLog {} checkParams fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectToJson(logicHandlerBaseInfo), ExceptionUtils.getStackTrace(e));
             throw e;
@@ -161,7 +171,7 @@ public abstract class AbstractLogicHandler<T> {
         }catch (BusinessException e) {
             this.onFail();
             log.error("handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), ExceptionUtils.getStackTrace(e));
-            return new BaseResult(e.getData(), e.getCode(), e.getMsg());
+            return new BaseResult<>(e.getCode(), e.getMsg());
         } catch (Throwable e) {
             this.onFail();
             log.error("handlerLog {} execute fail msg={}", logicHandlerBaseInfo.getLogStr(), ExceptionUtils.getStackTrace(e));
