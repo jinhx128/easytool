@@ -22,8 +22,8 @@ public enum NodeTimeoutEnums {
     SHORT(50L, "短"),
     SHORTER(100L, "较短"),
     COMMONLY(200L, "一般"),
-    LONG(500L, "较长"),
-    LONGER(1000L, "长"),
+    LONGER(500L, "较长"),
+    LONG(1000L, "长"),
     ;
 
     private Long code;
