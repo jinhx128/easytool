@@ -22,6 +22,9 @@ public class BaseResult<T> implements Serializable {
 
     private String msg;
 
+    private BaseResult(){
+    }
+
     public BaseResult(T data){
         this.data = data;
         this.code = ResultEnums.SUCCESS.getCode();

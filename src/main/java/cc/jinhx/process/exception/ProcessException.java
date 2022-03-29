@@ -31,4 +31,7 @@ public class ProcessException extends RuntimeException {
         this.msg = msg;
     }
 
+    public ProcessException(){
+    }
+
 }

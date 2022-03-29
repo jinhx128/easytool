@@ -1,6 +1,8 @@
 package cc.jinhx.process.handler;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
@@ -12,6 +14,8 @@ import java.io.Serializable;
  * @since 2021-08-06
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class LogicHandlerBaseInfo implements Serializable {
 
     private static final long serialVersionUID = 4035426155692378372L;

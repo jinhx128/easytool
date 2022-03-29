@@ -1,7 +1,9 @@
 package cc.jinhx.process.exception;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 /**
  * BusinessException
@@ -11,6 +13,8 @@ import lombok.EqualsAndHashCode;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class BusinessException extends RuntimeException {
 
     private static final long serialVersionUID = 8431670825597478959L;
@@ -18,10 +22,5 @@ public class BusinessException extends RuntimeException {
     private Integer code;
 
     private String msg;
-
-    public BusinessException(Integer code, String msg){
-        this.code = code;
-        this.msg = msg;
-    }
 
 }
