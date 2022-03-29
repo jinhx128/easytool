@@ -124,7 +124,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
      * @param failHandle failHandle
      * @param timeout timeout
      */
-    public void add(String groupName, Class<? extends AbstractNode> node, Integer failHandle, Long timeout) {
+    private void add(String groupName, Class<? extends AbstractNode> node, Integer failHandle, Long timeout) {
         AbstractNode abstractNode = NodeManager.getNode(node, failHandle, timeout);
         if (Objects.isNull(abstractNode)){
             throw new ProcessException(ExceptionEnums.NODE_UNREGISTERED.getMsg() + "=" + node.getName());
