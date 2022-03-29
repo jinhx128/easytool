@@ -6,10 +6,10 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 /**
- * BusinessException
+ * 业务异常，要返回的信息，比如xxx数据不存在
  *
  * @author jinhx
- * @since 2018-08-06
+ * @since 2022-03-21
  */
 @EqualsAndHashCode(callSuper = true)
 @Data

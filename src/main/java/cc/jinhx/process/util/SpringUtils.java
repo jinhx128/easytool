@@ -9,11 +9,13 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 /**
  * 加载和获取spring上下文环境，支持xml文件配置方式和静态代码加载方式两种形式
  *
  * @author jinhx
- * @since 2021-08-02
+ * @since 2022-03-21
  */
 @Component
 @Slf4j
@@ -50,7 +52,7 @@ public class SpringUtils implements ApplicationContextAware {
      * @return ApplicationContext
      */
     public static ApplicationContext getApplicationContext() {
-        if (applicationContext == null) {
+        if (Objects.isNull(applicationContext)) {
             throw new IllegalStateException("ApplicationContext未注入，请在Spring配置文件中定义SpringContext或在应用启动时手动加载");
         }
         return applicationContext;

@@ -1,13 +1,11 @@
 package cc.jinhx.process.chain;
 
-import cc.jinhx.process.enums.ExceptionEnums;
-import cc.jinhx.process.exception.BusinessException;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import cc.jinhx.process.annotation.NodeChain;
+import cc.jinhx.process.enums.ExceptionEnums;
 import cc.jinhx.process.enums.NodeChainLogLevelEnums;
 import cc.jinhx.process.enums.NodeFailHandleEnums;
 import cc.jinhx.process.enums.NodeLogLevelEnums;
+import cc.jinhx.process.exception.BusinessException;
 import cc.jinhx.process.exception.ProcessException;
 import cc.jinhx.process.manager.NodeManager;
 import cc.jinhx.process.node.AbstractNode;
@@ -16,17 +14,14 @@ import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.exception.ExceptionUtils;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
  * 抽象节点链
  *
  * @author jinhx
- * @since 2021-08-06
+ * @since 2022-03-21
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -38,53 +33,86 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
 
     private Integer logLevel = NodeChainLogLevelEnums.BASE_AND_TIME_AND_FIRST_AND_LAST_NODES_PARAMS.getCode();
 
-    public void add(Class<? extends AbstractNode> node) {
-        add(node.getName(), node, null, null);
+    private boolean asyncLastNode = false;
+
+    private String lastNodeName;
+
+    public void addSyncNode(Class<? extends AbstractNode> node) {
+        addSyncNode(node, null, null);
     }
 
-    public void add(Class<? extends AbstractNode> node, Integer failHandle) {
-        add(node.getName(), node, failHandle, null);
+    public void addSyncNode(Class<? extends AbstractNode> node, Integer failHandle) {
+        addSyncNode(node, failHandle, null);
     }
 
-    public void add(Class<? extends AbstractNode> node, Long timeout) {
-        add(node.getName(), node, null, timeout);
+    public void addSyncNode(Class<? extends AbstractNode> node, Long timeout) {
+        addSyncNode(node, null, timeout);
     }
 
-    public void add(Class<? extends AbstractNode> node, Integer failHandle, Long timeout) {
+    public void addSyncNode(Class<? extends AbstractNode> node, Integer failHandle, Long timeout) {
         add(node.getName(), node, failHandle, timeout);
-    }
-
-    public void add(String groupName, Class<? extends AbstractNode> node) {
-        add(groupName, node, null, null);
-    }
-
-    public void add(String groupName, Class<? extends AbstractNode> node, Integer failHandle) {
-        add(groupName, node, failHandle, null);
-    }
-
-    public void add(String groupName, Class<? extends AbstractNode> node, Long timeout) {
-        add(groupName, node, null, timeout);
-    }
-
-    public void addGroup(List<Class<? extends AbstractNode>> nodes) {
-        int i = nodes.hashCode();
-        for (Class<? extends AbstractNode> node : nodes) {
-            add(String.valueOf(i), node, null, null);
+        if (this.asyncLastNode){
+            this.asyncLastNode = false;
         }
     }
 
-    public void addGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle) {
-        addGroup(nodes, failHandle, null);
+    public void addAsyncNode(Class<? extends AbstractNode> node) {
+        addAsyncNode(node, null, null, false);
     }
 
-    public void addGroup(List<Class<? extends AbstractNode>> nodes, Long timeout) {
-        addGroup(nodes, null, timeout);
+    public void addAsyncNode(Class<? extends AbstractNode> node, Integer failHandle) {
+        addAsyncNode(node, failHandle, null, false);
     }
 
-    public void addGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle, Long timeout) {
+    public void addAsyncNode(Class<? extends AbstractNode> node, Long timeout) {
+        addAsyncNode(node, null, timeout, false);
+    }
+
+    public void addAsyncNode(Class<? extends AbstractNode> node, boolean restartAsyncNode) {
+        addAsyncNode(node, null, null, restartAsyncNode);
+    }
+
+    public void addAsyncNode(Class<? extends AbstractNode> node, Integer failHandle, boolean restartAsyncNode) {
+        addAsyncNode(node, failHandle, null, restartAsyncNode);
+    }
+
+    public void addAsyncNode(Class<? extends AbstractNode> node, Long timeout, boolean restartAsyncNode) {
+        addAsyncNode(node, null, timeout, restartAsyncNode);
+    }
+
+    public void addAsyncNode(Class<? extends AbstractNode> node, Integer failHandle, Long timeout, boolean restartAsyncNode) {
+        if (restartAsyncNode && this.asyncLastNode){
+            this.asyncLastNode = false;
+        }
+
+        if (this.asyncLastNode) {
+            add(this.lastNodeName, node, failHandle, timeout);
+        } else {
+            add(node.getName(), node, failHandle, timeout);
+            this.asyncLastNode = true;
+            this.lastNodeName = node.getName();
+        }
+    }
+
+    public void addSynNodeGroup(List<Class<? extends AbstractNode>> nodes) {
+        addSynNodeGroup(nodes, null, null);
+    }
+
+    public void addSynNodeGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle) {
+        addSynNodeGroup(nodes, failHandle, null);
+    }
+
+    public void addSynNodeGroup(List<Class<? extends AbstractNode>> nodes, Long timeout) {
+        addSynNodeGroup(nodes, null, timeout);
+    }
+
+    public void addSynNodeGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle, Long timeout) {
         int i = nodes.hashCode();
         for (Class<? extends AbstractNode> node : nodes) {
             add(String.valueOf(i), node, failHandle, timeout);
+        }
+        if (this.asyncLastNode){
+            this.asyncLastNode = false;
         }
     }
 
@@ -105,7 +133,9 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
         if (this.containsKey(groupName)) {
             this.get(groupName).add(abstractNode);
         } else {
-            this.put(groupName, Lists.newArrayList(abstractNode));
+            List<AbstractNode> list = new ArrayList();
+            list.add(abstractNode);
+            this.put(groupName, list);
         }
     }
 
@@ -161,7 +191,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
             }
 
             List<AbstractNode> abstractNodeList = nodesEntry.getValue();
-            Map<Future<Void>, AbstractNode> futureMap = Maps.newHashMap();
+            Map<Future<Void>, AbstractNode> futureMap = new HashMap<>();
             // 多个node节点的组合节点，并行执行
             for (AbstractNode abstractNode : abstractNodeList) {
 //                AbstractNode<T> abstractNode = SpringUtils.getBean(nodeClass);

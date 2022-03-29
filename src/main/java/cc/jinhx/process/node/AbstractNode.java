@@ -7,19 +7,19 @@ import cc.jinhx.process.enums.NodeLogLevelEnums;
 import cc.jinhx.process.enums.NodeTimeoutEnums;
 import cc.jinhx.process.exception.BusinessException;
 import cc.jinhx.process.util.JsonUtils;
-import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang.time.StopWatch;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * 抽象节点
  *
  * @author jinhx
- * @since 2021-08-06
+ * @since 2022-03-21
  */
 @Data
 @Slf4j
@@ -92,8 +92,8 @@ public abstract class AbstractNode<T> {
             // 日志
             StringBuilder logInfo = new StringBuilder(logStr);
 
-            buildLogInfo(logInfo, Lists.newArrayList(LOG_END, NODE_CHAIN_NAME, nodeChainName, NODE_NAME, nodeName), logLevel, NodeLogLevelEnums.BASE.getCode(), false);
-            buildLogInfo(logInfo, Lists.newArrayList(BEFORE_EXECUTE_PARAMS, JsonUtils.objectToJson(nodeChainContext)), logLevel, NodeLogLevelEnums.BASE_AND_TIME_AND_PARAMS.getCode(), false);
+            buildLogInfo(logInfo, Arrays.asList(LOG_END, NODE_CHAIN_NAME, nodeChainName, NODE_NAME, nodeName), logLevel, NodeLogLevelEnums.BASE.getCode(), false);
+            buildLogInfo(logInfo, Arrays.asList(BEFORE_EXECUTE_PARAMS, JsonUtils.objectToJson(nodeChainContext)), logLevel, NodeLogLevelEnums.BASE_AND_TIME_AND_PARAMS.getCode(), false);
 
             // 耗时计算
             StopWatch stopWatch = new StopWatch();
@@ -102,7 +102,7 @@ public abstract class AbstractNode<T> {
             beforeLog();
 
             if (isSkip(nodeChainContext)) {
-                buildLogInfo(logInfo, Lists.newArrayList(LOG_SKIP, TRUE), logLevel, NodeLogLevelEnums.BASE.getCode(), false);
+                buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, TRUE), logLevel, NodeLogLevelEnums.BASE.getCode(), false);
             } else {
                 try {
                     this.checkParams();
@@ -115,7 +115,7 @@ public abstract class AbstractNode<T> {
                     throw e;
                 }
 
-                buildLogInfo(logInfo, Lists.newArrayList(LOG_SKIP, FALSE), logLevel, NodeLogLevelEnums.BASE.getCode(), false);
+                buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, FALSE), logLevel, NodeLogLevelEnums.BASE.getCode(), false);
 
                 try {
                     process(nodeChainContext);
@@ -130,12 +130,12 @@ public abstract class AbstractNode<T> {
 
             afterLog();
 
-            buildLogInfo(logInfo, Lists.newArrayList(AFTER_EXECUTE_PARAMS, JsonUtils.objectToJson(nodeChainContext)), logLevel, NodeLogLevelEnums.BASE_AND_TIME_AND_PARAMS.getCode(), false);
+            buildLogInfo(logInfo, Arrays.asList(AFTER_EXECUTE_PARAMS, JsonUtils.objectToJson(nodeChainContext)), logLevel, NodeLogLevelEnums.BASE_AND_TIME_AND_PARAMS.getCode(), false);
 
             stopWatch.stop();
             long time = stopWatch.getTime();
 
-            buildLogInfo(logInfo, Lists.newArrayList(LOG_TIME, time), logLevel, NodeLogLevelEnums.BASE_AND_TIME.getCode(), true);
+            buildLogInfo(logInfo, Arrays.asList(LOG_TIME, time), logLevel, NodeLogLevelEnums.BASE_AND_TIME.getCode(), true);
         } catch (BusinessException e) {
             log.error(logStr + " execute business fail nodeName={} msg={}", nodeName, ExceptionUtils.getStackTrace(e));
             throw e;

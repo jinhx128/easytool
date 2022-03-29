@@ -11,7 +11,7 @@
 
     <groupId>cc.jinhx</groupId>
     <artifactId>spring-boot-starter-process</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.9</version>
 
     <name>spring-boot-starter-process</name>
     <description>spring-boot-starter-process</description>
@@ -68,12 +68,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${com.google.guava.version}</version>
         </dependency>
 
         <dependency>

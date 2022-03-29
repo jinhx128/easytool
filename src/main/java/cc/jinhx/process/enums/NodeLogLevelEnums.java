@@ -1,11 +1,9 @@
 package cc.jinhx.process.enums;
 
-import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -13,7 +11,7 @@ import java.util.stream.Collectors;
  * NodeLogLevelEnums
  *
  * @author jinhx
- * @since 2018-08-06
+ * @since 2022-03-21
  */
 @AllArgsConstructor
 @Getter
@@ -52,10 +50,6 @@ public enum NodeLogLevelEnums {
         }
 
         return MAP.get(code);
-    }
-
-    public static List<NodeLogLevelEnums> getEnums() {
-        return Lists.newArrayList(MAP.values());
     }
 
 }

@@ -20,7 +20,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * 抽象逻辑处理器
  *
  * @author jinhx
- * @since 2021-08-06
+ * @since 2022-03-21
  */
 @Slf4j
 public abstract class AbstractLogicHandler<T> {

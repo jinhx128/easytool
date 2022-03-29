@@ -14,7 +14,7 @@ import java.util.Objects;
  * 节点链上下文
  *
  * @author jinhx
- * @since 2021-08-06
+ * @since 2022-03-21
  */
 @Slf4j
 @Data
@@ -108,7 +108,7 @@ public class NodeChainContext<T> implements Serializable {
             constructor.setAccessible(true);
             return constructor.newInstance();
         }catch (Exception e){
-            log.error("act=NodeChainContext 反射创建对象失败 clazz={} error={}", clazz, e);
+            log.error("act=createNodeChainContext 反射创建对象失败 clazz={} error={}", clazz, e);
             return null;
         }
     }

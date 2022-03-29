@@ -15,7 +15,7 @@ import java.util.Objects;
  * 节点链管理器
  *
  * @author jinhx
- * @since 2021-08-06
+ * @since 2022-03-21
  */
 @Slf4j
 public class NodeChainManager {
@@ -31,7 +31,7 @@ public class NodeChainManager {
     }
 
     /**
-     * 享元模式，从全局唯一MAP获取实例，不存在则反射创建返回，并存入MAP
+     * 从全局唯一MAP获取实例，不存在则反射创建返回，并存入MAP
      *
      * @param clazz clazz
      * @param logLevel logLevel
@@ -52,7 +52,7 @@ public class NodeChainManager {
     }
 
     /**
-     * 反射创建单例，指的是同种类型的不同属性
+     * 反射创建单例，并且自动从spring获取bean注入，指的是同种类型的不同属性，比如相同的logLevel属性只会存在一个，不同的会存在多个
      *
      * @param clazz clazz
      * @param logLevel logLevel

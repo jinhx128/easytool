@@ -2,7 +2,6 @@ package cc.jinhx.process.manager;
 
 import cc.jinhx.process.annotation.Node;
 import cc.jinhx.process.enums.NodeFailHandleEnums;
-import cc.jinhx.process.enums.NodeTimeoutEnums;
 import cc.jinhx.process.node.AbstractNode;
 import cc.jinhx.process.util.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +19,7 @@ import java.util.Objects;
  * 节点管理器
  *
  * @author jinhx
- * @since 2021-08-06
+ * @since 2022-03-21
  */
 @Slf4j
 public class NodeManager {
@@ -32,7 +31,7 @@ public class NodeManager {
     }
 
     /**
-     * 享元模式，从全局唯一MAP获取实例，不存在则反射创建返回，并存入MAP
+     * 从全局唯一MAP获取实例，不存在则反射创建返回，并存入MAP
      *
      * @param clazz clazz
      * @param failHandle failHandle
@@ -54,7 +53,7 @@ public class NodeManager {
     }
 
     /**
-     * 反射创建单例，并且自动从spring获取bean注入，指的是同种类型的不同属性
+     * 反射创建单例，并且自动从spring获取bean注入，指的是同种类型的不同属性，比如相同的timeout属性只会存在一个，不同的会存在多个
      *
      * @param clazz clazz
      * @param failHandle failHandle

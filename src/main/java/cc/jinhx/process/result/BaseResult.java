@@ -9,7 +9,7 @@ import java.io.Serializable;
  * BaseResult
  *
  * @author jinhx
- * @since 2018-08-06
+ * @since 2022-03-21
  */
 @Data
 public class BaseResult<T> implements Serializable {

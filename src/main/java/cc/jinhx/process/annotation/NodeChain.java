@@ -3,10 +3,10 @@ package cc.jinhx.process.annotation;
 import java.lang.annotation.*;
 
 /**
- * NodeChain
+ * NodeChain注解
  *
  * @author jinhx
- * @since 2019-08-06
+ * @since 2022-03-21
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
