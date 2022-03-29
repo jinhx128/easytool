@@ -69,11 +69,15 @@ public class NodeChainManager {
             // 跳过了访问检查，并提高效率
             constructor.setAccessible(true);
             AbstractNodeChain abstractNodeChain = constructor.newInstance();
+            Method setNodeInfoMethod = clazz.getMethod("setNodeInfo");
+            // 跳过了访问检查，并提高效率
+            setNodeInfoMethod.setAccessible(true);
+            setNodeInfoMethod.invoke(abstractNodeChain);
             if (NodeChainLogLevelEnums.containsCode(logLevel)){
-                Method method = clazz.getMethod("setLogLevel", Integer.class);
+                Method setLogLevelMethod = clazz.getMethod("setLogLevel", Integer.class);
                 // 跳过了访问检查，并提高效率
-                method.setAccessible(true);
-                method.invoke(abstractNodeChain, logLevel);
+                setLogLevelMethod.setAccessible(true);
+                setLogLevelMethod.invoke(abstractNodeChain, logLevel);
             }
             return abstractNodeChain;
         }catch (Exception e){

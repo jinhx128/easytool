@@ -145,6 +145,11 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     }
 
     /**
+     * 配置节点信息
+     */
+    protected abstract void setNodeInfo();
+
+    /**
      * 获取节点链默认线程池
      *
      * @return ThreadPoolExecutor
