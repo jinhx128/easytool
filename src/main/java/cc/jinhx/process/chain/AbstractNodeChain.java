@@ -68,6 +68,10 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
         addAsyncNode(node, null, timeout, false);
     }
 
+    public void addAsyncNode(Class<? extends AbstractNode> node, Integer failHandle, Long timeout) {
+        addAsyncNode(node, failHandle, timeout, false);
+    }
+
     public void addAsyncNode(Class<? extends AbstractNode> node, boolean restartAsyncNode) {
         addAsyncNode(node, null, null, restartAsyncNode);
     }
@@ -94,23 +98,24 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
         }
     }
 
-    public void addSynNodeGroup(List<Class<? extends AbstractNode>> nodes) {
-        addSynNodeGroup(nodes, null, null);
+    public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes) {
+        addAsyncNodeGroup(nodes, null, null);
     }
 
-    public void addSynNodeGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle) {
-        addSynNodeGroup(nodes, failHandle, null);
+    public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle) {
+        addAsyncNodeGroup(nodes, failHandle, null);
     }
 
-    public void addSynNodeGroup(List<Class<? extends AbstractNode>> nodes, Long timeout) {
-        addSynNodeGroup(nodes, null, timeout);
+    public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, Long timeout) {
+        addAsyncNodeGroup(nodes, null, timeout);
     }
 
-    public void addSynNodeGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle, Long timeout) {
+    public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle, Long timeout) {
         int i = nodes.hashCode();
         for (Class<? extends AbstractNode> node : nodes) {
             add(String.valueOf(i), node, failHandle, timeout);
         }
+
         if (this.asyncLastNode){
             this.asyncLastNode = false;
         }
