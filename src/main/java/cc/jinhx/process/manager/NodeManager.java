@@ -78,7 +78,7 @@ public class NodeManager {
                 setFailHandleMethod.setAccessible(true);
                 setFailHandleMethod.invoke(abstractNode, failHandle);
             }
-            if (NodeTimeoutEnums.containsCode(timeout)){
+            if (Objects.nonNull(timeout) && timeout > 0L){
                 Method setTimeoutMethod = clazz.getMethod("setTimeout", Long.class);
                 // 跳过了访问检查，并提高效率
                 setTimeoutMethod.setAccessible(true);
