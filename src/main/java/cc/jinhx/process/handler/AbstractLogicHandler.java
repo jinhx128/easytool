@@ -127,6 +127,13 @@ public abstract class AbstractLogicHandler<T> {
     }
 
     /**
+     * 构建上下文
+     */
+    protected <T> NodeChainContext<T> builNodeChainContext(Class<T> clazz) {
+        return NodeChainContext.create(clazz);
+    }
+
+    /**
      * 构建成功结果
      */
     protected BaseResult<T> builSuccessResult(T data) {
