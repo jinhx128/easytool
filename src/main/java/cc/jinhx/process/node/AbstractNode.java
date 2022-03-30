@@ -6,11 +6,8 @@ import cc.jinhx.process.enums.NodeFailHandleEnums;
 import cc.jinhx.process.enums.NodeLogLevelEnums;
 import cc.jinhx.process.enums.NodeTimeoutEnums;
 import cc.jinhx.process.exception.BusinessException;
-import cc.jinhx.process.util.JsonUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.commons.lang.time.StopWatch;
 
 import java.util.Arrays;
 import java.util.List;
@@ -93,12 +90,10 @@ public abstract class AbstractNode<T> {
             StringBuilder logInfo = new StringBuilder(logStr);
 
             buildLogInfo(logInfo, Arrays.asList(LOG_END, NODE_CHAIN_NAME, nodeChainName, NODE_NAME, nodeName), logLevel, NodeLogLevelEnums.BASE.getCode(), false);
-            buildLogInfo(logInfo, Arrays.asList(BEFORE_EXECUTE_PARAMS, JsonUtils.objectToJson(nodeChainContext)), logLevel, NodeLogLevelEnums.BASE_AND_TIME_AND_PARAMS.getCode(), false);
+            buildLogInfo(logInfo, Arrays.asList(BEFORE_EXECUTE_PARAMS, nodeChainContext.toString()), logLevel, NodeLogLevelEnums.BASE_AND_TIME_AND_PARAMS.getCode(), false);
 
             // 耗时计算
-            StopWatch stopWatch = new StopWatch();
-            stopWatch.start();
-
+            long startTime = System.currentTimeMillis();
             beforeLog();
 
             if (isSkip(nodeChainContext)) {
@@ -108,10 +103,10 @@ public abstract class AbstractNode<T> {
                     this.checkParams();
 //            log.info(logStr + " checkParams success");
                 } catch (BusinessException e) {
-                    log.error(logStr + " checkParams business fail msg={}", ExceptionUtils.getStackTrace(e));
+                    log.error(logStr + " checkParams business fail msg=", e);
                     throw e;
                 } catch (Exception e) {
-                    log.error(logStr + " checkParams fail msg={}", ExceptionUtils.getStackTrace(e));
+                    log.error(logStr + " checkParams fail msg=", e);
                     throw e;
                 }
 
@@ -120,27 +115,24 @@ public abstract class AbstractNode<T> {
                 try {
                     process(nodeChainContext);
                 } catch (BusinessException e) {
-                    log.error(logStr + " execute business fail nodeName={} msg={}", nodeName, ExceptionUtils.getStackTrace(e));
+                    log.error(logStr + " execute business fail nodeName={} msg=", nodeName, e);
                     throw e;
                 } catch (Exception e) {
-                    log.error(logStr + " execute fail nodeName={} msg={}", nodeName, ExceptionUtils.getStackTrace(e));
+                    log.error(logStr + " execute fail nodeName={} msg=", nodeName, e);
                     throw e;
                 }
             }
 
             afterLog();
+            long endTime = System.currentTimeMillis();
 
-            buildLogInfo(logInfo, Arrays.asList(AFTER_EXECUTE_PARAMS, JsonUtils.objectToJson(nodeChainContext)), logLevel, NodeLogLevelEnums.BASE_AND_TIME_AND_PARAMS.getCode(), false);
-
-            stopWatch.stop();
-            long time = stopWatch.getTime();
-
-            buildLogInfo(logInfo, Arrays.asList(LOG_TIME, time), logLevel, NodeLogLevelEnums.BASE_AND_TIME.getCode(), true);
+            buildLogInfo(logInfo, Arrays.asList(AFTER_EXECUTE_PARAMS, nodeChainContext.toString()), logLevel, NodeLogLevelEnums.BASE_AND_TIME_AND_PARAMS.getCode(), false);
+            buildLogInfo(logInfo, Arrays.asList(LOG_TIME, endTime - startTime), logLevel, NodeLogLevelEnums.BASE_AND_TIME.getCode(), true);
         } catch (BusinessException e) {
-            log.error(logStr + " execute business fail nodeName={} msg={}", nodeName, ExceptionUtils.getStackTrace(e));
+            log.error(logStr + " execute business fail nodeName={} msg=", nodeName, e);
             throw e;
         } catch (Exception e) {
-            log.error(logStr + " execute fail nodeName={} msg={}", nodeName, ExceptionUtils.getStackTrace(e));
+            log.error(logStr + " execute fail nodeName={} msg=", nodeName, e);
             throw e;
         }
     }

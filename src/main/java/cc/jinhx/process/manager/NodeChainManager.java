@@ -69,7 +69,7 @@ public class NodeChainManager {
             // 跳过了访问检查，并提高效率
             constructor.setAccessible(true);
             AbstractNodeChain abstractNodeChain = constructor.newInstance();
-            Method setNodeInfoMethod = clazz.getMethod("setNodeInfo");
+            Method setNodeInfoMethod = clazz.getDeclaredMethod("setNodeInfo");
             // 跳过了访问检查，并提高效率
             setNodeInfoMethod.setAccessible(true);
             setNodeInfoMethod.invoke(abstractNodeChain);

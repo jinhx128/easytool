@@ -3,7 +3,7 @@ package cc.jinhx.process.handler;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang.StringUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 
@@ -26,7 +26,7 @@ public class LogicHandlerBaseInfo implements Serializable {
     private String logStr;
 
     public void setLogStr(String logStr){
-        if (StringUtils.isBlank(this.logStr)){
+        if (StringUtils.isEmpty(this.logStr)){
             this.logStr = logStr;
         }else {
             this.logStr += " " + logStr;

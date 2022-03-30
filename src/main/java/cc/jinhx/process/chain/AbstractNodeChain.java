@@ -12,7 +12,6 @@ import cc.jinhx.process.node.AbstractNode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.exception.ExceptionUtils;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -146,6 +145,14 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
 
     /**
      * 配置节点信息
+     * 1. 通过内部addxxx方法，添加节点到节点链，执行顺序按照添加顺序
+     * 2. 组内异步，与组外同步
+     * 3. 添加一个同步节点，自己属于一个组，且组内只能有自己
+     * 4. 添加一组异步节点
+     * 5. 添加一个异步节点
+     *   5.1 与上一个添加的异步节点属于同组
+     *   5.2 如果上一个是同步节点，则自己属于新的组，后面添加的异步节点属于这个组
+     *   5.3 也可以通过参数restartAsyncNode指定新开一个组，后面添加的
      */
     protected abstract void setNodeInfo();
 
@@ -241,13 +248,13 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                     log.error("nodeChainLog {} execute timeout nodeName={} timeout={} cancel={}", nodeChainContext.getLogStr(), nodeName, timeout, cancel);
                     processException = new ProcessException(ExceptionEnums.NODE_TIMEOUT.getMsg() + "=" + nodeName);
                 } catch (ProcessException e) {
-                    log.error("nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, ExceptionUtils.getStackTrace(e));
+                    log.error("nodeChainLog {} execute fail nodeName={} msg=", nodeChainContext.getLogStr(), nodeName, e);
                     processException = e;
                 } catch (BusinessException e) {
-                    log.error("nodeChainLog {} execute business fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, ExceptionUtils.getStackTrace(e));
+                    log.error("nodeChainLog {} execute business fail nodeName={} msg=", nodeChainContext.getLogStr(), nodeName, e);
                     throw e;
                 } catch (Exception e) {
-                    log.error("nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, ExceptionUtils.getStackTrace(e));
+                    log.error("nodeChainLog {} execute fail nodeName={} msg=", nodeChainContext.getLogStr(), nodeName, e);
                     processException = new ProcessException(ExceptionEnums.NODE_UNKNOWN.getMsg() + "=" + nodeName);
                 }
 

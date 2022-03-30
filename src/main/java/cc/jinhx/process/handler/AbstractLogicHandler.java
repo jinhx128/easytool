@@ -7,11 +7,8 @@ import cc.jinhx.process.exception.BusinessException;
 import cc.jinhx.process.exception.ProcessException;
 import cc.jinhx.process.manager.NodeChainManager;
 import cc.jinhx.process.result.BaseResult;
-import cc.jinhx.process.util.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.commons.lang.time.StopWatch;
+import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -162,33 +159,32 @@ public abstract class AbstractLogicHandler<T> {
     private BaseResult<T> doExecute() {
         try {
             this.checkParams();
-            log.info("handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectToJson(logicHandlerBaseInfo));
+            log.info("handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString());
         } catch (BusinessException e) {
-            log.error("handlerLog {} checkParams business fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectToJson(logicHandlerBaseInfo), ExceptionUtils.getStackTrace(e));
+            log.error("handlerLog {} checkParams business fail req={} msg=", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString(), e);
             return builFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
-            log.error("handlerLog {} checkParams fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectToJson(logicHandlerBaseInfo), ExceptionUtils.getStackTrace(e));
+            log.error("handlerLog {} checkParams fail req={} msg=", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString(), e);
             throw e;
         }
 
         try {
             // 耗时计算
-            StopWatch stopWatch = new StopWatch();
-            stopWatch.start();
+            long startTime = System.currentTimeMillis();
 
             BaseResult<T> result = this.process();
 
-            stopWatch.stop();
-            log.info("handlerLog {} execute success time={} rsp={}", logicHandlerBaseInfo.getLogStr(), stopWatch.getTime(), JsonUtils.objectToJson(result));
+            long endTime = System.currentTimeMillis();
+            log.info("handlerLog {} execute success time={} rsp={}", logicHandlerBaseInfo.getLogStr(), endTime - startTime, result.toString());
             this.onSuccess();
             return result;
         }catch (BusinessException e) {
             this.onFail();
-            log.error("handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), ExceptionUtils.getStackTrace(e));
+            log.error("handlerLog {} execute business fail msg=", logicHandlerBaseInfo.getLogStr(), e);
             return builFailResult(e.getCode(), e.getMsg());
         } catch (Throwable e) {
             this.onFail();
-            log.error("handlerLog {} execute fail msg={}", logicHandlerBaseInfo.getLogStr(), ExceptionUtils.getStackTrace(e));
+            log.error("handlerLog {} execute fail msg=", logicHandlerBaseInfo.getLogStr(), e);
             throw e;
         } finally {
             this.afterProcess();
