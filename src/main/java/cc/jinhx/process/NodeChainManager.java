@@ -1,8 +1,5 @@
-package cc.jinhx.process.manager;
+package cc.jinhx.process;
 
-import cc.jinhx.process.chain.AbstractNodeChain;
-import cc.jinhx.process.annotation.NodeChain;
-import cc.jinhx.process.enums.NodeChainLogLevelEnums;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Constructor;
@@ -60,11 +57,6 @@ public class NodeChainManager {
      */
     private static AbstractNodeChain createNodeChain(Class<? extends AbstractNodeChain> clazz, Integer logLevel) {
         try {
-            if (Objects.isNull(clazz.getAnnotation(NodeChain.class))) {
-                log.error("act=createNodeChain 反射创建单例失败，类上缺少@NodeChain注解 clazz={} logLevel={}", clazz, logLevel);
-                return null;
-            }
-
             Constructor<? extends AbstractNodeChain> constructor = clazz.getDeclaredConstructor();
             // 跳过了访问检查，并提高效率
             constructor.setAccessible(true);
@@ -73,7 +65,7 @@ public class NodeChainManager {
             // 跳过了访问检查，并提高效率
             setNodeInfoMethod.setAccessible(true);
             setNodeInfoMethod.invoke(abstractNodeChain);
-            if (NodeChainLogLevelEnums.containsCode(logLevel)){
+            if (AbstractNodeChain.LogLevelEnum.containsCode(logLevel)){
                 Method setLogLevelMethod = clazz.getMethod("setLogLevel", Integer.class);
                 // 跳过了访问检查，并提高效率
                 setLogLevelMethod.setAccessible(true);
@@ -81,7 +73,7 @@ public class NodeChainManager {
             }
             return abstractNodeChain;
         }catch (Exception e){
-            log.error("act=createNodeChain 反射创建单例失败 clazz={} logLevel={} error={}", clazz, logLevel, e);
+            log.error("createNodeChain reflex create object fail clazz={} logLevel={} error={}", clazz, logLevel, e);
             return null;
         }
     }

@@ -1,4 +1,4 @@
-package cc.jinhx.process.util;
+package cc.jinhx.process;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -24,7 +24,7 @@ public class SpringUtils implements ApplicationContextAware {
     private static ApplicationContext applicationContext;
 
     public SpringUtils() {
-        log.info("act=SpringUtils init SpringUtils");
+        log.info("SpringUtils init");
     }
 
     /**
@@ -53,7 +53,7 @@ public class SpringUtils implements ApplicationContextAware {
      */
     public static ApplicationContext getApplicationContext() {
         if (Objects.isNull(applicationContext)) {
-            throw new IllegalStateException("ApplicationContext未注入，请在Spring配置文件中定义SpringContext或在应用启动时手动加载");
+            throw new ProcessException("ApplicationContext is null");
         }
         return applicationContext;
     }

@@ -1,9 +1,5 @@
-package cc.jinhx.process.manager;
+package cc.jinhx.process;
 
-import cc.jinhx.process.annotation.Node;
-import cc.jinhx.process.enums.NodeFailHandleEnums;
-import cc.jinhx.process.node.AbstractNode;
-import cc.jinhx.process.util.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -62,16 +58,11 @@ public class NodeManager {
      */
     private static AbstractNode createNode(Class<? extends AbstractNode> clazz, Integer failHandle, Long timeout) {
         try {
-            if (Objects.isNull(clazz.getAnnotation(Node.class))) {
-                log.error("act=createNode 反射创建单例失败，类上缺少@Node注解 clazz={} failHandle={} timeout={}", clazz, failHandle, timeout);
-                return null;
-            }
-
             Constructor<? extends AbstractNode> constructor = clazz.getDeclaredConstructor();
             // 跳过了访问检查，并提高效率
             constructor.setAccessible(true);
             AbstractNode abstractNode = constructor.newInstance();
-            if (NodeFailHandleEnums.containsCode(failHandle)){
+            if (AbstractNode.FailHandleEnum.containsCode(failHandle)){
                 Method setFailHandleMethod = clazz.getMethod("setFailHandle", Integer.class);
                 // 跳过了访问检查，并提高效率
                 setFailHandleMethod.setAccessible(true);
@@ -97,7 +88,7 @@ public class NodeManager {
             }
             return abstractNode;
         }catch (Exception e){
-            log.error("act=createNode 反射创建单例失败 clazz={} failHandle={} timeout={} error={}", clazz, failHandle, timeout, e);
+            log.error("createNode reflex create object fail clazz={} failHandle={} timeout={} error={}", clazz, failHandle, timeout, e);
             return null;
         }
     }

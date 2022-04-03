@@ -1,4 +1,4 @@
-package cc.jinhx.process.handler;
+package cc.jinhx.process;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

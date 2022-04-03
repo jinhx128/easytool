@@ -1,12 +1,5 @@
-package cc.jinhx.process.handler;
+package cc.jinhx.process;
 
-import cc.jinhx.process.chain.AbstractNodeChain;
-import cc.jinhx.process.chain.NodeChainContext;
-import cc.jinhx.process.enums.ExceptionEnums;
-import cc.jinhx.process.exception.BusinessException;
-import cc.jinhx.process.exception.ProcessException;
-import cc.jinhx.process.manager.NodeChainManager;
-import cc.jinhx.process.result.BaseResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
@@ -30,7 +23,7 @@ public abstract class AbstractLogicHandler<T> {
 
     protected AbstractLogicHandler(LogicHandlerBaseInfo logicHandlerBaseInfo) {
         if (Objects.isNull(logicHandlerBaseInfo)){
-            throw new ProcessException(ExceptionEnums.LOGIC_HANDLER_BASE_INFO_NOT_NULL);
+            throw new ProcessException(ProcessException.MsgEnum.LOGIC_HANDLER_BASE_INFO_NOT_NULL);
         }
 
         init(logicHandlerBaseInfo, null);
@@ -38,11 +31,11 @@ public abstract class AbstractLogicHandler<T> {
 
     protected AbstractLogicHandler(LogicHandlerBaseInfo logicHandlerBaseInfo, String logStr) {
         if (Objects.isNull(logicHandlerBaseInfo)){
-            throw new ProcessException(ExceptionEnums.LOGIC_HANDLER_BASE_INFO_NOT_NULL);
+            throw new ProcessException(ProcessException.MsgEnum.LOGIC_HANDLER_BASE_INFO_NOT_NULL);
         }
 
         if (StringUtils.isEmpty(logStr)){
-            throw new ProcessException(ExceptionEnums.LOGIC_HANDLER_LOG_STR_NOT_NULL);
+            throw new ProcessException(ProcessException.MsgEnum.LOGIC_HANDLER_LOG_STR_NOT_NULL);
         }
 
         init(logicHandlerBaseInfo, logStr);
@@ -97,7 +90,7 @@ public abstract class AbstractLogicHandler<T> {
     private AbstractNodeChain getNodeChain(Class<? extends AbstractNodeChain> clazz, Integer logLevel) {
         AbstractNodeChain abstractNodeChain = NodeChainManager.getNodeChain(clazz, logLevel);
         if (Objects.isNull(abstractNodeChain)){
-            throw new ProcessException(ExceptionEnums.NODE_CHAIN_UNREGISTERED.getMsg() + "=" + clazz.getName());
+            throw new ProcessException(ProcessException.MsgEnum.NODE_CHAIN_UNREGISTERED.getMsg() + "=" + clazz.getName());
         }
 
         return abstractNodeChain;
@@ -118,7 +111,16 @@ public abstract class AbstractLogicHandler<T> {
         throw new BusinessException(code, msg);
     }
 
-    protected abstract BaseResult<T> process();
+    /**
+     * 业务失败
+     *
+     * @param msg msg
+     */
+    protected void businessFail(String msg){
+        throw new BusinessException(ProcessResult.BaseEnum.FAIL.getCode(), msg);
+    }
+
+    protected abstract ProcessResult<T> process();
 
     /**
      * 无论成功失败，最后都会执行
@@ -136,15 +138,15 @@ public abstract class AbstractLogicHandler<T> {
     /**
      * 构建成功结果
      */
-    protected BaseResult<T> builSuccessResult(T data) {
-        return new BaseResult<>(data);
+    protected ProcessResult<T> builSuccessResult(T data) {
+        return new ProcessResult<>(data);
     }
 
     /**
      * 构建失败结果
      */
-    protected BaseResult<T> builFailResult(Integer code, String msg) {
-        return new BaseResult<>(code, msg);
+    protected ProcessResult<T> builFailResult(Integer code, String msg) {
+        return new ProcessResult<>(code, msg);
     }
 
     /**
@@ -159,11 +161,11 @@ public abstract class AbstractLogicHandler<T> {
     protected void onFail() {
     }
 
-    public BaseResult<T> execute() {
+    public ProcessResult<T> execute() {
         return this.doExecute();
     }
 
-    private BaseResult<T> doExecute() {
+    private ProcessResult<T> doExecute() {
         try {
             this.checkParams();
             log.info("handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString());
@@ -179,7 +181,7 @@ public abstract class AbstractLogicHandler<T> {
             // 耗时计算
             long startTime = System.currentTimeMillis();
 
-            BaseResult<T> result = this.process();
+            ProcessResult<T> result = this.process();
 
             long endTime = System.currentTimeMillis();
             log.info("handlerLog {} execute success time={} rsp={}", logicHandlerBaseInfo.getLogStr(), endTime - startTime, result.toString());

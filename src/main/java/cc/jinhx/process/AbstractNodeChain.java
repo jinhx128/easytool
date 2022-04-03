@@ -1,20 +1,14 @@
-package cc.jinhx.process.chain;
+package cc.jinhx.process;
 
-import cc.jinhx.process.annotation.NodeChain;
-import cc.jinhx.process.enums.ExceptionEnums;
-import cc.jinhx.process.enums.NodeChainLogLevelEnums;
-import cc.jinhx.process.enums.NodeFailHandleEnums;
-import cc.jinhx.process.enums.NodeLogLevelEnums;
-import cc.jinhx.process.exception.BusinessException;
-import cc.jinhx.process.exception.ProcessException;
-import cc.jinhx.process.manager.NodeManager;
-import cc.jinhx.process.node.AbstractNode;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 /**
  * 抽象节点链
@@ -25,12 +19,11 @@ import java.util.concurrent.*;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Slf4j
-@NodeChain
 public abstract class AbstractNodeChain extends LinkedHashMap<String, List<AbstractNode>> {
 
     private static final long serialVersionUID = 4780080785208529405L;
 
-    private Integer logLevel = NodeChainLogLevelEnums.BASE_AND_TIME_AND_FIRST_AND_LAST_NODES_PARAMS.getCode();
+    private Integer logLevel = AbstractNodeChain.LogLevelEnum.BASE_AND_TIME_AND_FIRST_AND_LAST_NODES_PARAMS.getCode();
 
     private boolean asyncLastNode = false;
 
@@ -131,7 +124,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     private void add(String groupName, Class<? extends AbstractNode> node, Integer failHandle, Long timeout) {
         AbstractNode abstractNode = NodeManager.getNode(node, failHandle, timeout);
         if (Objects.isNull(abstractNode)){
-            throw new ProcessException(ExceptionEnums.NODE_UNREGISTERED.getMsg() + "=" + node.getName());
+            throw new ProcessException(ProcessException.MsgEnum.NODE_UNREGISTERED.getMsg() + "=" + node.getName());
         }
 
         if (this.containsKey(groupName)) {
@@ -181,18 +174,18 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
         // 通过节点链日志设置节点日志级别
         Integer logLevel = this.logLevel;
         boolean baseAndTimeAndFirstAndLastNodesParamsLogLevel = false;
-        if (NodeChainLogLevelEnums.NO.getCode().equals(logLevel)){
-            logLevel = NodeLogLevelEnums.NO.getCode();
-        } else if (NodeChainLogLevelEnums.BASE.getCode().equals(logLevel)) {
-            logLevel = NodeLogLevelEnums.BASE.getCode();
-        } else if (NodeChainLogLevelEnums.BASE_AND_TIME.getCode().equals(logLevel)) {
-            logLevel = NodeLogLevelEnums.BASE_AND_TIME.getCode();
-        } else if (NodeChainLogLevelEnums.BASE_AND_TIME_AND_FIRST_AND_LAST_NODES_PARAMS.getCode().equals(logLevel)) {
+        if (LogLevelEnum.NO.getCode().equals(logLevel)){
+            logLevel = AbstractNode.LogLevelEnum.NO.getCode();
+        } else if (LogLevelEnum.BASE.getCode().equals(logLevel)) {
+            logLevel = AbstractNode.LogLevelEnum.BASE.getCode();
+        } else if (LogLevelEnum.BASE_AND_TIME.getCode().equals(logLevel)) {
+            logLevel = AbstractNode.LogLevelEnum.BASE_AND_TIME.getCode();
+        } else if (LogLevelEnum.BASE_AND_TIME_AND_FIRST_AND_LAST_NODES_PARAMS.getCode().equals(logLevel)) {
             baseAndTimeAndFirstAndLastNodesParamsLogLevel = true;
-        } else if (NodeChainLogLevelEnums.BASE_AND_TIME_AND_ALL_NODES_PARAMS.getCode().equals(logLevel)) {
-            logLevel = NodeLogLevelEnums.BASE_AND_TIME_AND_PARAMS.getCode();
+        } else if (LogLevelEnum.BASE_AND_TIME_AND_ALL_NODES_PARAMS.getCode().equals(logLevel)) {
+            logLevel = AbstractNode.LogLevelEnum.BASE_AND_TIME_AND_PARAMS.getCode();
         } else {
-            logLevel = NodeLogLevelEnums.BASE_AND_TIME.getCode();
+            logLevel = AbstractNode.LogLevelEnum.BASE_AND_TIME.getCode();
         }
 
         int count = 1;
@@ -200,9 +193,9 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
             // 通过节点链日志设置节点日志级别
             if (baseAndTimeAndFirstAndLastNodesParamsLogLevel){
                 if (count == 1 || count == this.entrySet().size()){
-                    logLevel = NodeLogLevelEnums.BASE_AND_TIME.getCode();
+                    logLevel = AbstractNode.LogLevelEnum.BASE_AND_TIME.getCode();
                 }else {
-                    logLevel = NodeLogLevelEnums.BASE_AND_TIME_AND_PARAMS.getCode();
+                    logLevel = AbstractNode.LogLevelEnum.BASE_AND_TIME_AND_PARAMS.getCode();
                 }
                 count++;
             }
@@ -229,7 +222,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                         return null;
                     }, getThreadPoolExecutor()), abstractNode);
                 } else {
-                    throw new ProcessException(ExceptionEnums.NODE_CHAIN_THREAD_POOL_EXECUTOR_NOT_NULL.getMsg() + "=" + nodeChainName);
+                    throw new ProcessException(ProcessException.MsgEnum.NODE_CHAIN_THREAD_POOL_EXECUTOR_NOT_NULL.getMsg() + "=" + nodeChainName);
                 }
             }
 
@@ -243,10 +236,10 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                 try {
                     future.get(timeout, TimeUnit.MILLISECONDS);
                 } catch (TimeoutException e) {
-                    // 中断超时线程，不一定成功
+                    // todo 中断超时线程，不一定成功
                     boolean cancel = future.cancel(true);
                     log.error("nodeChainLog {} execute timeout nodeName={} timeout={} cancel={}", nodeChainContext.getLogStr(), nodeName, timeout, cancel);
-                    processException = new ProcessException(ExceptionEnums.NODE_TIMEOUT.getMsg() + "=" + nodeName);
+                    processException = new ProcessException(ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);
                 } catch (ProcessException e) {
                     log.error("nodeChainLog {} execute fail nodeName={} msg=", nodeChainContext.getLogStr(), nodeName, e);
                     processException = e;
@@ -255,15 +248,15 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                     throw e;
                 } catch (Exception e) {
                     log.error("nodeChainLog {} execute fail nodeName={} msg=", nodeChainContext.getLogStr(), nodeName, e);
-                    processException = new ProcessException(ExceptionEnums.NODE_UNKNOWN.getMsg() + "=" + nodeName);
+                    processException = new ProcessException(ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName);
                 }
 
                 // 降级处理
                 if (Objects.nonNull(processException)) {
-                    if (NodeFailHandleEnums.INTERRUPT.getCode().equals(failHandle)){
+                    if (AbstractNode.FailHandleEnum.INTERRUPT.getCode().equals(failHandle)){
                         log.error("nodeChainLog {} execute fail interrupt nodeName={} timeout={}", nodeChainContext.getLogStr(), nodeName, timeout);
                         throw processException;
-                    } else if (NodeFailHandleEnums.ABANDON.getCode().equals(failHandle)){
+                    } else if (AbstractNode.FailHandleEnum.ABANDON.getCode().equals(failHandle)){
                         log.error("nodeChainLog {} execute fail abandon nodeName={} timeout={}", nodeChainContext.getLogStr(), nodeName, timeout);
                     }else {
                         // 默认中断
@@ -271,7 +264,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                         throw processException;
                     }
                     // todo 重试
-                    /* else if (NodeFailHandleEnums.RETRY.getCode().equals(failHandle)){
+                    /* else if (AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)){
                         log.error("nodeChainLog {} execute fail retry nodeName={} timeout={}", nodeChainContext.getLogStr(), nodeName, timeout);
                     }*/
                 }
@@ -282,6 +275,49 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                 return;
             }
         }
+    }
+
+
+    @AllArgsConstructor
+    @Getter
+    public enum LogLevelEnum {
+
+        NO(1, "不打印"),
+        BASE(2, "打印基本信息"),
+        BASE_AND_TIME(3, "打印基本信息和耗时"),
+        BASE_AND_TIME_AND_FIRST_AND_LAST_NODES_PARAMS(4, "打印基本信息和耗时和第一个和最后一个节点参数"),
+        BASE_AND_TIME_AND_ALL_NODES_PARAMS(5, "打印基本信息和耗时和所有节点参数"),
+        ;
+
+        private Integer code;
+        private String msg;
+
+        private static final Map<Integer, LogLevelEnum> MAP;
+
+        static {
+            MAP = Arrays.stream(LogLevelEnum.values()).collect(Collectors.toMap(LogLevelEnum::getCode, obj -> obj));
+        }
+
+        public static Boolean containsCode(Integer code) {
+            return MAP.containsKey(code);
+        }
+
+        public static String getMsg(Integer code) {
+            if (!MAP.containsKey(code)) {
+                return null;
+            }
+
+            return MAP.get(code).getMsg();
+        }
+
+        public static LogLevelEnum getEnum(Integer code) {
+            if (!MAP.containsKey(code)) {
+                return null;
+            }
+
+            return MAP.get(code);
+        }
+
     }
 
 }

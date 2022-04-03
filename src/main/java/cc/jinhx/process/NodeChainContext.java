@@ -1,7 +1,5 @@
-package cc.jinhx.process.chain;
+package cc.jinhx.process;
 
-import cc.jinhx.process.enums.ExceptionEnums;
-import cc.jinhx.process.exception.ProcessException;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
@@ -54,32 +52,32 @@ public class NodeChainContext<T> implements Serializable {
      */
     public static <T> NodeChainContext<T> create(T contextInfo, String logStr) {
         if (Objects.isNull(contextInfo)){
-            throw new ProcessException(ExceptionEnums.NODE_CHAIN_CONTEXT_INFO_NOT_NULL);
+            throw new ProcessException(ProcessException.MsgEnum.NODE_CHAIN_CONTEXT_INFO_NOT_NULL);
         }
 
         if (StringUtils.isEmpty(logStr)){
-            throw new ProcessException(ExceptionEnums.NODE_CHAIN_LOG_STR_NOT_NULL);
+            throw new ProcessException(ProcessException.MsgEnum.NODE_CHAIN_LOG_STR_NOT_NULL);
         }
-        return new NodeChainContext<>(contextInfo, logStr + " act=" + Thread.currentThread().getStackTrace()[3].getMethodName());
+        return new NodeChainContext<>(contextInfo, logStr + " act=" + Thread.currentThread().getStackTrace()[4].getMethodName());
     }
 
     public static <T> NodeChainContext<T> create(Class<T> clazz) {
-        return new NodeChainContext<>(createNodeChainContext(clazz), "act=" + Thread.currentThread().getStackTrace()[3].getMethodName());
+        return new NodeChainContext<>(createNodeChainContext(clazz), "act=" + Thread.currentThread().getStackTrace()[4].getMethodName());
     }
 
     public static <T> NodeChainContext<T> create(T contextInfo) {
-        return new NodeChainContext<>(contextInfo, "act=" + Thread.currentThread().getStackTrace()[3].getMethodName());
+        return new NodeChainContext<>(contextInfo, "act=" + Thread.currentThread().getStackTrace()[4].getMethodName());
     }
 
     public static <T> NodeChainContext<T> create(Class<T> clazz, String logStr) {
         if (Objects.isNull(clazz)){
-            throw new ProcessException(ExceptionEnums.NODE_CHAIN_CLASS_NOT_NULL);
+            throw new ProcessException(ProcessException.MsgEnum.NODE_CHAIN_CLASS_NOT_NULL);
         }
 
         if (StringUtils.isEmpty(logStr)){
-            throw new ProcessException(ExceptionEnums.NODE_CHAIN_LOG_STR_NOT_NULL);
+            throw new ProcessException(ProcessException.MsgEnum.NODE_CHAIN_LOG_STR_NOT_NULL);
         }
-        return new NodeChainContext<>(createNodeChainContext(clazz), logStr + " act=" + Thread.currentThread().getStackTrace()[3].getMethodName());
+        return new NodeChainContext<>(createNodeChainContext(clazz), logStr + " act=" + Thread.currentThread().getStackTrace()[4].getMethodName());
     }
 
     /**
@@ -108,7 +106,7 @@ public class NodeChainContext<T> implements Serializable {
             constructor.setAccessible(true);
             return constructor.newInstance();
         }catch (Exception e){
-            log.error("act=createNodeChainContext 反射创建对象失败 clazz={} error={}", clazz, e);
+            log.error("createNodeChainContext reflex create object fail clazz={} error={}", clazz, e);
             return null;
         }
     }
