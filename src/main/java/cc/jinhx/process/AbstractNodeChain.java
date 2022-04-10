@@ -248,7 +248,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                     throw e;
                 } catch (Exception e) {
                     log.error("nodeChainLog {} execute fail nodeName={} msg=", nodeChainContext.getLogStr(), nodeName, e);
-                    processException = new ProcessException(ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName);
+                    processException = new ProcessException(ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + e.getMessage());
                 }
 
                 // 降级处理
