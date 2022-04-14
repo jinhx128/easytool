@@ -91,26 +91,51 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     }
 
     public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes) {
-        addAsyncNodeGroup(nodes, null, null);
+        addAsyncNodeGroup(nodes, null, null, false);
     }
 
     public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle) {
-        addAsyncNodeGroup(nodes, failHandle, null);
+        addAsyncNodeGroup(nodes, failHandle, null, false);
     }
 
     public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, Long timeout) {
-        addAsyncNodeGroup(nodes, null, timeout);
+        addAsyncNodeGroup(nodes, null, timeout, false);
     }
 
     public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle, Long timeout) {
-        int i = nodes.hashCode();
-        for (Class<? extends AbstractNode> node : nodes) {
-            add(String.valueOf(i), node, failHandle, timeout);
-        }
+        addAsyncNodeGroup(nodes, failHandle, timeout, false);
+    }
 
-        if (this.asyncLastNode){
+    public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, boolean restartAsyncNode) {
+        addAsyncNodeGroup(nodes, null, null, restartAsyncNode);
+    }
+
+    public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle, boolean restartAsyncNode) {
+        addAsyncNodeGroup(nodes, failHandle, null, restartAsyncNode);
+    }
+
+    public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, Long timeout, boolean restartAsyncNode) {
+        addAsyncNodeGroup(nodes, null, timeout, restartAsyncNode);
+    }
+
+    public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle, Long timeout, boolean restartAsyncNode) {
+        if (restartAsyncNode && this.asyncLastNode){
             this.asyncLastNode = false;
         }
+
+        if (this.asyncLastNode) {
+            for (Class<? extends AbstractNode> node : nodes) {
+                add(this.lastNodeName, node, failHandle, timeout);
+            }
+        } else {
+            String name = String.valueOf(nodes.hashCode());
+            for (Class<? extends AbstractNode> node : nodes) {
+                add(name, node, failHandle, timeout);
+            }
+            this.asyncLastNode = true;
+            this.lastNodeName = name;
+        }
+
     }
 
     /**
@@ -141,11 +166,9 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
      * 1. 通过内部addxxx方法，添加节点到节点链，执行顺序按照添加顺序
      * 2. 组内异步，与组外同步
      * 3. 添加一个同步节点，自己属于一个组，且组内只能有自己
-     * 4. 添加一组异步节点
-     * 5. 添加一个异步节点
-     *   5.1 与上一个添加的异步节点属于同组
-     *   5.2 如果上一个是同步节点，则自己属于新的组，后面添加的异步节点属于这个组
-     *   5.3 也可以通过参数restartAsyncNode指定新开一个组，后面添加的
+     * 4. 添加一个异步节点/节点组
+     *   4.1 可通过参数restartAsyncNode控制是否要加入上一个添加的异步节点/节点组属于同组，默认是
+     *   4.2 如果上一个是同步节点，则无法加入，自己只能属于一个新的组，后面添加的异步节点/节点组依然可以通过参数restartAsyncNode控制
      */
     protected abstract void setNodeInfo();
 
