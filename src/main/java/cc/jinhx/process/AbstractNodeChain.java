@@ -150,11 +150,13 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     protected abstract void setNodeInfo();
 
     /**
-     * 获取节点链默认线程池
+     * 获取节点链默认线程池，内置异步线程池
      *
      * @return ThreadPoolExecutor
      */
-    protected abstract ThreadPoolExecutor getThreadPoolExecutor();
+    protected ThreadPoolExecutor getThreadPoolExecutor() {
+        return ThreadPoolManager.COMMON_NODE_CHAIN_THREAD_POOL;
+    }
 
     /**
      * 执行当前节点链，利用LinkedHashMap特性，按照添加顺序执行，使用默认线程池

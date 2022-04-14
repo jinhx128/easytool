@@ -1,8 +1,11 @@
 package cc.jinhx.process;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Resource;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,6 +74,19 @@ public class NodeChainManager {
                 setLogLevelMethod.setAccessible(true);
                 setLogLevelMethod.invoke(abstractNodeChain, logLevel);
             }
+
+            for (Field declaredField : clazz.getDeclaredFields()) {
+                // 跳过了访问检查，并提高效率
+                declaredField.setAccessible(true);
+                if (Objects.isNull(declaredField.get(abstractNodeChain))){
+                    if (Objects.nonNull(declaredField.getAnnotation(Resource.class))) {
+                        declaredField.set(abstractNodeChain, SpringUtils.getBean(declaredField.getName(), declaredField.getType()));
+                    } else if (Objects.nonNull(declaredField.getAnnotation(Autowired.class))) {
+                        declaredField.set(abstractNodeChain, SpringUtils.getBean(declaredField.getType()));
+                    }
+                }
+            }
+
             return abstractNodeChain;
         }catch (Exception e){
             log.error("createNodeChain reflex create object fail clazz={} logLevel={} error={}", clazz, logLevel, e);
