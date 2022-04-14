@@ -64,20 +64,20 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
         addAsyncNode(node, failHandle, timeout, false);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, boolean restartAsyncNode) {
-        addAsyncNode(node, null, null, restartAsyncNode);
+    public void addAsyncNode(Class<? extends AbstractNode> node, boolean restartAsyncGroup) {
+        addAsyncNode(node, null, null, restartAsyncGroup);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, Integer failHandle, boolean restartAsyncNode) {
-        addAsyncNode(node, failHandle, null, restartAsyncNode);
+    public void addAsyncNode(Class<? extends AbstractNode> node, Integer failHandle, boolean restartAsyncGroup) {
+        addAsyncNode(node, failHandle, null, restartAsyncGroup);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, Long timeout, boolean restartAsyncNode) {
-        addAsyncNode(node, null, timeout, restartAsyncNode);
+    public void addAsyncNode(Class<? extends AbstractNode> node, Long timeout, boolean restartAsyncGroup) {
+        addAsyncNode(node, null, timeout, restartAsyncGroup);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, Integer failHandle, Long timeout, boolean restartAsyncNode) {
-        if (restartAsyncNode && this.asyncLastNode){
+    public void addAsyncNode(Class<? extends AbstractNode> node, Integer failHandle, Long timeout, boolean restartAsyncGroup) {
+        if (restartAsyncGroup && this.asyncLastNode){
             this.asyncLastNode = false;
         }
 
@@ -90,36 +90,36 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
         }
     }
 
-    public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes) {
-        addAsyncNodeGroup(nodes, null, null, false);
+    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes) {
+        addAsyncNodeList(nodes, null, null, false);
     }
 
-    public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle) {
-        addAsyncNodeGroup(nodes, failHandle, null, false);
+    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, Integer failHandle) {
+        addAsyncNodeList(nodes, failHandle, null, false);
     }
 
-    public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, Long timeout) {
-        addAsyncNodeGroup(nodes, null, timeout, false);
+    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, Long timeout) {
+        addAsyncNodeList(nodes, null, timeout, false);
     }
 
-    public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle, Long timeout) {
-        addAsyncNodeGroup(nodes, failHandle, timeout, false);
+    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, Integer failHandle, Long timeout) {
+        addAsyncNodeList(nodes, failHandle, timeout, false);
     }
 
-    public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, boolean restartAsyncNode) {
-        addAsyncNodeGroup(nodes, null, null, restartAsyncNode);
+    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, boolean restartAsyncGroup) {
+        addAsyncNodeList(nodes, null, null, restartAsyncGroup);
     }
 
-    public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle, boolean restartAsyncNode) {
-        addAsyncNodeGroup(nodes, failHandle, null, restartAsyncNode);
+    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, Integer failHandle, boolean restartAsyncGroup) {
+        addAsyncNodeList(nodes, failHandle, null, restartAsyncGroup);
     }
 
-    public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, Long timeout, boolean restartAsyncNode) {
-        addAsyncNodeGroup(nodes, null, timeout, restartAsyncNode);
+    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, Long timeout, boolean restartAsyncGroup) {
+        addAsyncNodeList(nodes, null, timeout, restartAsyncGroup);
     }
 
-    public void addAsyncNodeGroup(List<Class<? extends AbstractNode>> nodes, Integer failHandle, Long timeout, boolean restartAsyncNode) {
-        if (restartAsyncNode && this.asyncLastNode){
+    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, Integer failHandle, Long timeout, boolean restartAsyncGroup) {
+        if (restartAsyncGroup && this.asyncLastNode){
             this.asyncLastNode = false;
         }
 
@@ -128,7 +128,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                 add(this.lastNodeName, node, failHandle, timeout);
             }
         } else {
-            String name = String.valueOf(nodes.hashCode());
+            String name = UUID.randomUUID().toString();
             for (Class<? extends AbstractNode> node : nodes) {
                 add(name, node, failHandle, timeout);
             }
@@ -167,8 +167,8 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
      * 2. 组内异步，与组外同步
      * 3. 添加一个同步节点，自己属于一个组，且组内只能有自己
      * 4. 添加一个异步节点/节点组
-     *   4.1 可通过参数restartAsyncNode控制是否要加入上一个添加的异步节点/节点组属于同组，默认是
-     *   4.2 如果上一个是同步节点，则无法加入，自己只能属于一个新的组，后面添加的异步节点/节点组依然可以通过参数restartAsyncNode控制
+     *   4.1 可通过参数restartAsyncGroup控制是否要加入上一个添加的异步节点/节点组属于同组，默认是
+     *   4.2 如果上一个是同步节点，则无法加入，自己只能属于一个新的组，后面添加的异步节点/节点组依然可以通过参数restartAsyncGroup控制
      */
     protected abstract void setNodeInfo();
 
