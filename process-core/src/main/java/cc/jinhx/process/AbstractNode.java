@@ -72,7 +72,7 @@ public abstract class AbstractNode<T> {
      * @param msg msg
      */
     protected void businessFail(String msg){
-        throw new BusinessException(ProcessResult.BaseEnum.FAIL.getCode(), msg);
+        throw new BusinessException(ProcessResult.BaseEnum.BUSINESS_FAIL.getCode(), msg);
     }
 
     /**

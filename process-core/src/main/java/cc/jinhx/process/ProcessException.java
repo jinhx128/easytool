@@ -22,17 +22,17 @@ public class ProcessException extends RuntimeException {
     public ProcessException(MsgEnum msgEnum, Throwable e){
         super(msgEnum.getMsg(), e);
         this.msg = msgEnum.getMsg();
-        this.code = ProcessResult.BaseEnum.FAIL.getCode();
+        this.code = ProcessResult.BaseEnum.UNKONW_FAIL.getCode();
     }
 
     public ProcessException(MsgEnum msgEnum){
         msg = msgEnum.getMsg();
-        this.code = ProcessResult.BaseEnum.FAIL.getCode();
+        this.code = ProcessResult.BaseEnum.UNKONW_FAIL.getCode();
     }
 
     public ProcessException(String msg){
         this.msg = msg;
-        this.code = ProcessResult.BaseEnum.FAIL.getCode();
+        this.code = ProcessResult.BaseEnum.UNKONW_FAIL.getCode();
     }
 
     @Getter

@@ -15,7 +15,7 @@ class ProcessDemoApplicationTests {
 	void Test1() {
 		ProcessResult<TestContext> processResult = new AbstractLogicHandler<TestContext>() {
 
-			NodeChainContext<TestContext> testNodeChainContext = builNodeChainContext(TestContext.class);
+			NodeChainContext<TestContext> testNodeChainContext = buildNodeChainContext(TestContext.class);
 
 			@Override
 			protected void checkParams() {
@@ -26,7 +26,7 @@ class ProcessDemoApplicationTests {
 			protected ProcessResult<TestContext> process() {
 				testNodeChainContext.getContextInfo().setReq("re");
 				executeNodeChain(TestNodeChain.class, testNodeChainContext);
-				return builSuccessResult(testNodeChainContext.getContextInfo());
+				return buildSuccessResult(testNodeChainContext.getContextInfo());
 			}
 
 		}.execute();
@@ -37,7 +37,7 @@ class ProcessDemoApplicationTests {
 	void Test2() {
 		ProcessResult<TestContext> processResult = new AbstractLogicHandler<TestContext>() {
 
-			NodeChainContext<TestContext> testNodeChainContext = builNodeChainContext(TestContext.class);
+			NodeChainContext<TestContext> testNodeChainContext = buildNodeChainContext(TestContext.class);
 
 			@Override
 			protected void checkParams() {
@@ -48,7 +48,7 @@ class ProcessDemoApplicationTests {
 			protected ProcessResult<TestContext> process() {
 				testNodeChainContext.getContextInfo().setReq("req");
 				executeNodeChain(TestNodeChain.class, testNodeChainContext);
-				return builSuccessResult(testNodeChainContext.getContextInfo());
+				return buildSuccessResult(testNodeChainContext.getContextInfo());
 			}
 
 		}.execute();

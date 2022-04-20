@@ -54,7 +54,8 @@ public class ProcessResult<T> implements Serializable {
     public enum BaseEnum {
 
         SUCCESS(1, "success"),
-        FAIL(-1, "fail")
+        BUSINESS_FAIL(0, "business fail"),
+        UNKONW_FAIL(-1, "unknown fail")
         ;
 
         private final Integer code;

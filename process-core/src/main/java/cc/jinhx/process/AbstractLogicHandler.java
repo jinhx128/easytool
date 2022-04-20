@@ -117,7 +117,7 @@ public abstract class AbstractLogicHandler<T> {
      * @param msg msg
      */
     protected void businessFail(String msg){
-        throw new BusinessException(ProcessResult.BaseEnum.FAIL.getCode(), msg);
+        throw new BusinessException(ProcessResult.BaseEnum.BUSINESS_FAIL.getCode(), msg);
     }
 
     protected abstract ProcessResult<T> process();
@@ -131,29 +131,43 @@ public abstract class AbstractLogicHandler<T> {
     /**
      * 构建上下文
      */
-    protected <T> NodeChainContext<T> builNodeChainContext(Class<T> clazz) {
+    protected <T> NodeChainContext<T> buildNodeChainContext(Class<T> clazz) {
         return NodeChainContext.create(clazz);
     }
 
     /**
      * 构建成功结果
      */
-    protected ProcessResult<T> builSuccessResult(T data) {
+    protected ProcessResult<T> buildSuccessResult(T data) {
         return new ProcessResult<>(data);
     }
 
     /**
      * 构建失败结果
      */
-    protected ProcessResult<T> builFailResult(Integer code, String msg) {
+    protected ProcessResult<T> buildFailResult(Integer code, String msg) {
         return new ProcessResult<>(code, msg);
     }
 
     /**
-     * 构建失败结果
+     * 构建未知失败结果
      */
-    protected ProcessResult<T> builFailResult(String msg) {
-        return new ProcessResult<>(ProcessResult.BaseEnum.FAIL.getCode(), msg);
+    protected ProcessResult<T> buildUnknownFailResult(String msg) {
+        return new ProcessResult<>(ProcessResult.BaseEnum.UNKONW_FAIL.getCode(), msg);
+    }
+
+    /**
+     * 构建业务失败结果
+     */
+    protected ProcessResult<T> buildBusinessFailResult(String msg) {
+        return new ProcessResult<>(ProcessResult.BaseEnum.BUSINESS_FAIL.getCode(), msg);
+    }
+
+    /**
+     * 构建业务失败结果
+     */
+    protected ProcessResult<T> buildBusinessFailResult(Integer code, String msg) {
+        return new ProcessResult<>(code, msg);
     }
 
     /**
@@ -178,14 +192,14 @@ public abstract class AbstractLogicHandler<T> {
             log.info("handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString());
         } catch (ProcessException e) {
             log.error("handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
-            return builFailResult(e.getCode(), e.getMsg());
+            return buildFailResult(e.getCode(), e.getMsg());
         } catch (BusinessException e) {
             log.error("handlerLog {} checkParams business fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString(), e.getMsg());
-            return builFailResult(e.getCode(), e.getMsg());
+            return buildBusinessFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
             String exceptionLog = getExceptionLog(e);
             log.error("handlerLog {} checkParams fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString(), exceptionLog);
-            return builFailResult(exceptionLog);
+            return buildUnknownFailResult(exceptionLog);
         }
 
         try {
@@ -200,16 +214,16 @@ public abstract class AbstractLogicHandler<T> {
             return result;
         } catch (ProcessException e) {
             log.error("handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
-            return builFailResult(e.getCode(), e.getMsg());
+            return buildFailResult(e.getCode(), e.getMsg());
         } catch (BusinessException e) {
             this.onFail();
             log.error("handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
-            return builFailResult(e.getCode(), e.getMsg());
+            return buildBusinessFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
             this.onFail();
             String exceptionLog = getExceptionLog(e);
             log.error("handlerLog {} execute fail msg={}", logicHandlerBaseInfo.getLogStr(), exceptionLog);
-            return builFailResult(exceptionLog);
+            return buildUnknownFailResult(exceptionLog);
         } finally {
             this.afterProcess();
         }
