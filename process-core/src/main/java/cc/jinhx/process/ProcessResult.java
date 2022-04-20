@@ -44,8 +44,12 @@ public class ProcessResult<T> implements Serializable {
         return BaseEnum.SUCCESS.getCode().equals(this.code);
     }
 
-    public boolean isFail(){
-        return !isSuccess();
+    public boolean isBusinessFail(){
+        return BaseEnum.BUSINESS_FAIL.getCode().equals(this.code);
+    }
+
+    public boolean isUnknowFail(){
+        return BaseEnum.UNKNOW_FAIL.getCode().equals(this.code);
     }
 
 
@@ -55,7 +59,7 @@ public class ProcessResult<T> implements Serializable {
 
         SUCCESS(1, "success"),
         BUSINESS_FAIL(0, "business fail"),
-        UNKONW_FAIL(-1, "unknown fail")
+        UNKNOW_FAIL(-1, "unknown fail")
         ;
 
         private final Integer code;

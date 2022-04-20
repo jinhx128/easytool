@@ -153,7 +153,7 @@ public abstract class AbstractLogicHandler<T> {
      * 构建未知失败结果
      */
     protected ProcessResult<T> buildUnknownFailResult(String msg) {
-        return new ProcessResult<>(ProcessResult.BaseEnum.UNKONW_FAIL.getCode(), msg);
+        return new ProcessResult<>(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), msg);
     }
 
     /**
