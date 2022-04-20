@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
 public abstract class AbstractNodeChain extends LinkedHashMap<String, List<AbstractNode>> {
 
     private static final long serialVersionUID = 4780080785208529405L;
+
+    private static final String LOG_ID = "traceId";
 
     private LogLevelEnum logLevel = LogLevelEnum.BASE_AND_TIME_AND_FIRST_AND_LAST_NODES_PARAMS;
 
@@ -260,6 +263,15 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     }
 
     /**
+     * 获取日志id
+     *
+     * @return String
+     */
+    protected String getLogId() {
+        return LOG_ID;
+    }
+
+    /**
      * 执行当前节点链，利用LinkedHashMap特性，按照添加顺序执行，使用默认线程池
      *
      * @param nodeChainContext nodeChainContext
@@ -328,18 +340,23 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
      */
     private Map<Future<Void>, AbstractNode> getFutureMap(NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor,
                                                          List<AbstractNode> abstractNodeList, AbstractNode.LogLevelEnum nodeLogLevel){
+        String logId = MDC.get(getLogId());
         Map<Future<Void>, AbstractNode> futureMap = new HashMap<>();
         // 同组单/多个节点并行执行
         for (AbstractNode abstractNode : abstractNodeList) {
             String nodeChainName = this.getClass().getName();
             if (Objects.nonNull(threadPoolExecutor)){
                 futureMap.put(CompletableFuture.supplyAsync(() -> {
+                    MDC.put(getLogId(), logId);
                     abstractNode.execute(nodeChainContext, nodeLogLevel, nodeChainName);
+                    MDC.remove(getLogId());
                     return null;
                 }, threadPoolExecutor), abstractNode);
             } else if (Objects.nonNull(getThreadPoolExecutor())) {
                 futureMap.put(CompletableFuture.supplyAsync(() -> {
+                    MDC.put(getLogId(), logId);
                     abstractNode.execute(nodeChainContext, nodeLogLevel, nodeChainName);
+                    MDC.remove(getLogId());
                     return null;
                 }, getThreadPoolExecutor()), abstractNode);
             } else {
