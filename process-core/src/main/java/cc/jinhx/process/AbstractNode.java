@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -34,12 +35,17 @@ public abstract class AbstractNode<T> {
     /**
      * 节点失败处理
      */
-    private Integer failHandle = AbstractNode.FailHandleEnum.INTERRUPT.getCode();
+    private FailHandleEnum failHandle = FailHandleEnum.INTERRUPT;
 
     /**
      * 节点执行超时时间
      */
-    private Long timeout = AbstractNode.TimeoutEnum.COMMONLY.getCode();
+    private Long timeout = TimeoutEnum.COMMONLY.getCode();
+
+    /**
+     * 重试次数
+     */
+    private RetryTimesEnum retryTimes = RetryTimesEnum.ONE;
 
     /**
      * 获取上下文信息
@@ -87,44 +93,45 @@ public abstract class AbstractNode<T> {
      *
      * @param nodeChainContext nodeChainContext
      * @param logLevel logLevel
+     * @param nodeChainName nodeChainName
      */
-    public void execute(NodeChainContext<T> nodeChainContext, Integer logLevel, String nodeChainName) {
+    public void execute(NodeChainContext<T> nodeChainContext, LogLevelEnum logLevel, String nodeChainName) {
         String logStr = NODE_LOG + nodeChainContext.getLogStr();
         String nodeName = this.getClass().getName();
         try {
             // 日志
             StringBuilder logInfo = new StringBuilder(logStr);
 
-            buildLogInfo(logInfo, Arrays.asList(LOG_END, NODE_CHAIN_NAME, nodeChainName, NODE_NAME, nodeName), logLevel, LogLevelEnum.BASE.getCode(), false);
-            buildLogInfo(logInfo, Arrays.asList(BEFORE_EXECUTE_PARAMS, nodeChainContext.toString()), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS.getCode(), false);
+            buildLogInfo(logInfo, Arrays.asList(LOG_END, NODE_CHAIN_NAME, nodeChainName, NODE_NAME, nodeName), logLevel, LogLevelEnum.BASE, false);
+            buildLogInfo(logInfo, Arrays.asList(BEFORE_EXECUTE_PARAMS, nodeChainContext.toString()), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
 
             // 耗时计算
             long startTime = System.currentTimeMillis();
             beforeLog();
 
             if (isSkip(nodeChainContext)) {
-                buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, TRUE), logLevel, LogLevelEnum.BASE.getCode(), false);
+                buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, TRUE), logLevel, LogLevelEnum.BASE, false);
             } else {
                 try {
                     this.checkParams();
 //            log.info(logStr + " checkParams success");
                 } catch (BusinessException e) {
-                    log.error(logStr + " checkParams business fail msg=", e);
+//                    log.error(logStr + " checkParams business fail msg=", e);
                     throw e;
                 } catch (Exception e) {
-                    log.error(logStr + " checkParams fail msg=", e);
+//                    log.error(logStr + " checkParams fail msg=", e);
                     throw e;
                 }
 
-                buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, FALSE), logLevel, LogLevelEnum.BASE.getCode(), false);
+                buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, FALSE), logLevel, LogLevelEnum.BASE, false);
 
                 try {
                     process(nodeChainContext);
                 } catch (BusinessException e) {
-                    log.error(logStr + " execute business fail nodeName={} msg=", nodeName, e);
+//                    log.error(logStr + " execute business fail nodeName={} msg=", nodeName, e);
                     throw e;
                 } catch (Exception e) {
-                    log.error(logStr + " execute fail nodeName={} msg=", nodeName, e);
+//                    log.error(logStr + " execute fail nodeName={} msg=", nodeName, e);
                     throw e;
                 }
             }
@@ -132,13 +139,13 @@ public abstract class AbstractNode<T> {
             afterLog();
             long endTime = System.currentTimeMillis();
 
-            buildLogInfo(logInfo, Arrays.asList(AFTER_EXECUTE_PARAMS, nodeChainContext.toString()), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS.getCode(), false);
-            buildLogInfo(logInfo, Arrays.asList(LOG_TIME, endTime - startTime), logLevel, LogLevelEnum.BASE_AND_TIME.getCode(), true);
+            buildLogInfo(logInfo, Arrays.asList(AFTER_EXECUTE_PARAMS, nodeChainContext.toString()), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
+            buildLogInfo(logInfo, Arrays.asList(LOG_TIME, endTime - startTime), logLevel, LogLevelEnum.BASE_AND_TIME, true);
         } catch (BusinessException e) {
-            log.error(logStr + " execute business fail nodeName={} msg=", nodeName, e);
+//            log.error(logStr + " execute business fail nodeName={} msg=", nodeName, e);
             throw e;
         } catch (Exception e) {
-            log.error(logStr + " execute fail nodeName={} msg=", nodeName, e);
+//            log.error(logStr + " execute fail nodeName={} msg=", nodeName, e);
             throw e;
         }
     }
@@ -148,18 +155,20 @@ public abstract class AbstractNode<T> {
      *
      * @param logInfo logInfo
      * @param logInfos logInfos
+     * @param logLevel logLevel
+     * @param thisLogLevel thisLogLevel
      * @param print print
      */
-    private void buildLogInfo(StringBuilder logInfo, List<Object> logInfos, Integer logLevel, Integer thisLogLevel, Boolean print) {
-        if (!LogLevelEnum.containsCode(logLevel)){
-            logLevel = LogLevelEnum.BASE_AND_TIME.getCode();
+    private void buildLogInfo(StringBuilder logInfo, List<Object> logInfos, LogLevelEnum logLevel, LogLevelEnum thisLogLevel, Boolean print) {
+        if (Objects.isNull(logLevel) || !LogLevelEnum.containsCode(logLevel.getCode())){
+            logLevel = LogLevelEnum.BASE_AND_TIME;
         }
 
-        if (thisLogLevel <= logLevel && !LogLevelEnum.NO.getCode().equals(logLevel)){
+        if (thisLogLevel.getCode() <= logLevel.getCode() && !LogLevelEnum.NO.getCode().equals(logLevel.getCode())){
             logInfos.forEach(logInfo::append);
         }
 
-        if (print && !LogLevelEnum.NO.getCode().equals(logLevel)){
+        if (print && !LogLevelEnum.NO.getCode().equals(logLevel.getCode())){
             log.info(logInfo.toString());
             // 打印完手动释放内存
             logInfo.setLength(0);
@@ -200,8 +209,8 @@ public abstract class AbstractNode<T> {
         LONG(1000L, "长"),
         ;
 
-        private Long code;
-        private String msg;
+        private final Long code;
+        private final String msg;
 
         private static final Map<Long, TimeoutEnum> MAP;
 
@@ -241,8 +250,8 @@ public abstract class AbstractNode<T> {
         BASE_AND_TIME_AND_PARAMS(4, "打印基本信息和耗时和参数"),
         ;
 
-        private Integer code;
-        private String msg;
+        private final Integer code;
+        private final String msg;
 
         private static final Map<Integer, LogLevelEnum> MAP;
 
@@ -278,17 +287,16 @@ public abstract class AbstractNode<T> {
 
         INTERRUPT(1, "中断链路"),
         ABANDON(2, "抛弃节点"),
-        // todo 重试
-//    RETRY(3, "重试节点"),
+        RETRY(3, "重试节点"),
         ;
 
-        private Integer code;
-        private String msg;
+        private final Integer code;
+        private final String msg;
 
-        private static final Map<Integer, AbstractNode.FailHandleEnum> MAP;
+        private static final Map<Integer, FailHandleEnum> MAP;
 
         static {
-            MAP = Arrays.stream(AbstractNode.FailHandleEnum.values()).collect(Collectors.toMap(AbstractNode.FailHandleEnum::getCode, obj -> obj));
+            MAP = Arrays.stream(FailHandleEnum.values()).collect(Collectors.toMap(FailHandleEnum::getCode, obj -> obj));
         }
 
         public static Boolean containsCode(Integer code) {
@@ -303,7 +311,39 @@ public abstract class AbstractNode<T> {
             return MAP.get(code).getMsg();
         }
 
-        public static AbstractNode.FailHandleEnum getEnum(Integer code) {
+        public static FailHandleEnum getEnum(Integer code) {
+            if (!MAP.containsKey(code)) {
+                return null;
+            }
+
+            return MAP.get(code);
+        }
+
+    }
+
+    @AllArgsConstructor
+    @Getter
+    public enum RetryTimesEnum {
+
+        ONE(1),
+        TWO(2),
+        THREE(3),
+        FOUR(4),
+        FIVE(5)
+        ;
+
+        private final Integer code;
+
+        private static final Map<Integer, RetryTimesEnum> MAP;
+
+        static {
+            MAP = Arrays.stream(RetryTimesEnum.values()).collect(Collectors.toMap(RetryTimesEnum::getCode, obj -> obj));
+        }
+
+        public static Boolean containsCode(Integer code) {
+            return MAP.containsKey(code);
+        }
+        public static RetryTimesEnum getEnum(Integer code) {
             if (!MAP.containsKey(code)) {
                 return null;
             }

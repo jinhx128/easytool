@@ -26,10 +26,6 @@ public class NodeChainManager {
         MAP.put(key, abstractNodeChain);
     }
 
-    public static AbstractNodeChain getNodeChain(Class<? extends AbstractNodeChain> clazz) {
-        return getNodeChain(clazz, null);
-    }
-
     /**
      * 从全局唯一MAP获取实例，不存在则反射创建返回，并存入MAP
      *
@@ -37,8 +33,14 @@ public class NodeChainManager {
      * @param logLevel logLevel
      * @return AbstractNode
      */
-    public static AbstractNodeChain getNodeChain(Class<? extends AbstractNodeChain> clazz, Integer logLevel) {
-        String key = clazz.getName() + logLevel;
+    public static AbstractNodeChain getNodeChain(Class<? extends AbstractNodeChain> clazz, AbstractNodeChain.LogLevelEnum logLevel) {
+        String key = clazz.getName() + ":";
+        if (Objects.isNull(logLevel)){
+            key += null;
+        }else {
+            key += logLevel.getCode();
+        }
+
         if (MAP.containsKey(key)){
             return MAP.get(key);
         }
@@ -58,7 +60,7 @@ public class NodeChainManager {
      * @param logLevel logLevel
      * @return AbstractNode
      */
-    private static AbstractNodeChain createNodeChain(Class<? extends AbstractNodeChain> clazz, Integer logLevel) {
+    private static AbstractNodeChain createNodeChain(Class<? extends AbstractNodeChain> clazz, AbstractNodeChain.LogLevelEnum logLevel) {
         try {
             Constructor<? extends AbstractNodeChain> constructor = clazz.getDeclaredConstructor();
             // 跳过了访问检查，并提高效率
@@ -68,8 +70,8 @@ public class NodeChainManager {
             // 跳过了访问检查，并提高效率
             setNodeInfoMethod.setAccessible(true);
             setNodeInfoMethod.invoke(abstractNodeChain);
-            if (AbstractNodeChain.LogLevelEnum.containsCode(logLevel)){
-                Method setLogLevelMethod = clazz.getMethod("setLogLevel", Integer.class);
+            if (Objects.nonNull(logLevel) && AbstractNodeChain.LogLevelEnum.containsCode(logLevel.getCode())){
+                Method setLogLevelMethod = clazz.getMethod("setLogLevel", AbstractNodeChain.LogLevelEnum.class);
                 // 跳过了访问检查，并提高效率
                 setLogLevelMethod.setAccessible(true);
                 setLogLevelMethod.invoke(abstractNodeChain, logLevel);

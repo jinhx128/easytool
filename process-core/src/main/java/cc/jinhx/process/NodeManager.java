@@ -34,13 +34,26 @@ public class NodeManager {
      * @param timeout timeout
      * @return AbstractNode
      */
-    public static AbstractNode getNode(Class<? extends AbstractNode> clazz, Integer failHandle, Long timeout) {
-        String key = clazz.getName() + failHandle + timeout;
+    public static AbstractNode getNode(Class<? extends AbstractNode> clazz, AbstractNode.FailHandleEnum failHandle,
+                                       Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
+        String key = clazz.getName() + ":";
+        if (Objects.isNull(failHandle)){
+            key += null +  ":" + timeout +  ":";
+        }else {
+            key += failHandle.getCode() +  ":" + timeout +  ":";
+        }
+
+        if (Objects.isNull(retryTimes)){
+            key += null;
+        }else {
+            key += retryTimes.getCode();
+        }
+
         if (MAP.containsKey(key)){
             return MAP.get(key);
         }
 
-        AbstractNode abstractNode = createNode(clazz, failHandle, timeout);
+        AbstractNode abstractNode = createNode(clazz, failHandle, timeout, retryTimes);
         if (Objects.nonNull(abstractNode)){
             MAP.put(key, abstractNode);
         }
@@ -56,18 +69,27 @@ public class NodeManager {
      * @param timeout timeout
      * @return AbstractNode
      */
-    private static AbstractNode createNode(Class<? extends AbstractNode> clazz, Integer failHandle, Long timeout) {
+    private static AbstractNode createNode(Class<? extends AbstractNode> clazz, AbstractNode.FailHandleEnum failHandle,
+                                           Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
         try {
             Constructor<? extends AbstractNode> constructor = clazz.getDeclaredConstructor();
             // 跳过了访问检查，并提高效率
             constructor.setAccessible(true);
             AbstractNode abstractNode = constructor.newInstance();
-            if (AbstractNode.FailHandleEnum.containsCode(failHandle)){
-                Method setFailHandleMethod = clazz.getMethod("setFailHandle", Integer.class);
+            if (Objects.nonNull(failHandle) && AbstractNode.FailHandleEnum.containsCode(failHandle.getCode())){
+                Method setFailHandleMethod = clazz.getMethod("setFailHandle", AbstractNode.FailHandleEnum.class);
                 // 跳过了访问检查，并提高效率
                 setFailHandleMethod.setAccessible(true);
                 setFailHandleMethod.invoke(abstractNode, failHandle);
             }
+
+            if (Objects.nonNull(retryTimes) && AbstractNode.RetryTimesEnum.containsCode(retryTimes.getCode())){
+                Method setRetryTimesMethod = clazz.getMethod("setRetryTimes", AbstractNode.RetryTimesEnum.class);
+                // 跳过了访问检查，并提高效率
+                setRetryTimesMethod.setAccessible(true);
+                setRetryTimesMethod.invoke(abstractNode, retryTimes);
+            }
+
             if (Objects.nonNull(timeout) && timeout > 0L){
                 Method setTimeoutMethod = clazz.getMethod("setTimeout", Long.class);
                 // 跳过了访问检查，并提高效率

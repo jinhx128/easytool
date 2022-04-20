@@ -31,8 +31,8 @@ public class ProcessResult<T> implements Serializable {
 
     public ProcessResult(T data){
         this.data = data;
-        this.code = ProcessResult.BaseEnum.SUCCESS.getCode();
-        this.msg = ProcessResult.BaseEnum.SUCCESS.getMsg();
+        this.code = BaseEnum.SUCCESS.getCode();
+        this.msg = BaseEnum.SUCCESS.getMsg();
     }
 
     public ProcessResult(Integer code, String msg){
@@ -41,7 +41,7 @@ public class ProcessResult<T> implements Serializable {
     }
 
     public boolean isSuccess(){
-        return ProcessResult.BaseEnum.SUCCESS.getCode().equals(this.code);
+        return BaseEnum.SUCCESS.getCode().equals(this.code);
     }
 
     public boolean isFail(){
@@ -57,13 +57,13 @@ public class ProcessResult<T> implements Serializable {
         FAIL(-1, "fail")
         ;
 
-        private Integer code;
-        private String msg;
+        private final Integer code;
+        private final String msg;
 
-        private static final Map<Integer, ProcessResult.BaseEnum> MAP;
+        private static final Map<Integer, BaseEnum> MAP;
 
         static {
-            MAP = Arrays.stream(ProcessResult.BaseEnum.values()).collect(Collectors.toMap(ProcessResult.BaseEnum::getCode, obj -> obj));
+            MAP = Arrays.stream(BaseEnum.values()).collect(Collectors.toMap(BaseEnum::getCode, obj -> obj));
         }
 
         public static Boolean containsCode(Integer code) {
@@ -78,7 +78,7 @@ public class ProcessResult<T> implements Serializable {
             return MAP.get(code).getMsg();
         }
 
-        public static ProcessResult.BaseEnum getEnum(Integer code) {
+        public static BaseEnum getEnum(Integer code) {
             if (!MAP.containsKey(code)) {
                 return null;
             }

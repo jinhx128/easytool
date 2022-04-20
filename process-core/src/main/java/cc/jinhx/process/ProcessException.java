@@ -19,13 +19,13 @@ public class ProcessException extends RuntimeException {
     private String msg;
     private Integer code;
 
-    public ProcessException(ProcessException.MsgEnum msgEnum, Throwable e){
+    public ProcessException(MsgEnum msgEnum, Throwable e){
         super(msgEnum.getMsg(), e);
         this.msg = msgEnum.getMsg();
         this.code = ProcessResult.BaseEnum.FAIL.getCode();
     }
 
-    public ProcessException(ProcessException.MsgEnum msgEnum){
+    public ProcessException(MsgEnum msgEnum){
         msg = msgEnum.getMsg();
         this.code = ProcessResult.BaseEnum.FAIL.getCode();
     }
@@ -53,7 +53,7 @@ public class ProcessException extends RuntimeException {
         LOGIC_HANDLER_LOG_STR_NOT_NULL("逻辑处理器日志不能为空")
         ;
 
-        private String msg;
+        private final String msg;
 
     }
 

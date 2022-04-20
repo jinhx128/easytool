@@ -66,7 +66,7 @@ public abstract class AbstractLogicHandler<T> {
      * @param nodeChainContext nodeChainContext
      * @param threadPoolExecutor threadPoolExecutor
      */
-    protected void executeNodeChain(Class<? extends AbstractNodeChain> clazz, Integer logLevel, NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor) {
+    protected void executeNodeChain(Class<? extends AbstractNodeChain> clazz, AbstractNodeChain.LogLevelEnum logLevel, NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor) {
         getNodeChain(clazz, logLevel).execute(nodeChainContext, threadPoolExecutor);
     }
 
@@ -77,7 +77,7 @@ public abstract class AbstractLogicHandler<T> {
      * @param logLevel logLevel
      * @param nodeChainContext nodeChainContext
      */
-    protected void executeNodeChain(Class<? extends AbstractNodeChain> clazz, Integer logLevel, NodeChainContext<?> nodeChainContext) {
+    protected void executeNodeChain(Class<? extends AbstractNodeChain> clazz, AbstractNodeChain.LogLevelEnum logLevel, NodeChainContext<?> nodeChainContext) {
         getNodeChain(clazz, logLevel).execute(nodeChainContext);
     }
 
@@ -87,7 +87,7 @@ public abstract class AbstractLogicHandler<T> {
      * @param clazz clazz
      * @param logLevel logLevel
      */
-    private AbstractNodeChain getNodeChain(Class<? extends AbstractNodeChain> clazz, Integer logLevel) {
+    private AbstractNodeChain getNodeChain(Class<? extends AbstractNodeChain> clazz, AbstractNodeChain.LogLevelEnum logLevel) {
         AbstractNodeChain abstractNodeChain = NodeChainManager.getNodeChain(clazz, logLevel);
         if (Objects.isNull(abstractNodeChain)){
             throw new ProcessException(ProcessException.MsgEnum.NODE_CHAIN_UNREGISTERED.getMsg() + "=" + clazz.getName());
@@ -150,6 +150,13 @@ public abstract class AbstractLogicHandler<T> {
     }
 
     /**
+     * 构建失败结果
+     */
+    protected ProcessResult<T> builFailResult(String msg) {
+        return new ProcessResult<>(ProcessResult.BaseEnum.FAIL.getCode(), msg);
+    }
+
+    /**
      * 成功时执行
      */
     protected void onSuccess() {
@@ -169,12 +176,16 @@ public abstract class AbstractLogicHandler<T> {
         try {
             this.checkParams();
             log.info("handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString());
+        } catch (ProcessException e) {
+            log.error("handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
+            return builFailResult(e.getCode(), e.getMsg());
         } catch (BusinessException e) {
-            log.error("handlerLog {} checkParams business fail req={} msg=", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString(), e);
+            log.error("handlerLog {} checkParams business fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString(), e.getMsg());
             return builFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
-            log.error("handlerLog {} checkParams fail req={} msg=", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString(), e);
-            throw e;
+            String exceptionLog = getExceptionLog(e);
+            log.error("handlerLog {} checkParams fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString(), exceptionLog);
+            return builFailResult(exceptionLog);
         }
 
         try {
@@ -187,17 +198,47 @@ public abstract class AbstractLogicHandler<T> {
             log.info("handlerLog {} execute success time={} rsp={}", logicHandlerBaseInfo.getLogStr(), endTime - startTime, result.toString());
             this.onSuccess();
             return result;
-        }catch (BusinessException e) {
-            this.onFail();
-            log.error("handlerLog {} execute business fail msg=", logicHandlerBaseInfo.getLogStr(), e);
+        } catch (ProcessException e) {
+            log.error("handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
             return builFailResult(e.getCode(), e.getMsg());
-        } catch (Throwable e) {
+        } catch (BusinessException e) {
             this.onFail();
-            log.error("handlerLog {} execute fail msg=", logicHandlerBaseInfo.getLogStr(), e);
-            throw e;
+            log.error("handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMessage());
+            return builFailResult(e.getCode(), e.getMsg());
+        } catch (Exception e) {
+            this.onFail();
+            String exceptionLog = getExceptionLog(e);
+            log.error("handlerLog {} execute fail msg={}", logicHandlerBaseInfo.getLogStr(), exceptionLog);
+            return builFailResult(exceptionLog);
         } finally {
             this.afterProcess();
         }
+    }
+
+    /**
+     * 拼接错误日志
+     *
+     * @param e e
+     * @return String
+     */
+    private String getExceptionLog(Exception e){
+        if (Objects.nonNull(e)){
+            StringBuilder stringBuffer = new StringBuilder("\n");
+            if (Objects.nonNull(e.getMessage())){
+                stringBuffer.append(e.getMessage()).append("\n");
+            }
+            if (Objects.nonNull(e.getCause())){
+                StackTraceElement[] stackTrace = e.getCause().getStackTrace();
+                if (Objects.nonNull(stackTrace) && stackTrace.length > 0){
+                    for (StackTraceElement stackTraceElement : stackTrace) {
+                        stringBuffer.append(stackTraceElement.toString()).append("\n");
+                    }
+                    return stringBuffer.toString();
+                }
+            }
+        }
+
+        return null;
     }
 
 }
