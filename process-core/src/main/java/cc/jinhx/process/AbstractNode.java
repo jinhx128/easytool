@@ -115,6 +115,9 @@ public abstract class AbstractNode<T> {
                 try {
                     this.checkParams();
 //            log.info(logStr + " checkParams success");
+                } catch (ProcessException e) {
+//                    log.error(logStr + " checkParams business fail msg=", e);
+                    throw e;
                 } catch (BusinessException e) {
 //                    log.error(logStr + " checkParams business fail msg=", e);
                     throw e;
@@ -127,6 +130,9 @@ public abstract class AbstractNode<T> {
 
                 try {
                     process(nodeChainContext);
+                } catch (ProcessException e) {
+//                    log.error(logStr + " checkParams business fail msg=", e);
+                    throw e;
                 } catch (BusinessException e) {
 //                    log.error(logStr + " execute business fail nodeName={} msg=", nodeName, e);
                     throw e;
@@ -141,6 +147,9 @@ public abstract class AbstractNode<T> {
 
             buildLogInfo(logInfo, Arrays.asList(AFTER_EXECUTE_PARAMS, nodeChainContext.toString()), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
             buildLogInfo(logInfo, Arrays.asList(LOG_TIME, endTime - startTime), logLevel, LogLevelEnum.BASE_AND_TIME, true);
+        } catch (ProcessException e) {
+//                    log.error(logStr + " checkParams business fail msg=", e);
+            throw e;
         } catch (BusinessException e) {
 //            log.error(logStr + " execute business fail nodeName={} msg=", nodeName, e);
             throw e;

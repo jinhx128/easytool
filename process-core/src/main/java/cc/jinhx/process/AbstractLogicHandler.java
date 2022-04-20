@@ -203,7 +203,7 @@ public abstract class AbstractLogicHandler<T> {
             return builFailResult(e.getCode(), e.getMsg());
         } catch (BusinessException e) {
             this.onFail();
-            log.error("handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMessage());
+            log.error("handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
             return builFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
             this.onFail();

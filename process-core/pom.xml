@@ -11,7 +11,7 @@
 
     <groupId>cc.jinhx</groupId>
     <artifactId>spring-boot-starter-process-core</artifactId>
-    <version>1.0.22</version>
+    <version>1.0.23</version>
 
     <name>spring-boot-starter-process-core</name>
     <description>spring-boot-starter-process-core</description>

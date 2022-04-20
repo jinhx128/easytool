@@ -376,12 +376,18 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                 boolean cancel = future.cancel(true);
                 log.error("nodeChainLog {} execute timeout nodeName={} timeout={} cancel={}", nodeChainContext.getLogStr(), nodeName, timeout, cancel);
                 processException = new ProcessException(ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);
-            } catch (ProcessException e) {
-                log.error("nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, getExceptionLog(e));
-                processException = e;
-            } catch (BusinessException e) {
-                log.error("nodeChainLog {} execute business fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, getExceptionLog(e));
-                throw e;
+            } catch (ExecutionException e) {
+                if (e.getCause() instanceof ProcessException){
+                    log.error("nodeChainLog {} execute process fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, getExceptionLog(e));
+                    processException = (ProcessException) e.getCause();
+                }else if (e.getCause() instanceof BusinessException){
+                    log.error("nodeChainLog {} execute business fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, getExceptionLog(e));
+                    throw (BusinessException) e.getCause();
+                }else {
+                    String exceptionLog = getExceptionLog(e);
+                    log.error("nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, exceptionLog);
+                    processException = new ProcessException(ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
+                }
             } catch (Exception e) {
                 String exceptionLog = getExceptionLog(e);
                 log.error("nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, exceptionLog);
