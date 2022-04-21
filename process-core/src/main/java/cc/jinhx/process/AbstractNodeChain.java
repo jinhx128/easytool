@@ -263,12 +263,21 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     }
 
     /**
-     * 获取日志id
+     * 获取MDC日志id的key
      *
      * @return String
      */
-    protected String getLogId() {
+    protected String getMDCLogIdKey() {
         return LOG_ID;
+    }
+
+    /**
+     * 获取MDC日志id
+     *
+     * @return String
+     */
+    protected String getMDCLogId() {
+        return MDC.get(getMDCLogIdKey());
     }
 
     /**
@@ -340,23 +349,23 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
      */
     private Map<Future<Void>, AbstractNode> getFutureMap(NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor,
                                                          List<AbstractNode> abstractNodeList, AbstractNode.LogLevelEnum nodeLogLevel){
-        String logId = MDC.get(getLogId());
+        String logId = MDC.get(getMDCLogIdKey());
         Map<Future<Void>, AbstractNode> futureMap = new HashMap<>();
         // 同组单/多个节点并行执行
         for (AbstractNode abstractNode : abstractNodeList) {
             String nodeChainName = this.getClass().getName();
             if (Objects.nonNull(threadPoolExecutor)){
                 futureMap.put(CompletableFuture.supplyAsync(() -> {
-                    MDC.put(getLogId(), logId);
+                    MDC.put(getMDCLogIdKey(), logId);
                     abstractNode.execute(nodeChainContext, nodeLogLevel, nodeChainName);
-                    MDC.remove(getLogId());
+                    MDC.remove(getMDCLogIdKey());
                     return null;
                 }, threadPoolExecutor), abstractNode);
             } else if (Objects.nonNull(getThreadPoolExecutor())) {
                 futureMap.put(CompletableFuture.supplyAsync(() -> {
-                    MDC.put(getLogId(), logId);
+                    MDC.put(getMDCLogIdKey(), logId);
                     abstractNode.execute(nodeChainContext, nodeLogLevel, nodeChainName);
-                    MDC.remove(getLogId());
+                    MDC.remove(getMDCLogIdKey());
                     return null;
                 }, getThreadPoolExecutor()), abstractNode);
             } else {
