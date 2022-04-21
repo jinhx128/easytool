@@ -113,7 +113,7 @@ public abstract class AbstractNode<T> {
                 buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, TRUE), logLevel, LogLevelEnum.BASE, false);
             } else {
                 try {
-                    this.checkParams();
+                    checkParams();
 //            log.info(logStr + " checkParams success");
                 } catch (ProcessException e) {
 //                    log.error(logStr + " checkParams process fail msg=", e);

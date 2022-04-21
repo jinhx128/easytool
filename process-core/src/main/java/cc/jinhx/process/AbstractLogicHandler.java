@@ -183,12 +183,12 @@ public abstract class AbstractLogicHandler<T> {
     }
 
     public ProcessResult<T> execute() {
-        return this.doExecute();
+        return doExecute();
     }
 
     private ProcessResult<T> doExecute() {
         try {
-            this.checkParams();
+            checkParams();
             log.info("handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString());
         } catch (ProcessException e) {
             log.error("handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
@@ -206,26 +206,26 @@ public abstract class AbstractLogicHandler<T> {
             // 耗时计算
             long startTime = System.currentTimeMillis();
 
-            ProcessResult<T> result = this.process();
+            ProcessResult<T> result = process();
 
             long endTime = System.currentTimeMillis();
             log.info("handlerLog {} execute success time={} rsp={}", logicHandlerBaseInfo.getLogStr(), endTime - startTime, result.toString());
-            this.onSuccess();
+            onSuccess();
             return result;
         } catch (ProcessException e) {
             log.error("handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
             return buildFailResult(e.getCode(), e.getMsg());
         } catch (BusinessException e) {
-            this.onFail();
+            onFail();
             log.error("handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
             return buildBusinessFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
-            this.onFail();
+            onFail();
             String exceptionLog = getExceptionLog(e);
             log.error("handlerLog {} execute fail msg={}", logicHandlerBaseInfo.getLogStr(), exceptionLog);
             return buildUnknownFailResult(exceptionLog);
         } finally {
-            this.afterProcess();
+            afterProcess();
         }
     }
 

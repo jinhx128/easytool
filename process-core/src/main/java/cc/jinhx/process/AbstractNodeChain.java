@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -296,6 +297,10 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
      * @param threadPoolExecutor threadPoolExecutor
      */
     public void execute(NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor) {
+        String logId = MDC.get(getMDCLogIdKey());
+        if (!StringUtils.isEmpty(logId) && !logId.contains("-process")){
+            MDC.put(getMDCLogIdKey(), logId + "-process");
+        }
         // 通过节点链日志设置节点日志级别
         AbstractNode.LogLevelEnum nodeLogLevel = null;
         LogLevelEnum nodeChainLogLevel= this.logLevel;
@@ -349,7 +354,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
      */
     private Map<Future<Void>, AbstractNode> getFutureMap(NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor,
                                                          List<AbstractNode> abstractNodeList, AbstractNode.LogLevelEnum nodeLogLevel){
-        String processLogId = MDC.get(getMDCLogIdKey()) + "-process";
+        String processLogId = MDC.get(getMDCLogIdKey());
         Map<Future<Void>, AbstractNode> futureMap = new HashMap<>();
         // 同组单/多个节点并行执行
         for (AbstractNode abstractNode : abstractNodeList) {
