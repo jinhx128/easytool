@@ -349,21 +349,21 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
      */
     private Map<Future<Void>, AbstractNode> getFutureMap(NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor,
                                                          List<AbstractNode> abstractNodeList, AbstractNode.LogLevelEnum nodeLogLevel){
-        String logId = MDC.get(getMDCLogIdKey());
+        String processLogId = MDC.get(getMDCLogIdKey()) + "-process";
         Map<Future<Void>, AbstractNode> futureMap = new HashMap<>();
         // 同组单/多个节点并行执行
         for (AbstractNode abstractNode : abstractNodeList) {
             String nodeChainName = this.getClass().getName();
             if (Objects.nonNull(threadPoolExecutor)){
                 futureMap.put(CompletableFuture.supplyAsync(() -> {
-                    MDC.put(getMDCLogIdKey(), logId);
+                    MDC.put(getMDCLogIdKey(), processLogId);
                     abstractNode.execute(nodeChainContext, nodeLogLevel, nodeChainName);
                     MDC.remove(getMDCLogIdKey());
                     return null;
                 }, threadPoolExecutor), abstractNode);
             } else if (Objects.nonNull(getThreadPoolExecutor())) {
                 futureMap.put(CompletableFuture.supplyAsync(() -> {
-                    MDC.put(getMDCLogIdKey(), logId);
+                    MDC.put(getMDCLogIdKey(), processLogId);
                     abstractNode.execute(nodeChainContext, nodeLogLevel, nodeChainName);
                     MDC.remove(getMDCLogIdKey());
                     return null;
