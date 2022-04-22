@@ -177,9 +177,15 @@ public abstract class AbstractLogicHandler<T> {
     }
 
     /**
-     * 失败时执行
+     * 未知失败时执行
      */
-    protected void onFail() {
+    protected void onUnknowFail() {
+    };
+
+    /**
+     * 业务失败时执行
+     */
+    protected void onBusinessFail() {
     }
 
     public ProcessResult<T> execute() {
@@ -213,14 +219,15 @@ public abstract class AbstractLogicHandler<T> {
             onSuccess();
             return result;
         } catch (ProcessException e) {
+            onUnknowFail();
             log.error("handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
             return buildFailResult(e.getCode(), e.getMsg());
         } catch (BusinessException e) {
-            onFail();
+            onBusinessFail();
             log.error("handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
             return buildBusinessFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
-            onFail();
+            onUnknowFail();
             String exceptionLog = getExceptionLog(e);
             log.error("handlerLog {} execute fail msg={}", logicHandlerBaseInfo.getLogStr(), exceptionLog);
             return buildUnknownFailResult(exceptionLog);

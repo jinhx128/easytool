@@ -197,6 +197,30 @@ public abstract class AbstractNode<T> {
     }
 
     /**
+     * 成功时执行
+     */
+    protected void onSuccess() {
+    }
+
+    /**
+     * 未知失败时执行
+     */
+    protected void onUnknowFail() {
+    }
+
+    /**
+     * 业务失败时执行
+     */
+    protected void onBusinessFail() {
+    }
+
+    /**
+     * 超时失败时执行
+     */
+    protected void onTimeoutFail() {
+    }
+
+    /**
      * 是否跳过当前执行方法，默认不跳过
      *
      * @param nodeChainContext nodeChainContext

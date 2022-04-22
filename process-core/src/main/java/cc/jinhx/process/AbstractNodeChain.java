@@ -402,24 +402,30 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
             String nodeName = abstractNode.getClass().getName();
             try {
                 future.get(timeout, TimeUnit.MILLISECONDS);
+                abstractNode.onSuccess();
             } catch (TimeoutException e) {
                 // 中断超时线程，不一定成功
+                abstractNode.onTimeoutFail();
                 boolean cancel = future.cancel(true);
                 log.error("nodeChainLog {} execute timeout nodeName={} timeout={} cancel={}", nodeChainContext.getLogStr(), nodeName, timeout, cancel);
                 processException = new ProcessException(ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);
             } catch (ExecutionException e) {
                 if (e.getCause() instanceof ProcessException){
+                    abstractNode.onUnknowFail();
                     log.error("nodeChainLog {} execute process fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, getExceptionLog(e));
                     processException = (ProcessException) e.getCause();
                 }else if (e.getCause() instanceof BusinessException){
+                    abstractNode.onBusinessFail();
                     log.error("nodeChainLog {} execute business fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, getExceptionLog(e));
                     throw (BusinessException) e.getCause();
                 }else {
+                    abstractNode.onUnknowFail();
                     String exceptionLog = getExceptionLog(e);
                     log.error("nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, exceptionLog);
                     processException = new ProcessException(ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
                 }
             } catch (Exception e) {
+                abstractNode.onUnknowFail();
                 String exceptionLog = getExceptionLog(e);
                 log.error("nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, exceptionLog);
                 processException = new ProcessException(ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
