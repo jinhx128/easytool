@@ -47,15 +47,15 @@ public class NodeChainContext<T> implements Serializable {
      * 初始化数据，并进行数据校验
      *
      * @param contextInfo contextInfo
-     * @param logStr logStr
+     * @param logStr      logStr
      * @return NodeChainContext
      */
     public static <T> NodeChainContext<T> create(T contextInfo, String logStr) {
-        if (Objects.isNull(contextInfo)){
+        if (Objects.isNull(contextInfo)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_CHAIN_CONTEXT_INFO_NOT_NULL);
         }
 
-        if (StringUtils.isEmpty(logStr)){
+        if (StringUtils.isEmpty(logStr)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_CHAIN_LOG_STR_NOT_NULL);
         }
         return new NodeChainContext<>(contextInfo, logStr + " act=" + Thread.currentThread().getStackTrace()[4].getMethodName());
@@ -70,11 +70,11 @@ public class NodeChainContext<T> implements Serializable {
     }
 
     public static <T> NodeChainContext<T> create(Class<T> clazz, String logStr) {
-        if (Objects.isNull(clazz)){
+        if (Objects.isNull(clazz)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_CHAIN_CLASS_NOT_NULL);
         }
 
-        if (StringUtils.isEmpty(logStr)){
+        if (StringUtils.isEmpty(logStr)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_CHAIN_LOG_STR_NOT_NULL);
         }
         return new NodeChainContext<>(createNodeChainContext(clazz), logStr + " act=" + Thread.currentThread().getStackTrace()[4].getMethodName());
@@ -85,10 +85,10 @@ public class NodeChainContext<T> implements Serializable {
      *
      * @param logStr logStr
      */
-    public void setLogStr(String logStr){
-        if (StringUtils.isEmpty(this.logStr)){
+    public void setLogStr(String logStr) {
+        if (StringUtils.isEmpty(this.logStr)) {
             this.logStr = logStr;
-        }else {
+        } else {
             this.logStr += " " + logStr;
         }
     }
@@ -105,7 +105,7 @@ public class NodeChainContext<T> implements Serializable {
             // 跳过了访问检查，并提高效率
             constructor.setAccessible(true);
             return constructor.newInstance();
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("createNodeChainContext reflex create object fail clazz={} error={}", clazz, e);
             return null;
         }

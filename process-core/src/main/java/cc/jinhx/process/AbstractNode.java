@@ -52,7 +52,7 @@ public abstract class AbstractNode<T> {
      *
      * @param nodeChainContext nodeChainContext
      */
-    protected void checkParams(NodeChainContext<T> nodeChainContext){
+    protected void checkParams(NodeChainContext<T> nodeChainContext) {
     }
 
     /**
@@ -66,8 +66,8 @@ public abstract class AbstractNode<T> {
      * 通用执行方法
      *
      * @param nodeChainContext nodeChainContext
-     * @param logLevel logLevel
-     * @param nodeChainName nodeChainName
+     * @param logLevel         logLevel
+     * @param nodeChainName    nodeChainName
      */
     public void execute(NodeChainContext<T> nodeChainContext, LogLevelEnum logLevel, String nodeChainName) {
         String logStr = NODE_LOG + nodeChainContext.getLogStr();
@@ -134,22 +134,22 @@ public abstract class AbstractNode<T> {
     /**
      * 通过传进来的节点日志类型判断打印什么日志，太长可能出现YGC频繁
      *
-     * @param logInfo logInfo
-     * @param logInfos logInfos
-     * @param logLevel logLevel
+     * @param logInfo      logInfo
+     * @param logInfos     logInfos
+     * @param logLevel     logLevel
      * @param thisLogLevel thisLogLevel
-     * @param print print
+     * @param print        print
      */
     private void buildLogInfo(StringBuilder logInfo, List<Object> logInfos, LogLevelEnum logLevel, LogLevelEnum thisLogLevel, Boolean print) {
-        if (Objects.isNull(logLevel) || !LogLevelEnum.containsCode(logLevel.getCode())){
+        if (Objects.isNull(logLevel) || !LogLevelEnum.containsCode(logLevel.getCode())) {
             logLevel = LogLevelEnum.BASE_AND_TIME;
         }
 
-        if (thisLogLevel.getCode() <= logLevel.getCode() && !LogLevelEnum.NO.getCode().equals(logLevel.getCode())){
+        if (thisLogLevel.getCode() <= logLevel.getCode() && !LogLevelEnum.NO.getCode().equals(logLevel.getCode())) {
             logInfos.forEach(logInfo::append);
         }
 
-        if (print && !LogLevelEnum.NO.getCode().equals(logLevel.getCode())){
+        if (print && !LogLevelEnum.NO.getCode().equals(logLevel.getCode())) {
             log.info(logInfo.toString());
             // 打印完手动释放内存
             logInfo.setLength(0);
@@ -160,9 +160,9 @@ public abstract class AbstractNode<T> {
      * 业务失败
      *
      * @param code code
-     * @param msg msg
+     * @param msg  msg
      */
-    protected void businessFail(Integer code, String msg){
+    protected void businessFail(Integer code, String msg) {
         throw new BusinessException(code, msg);
     }
 
@@ -171,7 +171,7 @@ public abstract class AbstractNode<T> {
      *
      * @param msg msg
      */
-    protected void businessFail(String msg){
+    protected void businessFail(String msg) {
         throw new BusinessException(ProcessResult.BaseEnum.BUSINESS_FAIL.getCode(), msg);
     }
 
@@ -181,8 +181,8 @@ public abstract class AbstractNode<T> {
      * @param nodeChainContext nodeChainContext
      * @return T
      */
-    protected <T> T getContextInfo(NodeChainContext<T> nodeChainContext){
-        if (Objects.isNull(nodeChainContext)){
+    protected <T> T getContextInfo(NodeChainContext<T> nodeChainContext) {
+        if (Objects.isNull(nodeChainContext)) {
             return null;
         }
         return nodeChainContext.getContextInfo();
@@ -368,8 +368,7 @@ public abstract class AbstractNode<T> {
         TWO(2),
         THREE(3),
         FOUR(4),
-        FIVE(5)
-        ;
+        FIVE(5);
 
         private final Integer code;
 
@@ -382,6 +381,7 @@ public abstract class AbstractNode<T> {
         public static Boolean containsCode(Integer code) {
             return MAP.containsKey(code);
         }
+
         public static RetryTimesEnum getEnum(Integer code) {
             if (!MAP.containsKey(code)) {
                 return null;

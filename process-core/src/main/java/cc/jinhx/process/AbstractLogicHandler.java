@@ -22,7 +22,7 @@ public abstract class AbstractLogicHandler<T> {
     }
 
     protected AbstractLogicHandler(LogicHandlerBaseInfo logicHandlerBaseInfo) {
-        if (Objects.isNull(logicHandlerBaseInfo)){
+        if (Objects.isNull(logicHandlerBaseInfo)) {
             throw new ProcessException(ProcessException.MsgEnum.LOGIC_HANDLER_BASE_INFO_NOT_NULL);
         }
 
@@ -30,11 +30,11 @@ public abstract class AbstractLogicHandler<T> {
     }
 
     protected AbstractLogicHandler(LogicHandlerBaseInfo logicHandlerBaseInfo, String logStr) {
-        if (Objects.isNull(logicHandlerBaseInfo)){
+        if (Objects.isNull(logicHandlerBaseInfo)) {
             throw new ProcessException(ProcessException.MsgEnum.LOGIC_HANDLER_BASE_INFO_NOT_NULL);
         }
 
-        if (StringUtils.isEmpty(logStr)){
+        if (StringUtils.isEmpty(logStr)) {
             throw new ProcessException(ProcessException.MsgEnum.LOGIC_HANDLER_LOG_STR_NOT_NULL);
         }
 
@@ -45,13 +45,13 @@ public abstract class AbstractLogicHandler<T> {
      * 初始化，将当前方法名写入日志字段
      *
      * @param logicHandlerBaseInfo logicHandlerBaseInfo
-     * @param logStr logStr
+     * @param logStr               logStr
      */
-    private void init(LogicHandlerBaseInfo logicHandlerBaseInfo, String logStr){
+    private void init(LogicHandlerBaseInfo logicHandlerBaseInfo, String logStr) {
         this.logicHandlerBaseInfo = logicHandlerBaseInfo;
-        if (StringUtils.isEmpty(logStr)){
+        if (StringUtils.isEmpty(logStr)) {
             logicHandlerBaseInfo.setLogStr("act=" + Thread.currentThread().getStackTrace()[4].getMethodName());
-        }else {
+        } else {
             logicHandlerBaseInfo.setLogStr(logStr + " act=" + Thread.currentThread().getStackTrace()[4].getMethodName());
         }
     }
@@ -123,15 +123,15 @@ public abstract class AbstractLogicHandler<T> {
      * @param e e
      * @return String
      */
-    private String getExceptionLog(Exception e){
-        if (Objects.nonNull(e)){
+    private String getExceptionLog(Exception e) {
+        if (Objects.nonNull(e)) {
             StringBuilder stringBuffer = new StringBuilder("\n");
-            if (Objects.nonNull(e.getMessage())){
+            if (Objects.nonNull(e.getMessage())) {
                 stringBuffer.append(e.getMessage()).append("\n");
             }
-            if (Objects.nonNull(e.getCause())){
+            if (Objects.nonNull(e.getCause())) {
                 StackTraceElement[] stackTrace = e.getCause().getStackTrace();
-                if (Objects.nonNull(stackTrace) && stackTrace.length > 0){
+                if (Objects.nonNull(stackTrace) && stackTrace.length > 0) {
                     for (StackTraceElement stackTraceElement : stackTrace) {
                         stringBuffer.append(stackTraceElement.toString()).append("\n");
                     }
@@ -154,9 +154,9 @@ public abstract class AbstractLogicHandler<T> {
     /**
      * 执行指定节点链
      *
-     * @param clazz clazz
-     * @param logLevel logLevel
-     * @param nodeChainContext nodeChainContext
+     * @param clazz              clazz
+     * @param logLevel           logLevel
+     * @param nodeChainContext   nodeChainContext
      * @param threadPoolExecutor threadPoolExecutor
      */
     protected void executeNodeChain(Class<? extends AbstractNodeChain> clazz, AbstractNodeChain.LogLevelEnum logLevel, NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor) {
@@ -166,8 +166,8 @@ public abstract class AbstractLogicHandler<T> {
     /**
      * 执行指定节点链
      *
-     * @param clazz clazz
-     * @param logLevel logLevel
+     * @param clazz            clazz
+     * @param logLevel         logLevel
      * @param nodeChainContext nodeChainContext
      */
     protected void executeNodeChain(Class<? extends AbstractNodeChain> clazz, AbstractNodeChain.LogLevelEnum logLevel, NodeChainContext<?> nodeChainContext) {
@@ -177,12 +177,12 @@ public abstract class AbstractLogicHandler<T> {
     /**
      * 获取指定节点链
      *
-     * @param clazz clazz
+     * @param clazz    clazz
      * @param logLevel logLevel
      */
     private AbstractNodeChain getNodeChain(Class<? extends AbstractNodeChain> clazz, AbstractNodeChain.LogLevelEnum logLevel) {
         AbstractNodeChain abstractNodeChain = NodeChainManager.getNodeChain(clazz, logLevel);
-        if (Objects.isNull(abstractNodeChain)){
+        if (Objects.isNull(abstractNodeChain)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_CHAIN_UNREGISTERED.getMsg() + "=" + clazz.getName());
         }
 
@@ -193,9 +193,9 @@ public abstract class AbstractLogicHandler<T> {
      * 业务失败
      *
      * @param code code
-     * @param msg msg
+     * @param msg  msg
      */
-    protected void businessFail(Integer code, String msg){
+    protected void businessFail(Integer code, String msg) {
         throw new BusinessException(code, msg);
     }
 
@@ -204,7 +204,7 @@ public abstract class AbstractLogicHandler<T> {
      *
      * @param msg msg
      */
-    protected void businessFail(String msg){
+    protected void businessFail(String msg) {
         throw new BusinessException(ProcessResult.BaseEnum.BUSINESS_FAIL.getCode(), msg);
     }
 
@@ -266,7 +266,9 @@ public abstract class AbstractLogicHandler<T> {
      * 未知失败时执行
      */
     protected void onUnknowFail() {
-    };
+    }
+
+    ;
 
     /**
      * 业务失败时执行

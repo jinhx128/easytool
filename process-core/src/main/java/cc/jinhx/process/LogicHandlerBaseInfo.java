@@ -25,10 +25,10 @@ public class LogicHandlerBaseInfo implements Serializable {
      */
     private String logStr;
 
-    public void setLogStr(String logStr){
-        if (StringUtils.isEmpty(this.logStr)){
+    public void setLogStr(String logStr) {
+        if (StringUtils.isEmpty(this.logStr)) {
             this.logStr = logStr;
-        }else {
+        } else {
             this.logStr += " " + logStr;
         }
     }

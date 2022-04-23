@@ -61,7 +61,7 @@ public class SpringUtils implements ApplicationContextAware {
     /**
      * 根据名称注册bean
      *
-     * @param clazz clazz
+     * @param clazz    clazz
      * @param beanName beanName
      */
     public static <T> void registerBean(Class<T> clazz, String beanName) {
@@ -94,7 +94,7 @@ public class SpringUtils implements ApplicationContextAware {
     /**
      * 根据类型和名称获取bean
      *
-     * @param name name
+     * @param name  name
      * @param clazz clazz
      * @return T
      */

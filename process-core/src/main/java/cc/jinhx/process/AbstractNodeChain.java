@@ -63,7 +63,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
 
     public void addSyncNode(Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
         add(node.getName(), node, failHandle, timeout, retryTimes);
-        if (this.asyncLastNode){
+        if (this.asyncLastNode) {
             this.asyncLastNode = false;
         }
     }
@@ -130,7 +130,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
 
     public void addAsyncNode(Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout,
                              AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
-        if (restartAsyncGroup && this.asyncLastNode){
+        if (restartAsyncGroup && this.asyncLastNode) {
             this.asyncLastNode = false;
         }
 
@@ -200,7 +200,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     }
 
     public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, AbstractNode.FailHandleEnum failHandle, Long timeout, AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
-        if (restartAsyncGroup && this.asyncLastNode){
+        if (restartAsyncGroup && this.asyncLastNode) {
             this.asyncLastNode = false;
         }
 
@@ -222,15 +222,15 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     /**
      * 添加指定组节点，一个链路按理说只有一类型的节点，如果有多个，默认覆盖前面的，使用最后一个
      *
-     * @param groupName groupName
-     * @param node node
+     * @param groupName  groupName
+     * @param node       node
      * @param failHandle failHandle
-     * @param timeout timeout
+     * @param timeout    timeout
      * @param retryTimes retryTimes
      */
     private void add(String groupName, Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
         AbstractNode abstractNode = NodeManager.getNode(node, failHandle, timeout, retryTimes);
-        if (Objects.isNull(abstractNode)){
+        if (Objects.isNull(abstractNode)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_UNREGISTERED.getMsg() + "=" + node.getName());
         }
 
@@ -249,8 +249,8 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
      * 2. 组内异步，与组外同步
      * 3. 添加一个同步节点，自己属于一个组，且组内只能有自己
      * 4. 添加一个异步节点/节点组
-     *   4.1 可通过参数restartAsyncGroup控制是否要加入上一个添加的异步节点/节点组属于同组，默认是
-     *   4.2 如果上一个是同步节点，则无法加入，自己只能属于一个新的组，后面添加的异步节点/节点组依然可以通过参数restartAsyncGroup控制
+     * 4.1 可通过参数restartAsyncGroup控制是否要加入上一个添加的异步节点/节点组属于同组，默认是
+     * 4.2 如果上一个是同步节点，则无法加入，自己只能属于一个新的组，后面添加的异步节点/节点组依然可以通过参数restartAsyncGroup控制
      */
     protected abstract void setNodeInfo();
 
@@ -266,19 +266,19 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     /**
      * 执行当前节点链，利用LinkedHashMap特性，按照添加顺序执行，指定线程池，如果为空则使用默认配置的线程池
      *
-     * @param nodeChainContext nodeChainContext
+     * @param nodeChainContext   nodeChainContext
      * @param threadPoolExecutor threadPoolExecutor
      */
     public void execute(NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor) {
         String logId = MDC.get(getMDCLogIdKey());
-        if (!StringUtils.isEmpty(logId) && !logId.contains("-process")){
+        if (!StringUtils.isEmpty(logId) && !logId.contains("-process")) {
             MDC.put(getMDCLogIdKey(), logId + "-process");
         }
         // 通过节点链日志设置节点日志级别
         AbstractNode.LogLevelEnum nodeLogLevel = null;
-        LogLevelEnum nodeChainLogLevel= this.logLevel;
+        LogLevelEnum nodeChainLogLevel = this.logLevel;
         boolean baseAndTimeAndFirstAndLastNodesParamsLogLevel = false;
-        if (LogLevelEnum.NO.getCode().equals(nodeChainLogLevel.getCode())){
+        if (LogLevelEnum.NO.getCode().equals(nodeChainLogLevel.getCode())) {
             nodeLogLevel = AbstractNode.LogLevelEnum.NO;
         } else if (LogLevelEnum.BASE.getCode().equals(nodeChainLogLevel.getCode())) {
             nodeLogLevel = AbstractNode.LogLevelEnum.BASE;
@@ -295,10 +295,10 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
         int count = 1;
         for (Map.Entry<String, List<AbstractNode>> nodesEntry : this.entrySet()) {
             // 通过节点链日志设置节点日志级别
-            if (baseAndTimeAndFirstAndLastNodesParamsLogLevel){
-                if (count == 1 || count == this.entrySet().size()){
+            if (baseAndTimeAndFirstAndLastNodesParamsLogLevel) {
+                if (count == 1 || count == this.entrySet().size()) {
                     nodeLogLevel = AbstractNode.LogLevelEnum.BASE_AND_TIME_AND_PARAMS;
-                }else {
+                } else {
                     nodeLogLevel = AbstractNode.LogLevelEnum.BASE_AND_TIME;
                 }
                 count++;
@@ -310,7 +310,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
             waitFutureExecute(nodeChainContext, threadPoolExecutor, futureMap, new HashMap<>(), nodeLogLevel);
 
             // 是否需要执行下一组节点
-            if(Objects.nonNull(nodeChainContext.getExNextNodeGroup()) && !nodeChainContext.getExNextNodeGroup()){
+            if (Objects.nonNull(nodeChainContext.getExNextNodeGroup()) && !nodeChainContext.getExNextNodeGroup()) {
                 return;
             }
         }
@@ -319,20 +319,20 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     /**
      * 获取整组的执行future
      *
-     * @param nodeChainContext nodeChainContext
+     * @param nodeChainContext   nodeChainContext
      * @param threadPoolExecutor threadPoolExecutor
-     * @param abstractNodeList abstractNodeList
-     * @param nodeLogLevel nodeLogLevel
-     * @return Map<Future<Void>, AbstractNode>
+     * @param abstractNodeList   abstractNodeList
+     * @param nodeLogLevel       nodeLogLevel
+     * @return Map<Future < Void>, AbstractNode>
      */
     private Map<Future<Void>, AbstractNode> getFutureMap(NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor,
-                                                         List<AbstractNode> abstractNodeList, AbstractNode.LogLevelEnum nodeLogLevel){
+                                                         List<AbstractNode> abstractNodeList, AbstractNode.LogLevelEnum nodeLogLevel) {
         String processLogId = MDC.get(getMDCLogIdKey());
         Map<Future<Void>, AbstractNode> futureMap = new HashMap<>();
         // 同组单/多个节点并行执行
         for (AbstractNode abstractNode : abstractNodeList) {
             String nodeChainName = this.getClass().getName();
-            if (Objects.nonNull(threadPoolExecutor)){
+            if (Objects.nonNull(threadPoolExecutor)) {
                 futureMap.put(CompletableFuture.supplyAsync(() -> {
                     MDC.put(getMDCLogIdKey(), processLogId);
                     abstractNode.execute(nodeChainContext, nodeLogLevel, nodeChainName);
@@ -357,14 +357,14 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     /**
      * 等待整组的future执行完
      *
-     * @param nodeChainContext nodeChainContext
+     * @param nodeChainContext   nodeChainContext
      * @param threadPoolExecutor threadPoolExecutor
-     * @param futureMap futureMap
-     * @param retriedMap retriedMap
-     * @param nodeLogLevel nodeLogLevel
+     * @param futureMap          futureMap
+     * @param retriedMap         retriedMap
+     * @param nodeLogLevel       nodeLogLevel
      */
     private void waitFutureExecute(NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor, Map<Future<Void>, AbstractNode> futureMap,
-                          Map<String, Integer> retriedMap, AbstractNode.LogLevelEnum nodeLogLevel) {
+                                   Map<String, Integer> retriedMap, AbstractNode.LogLevelEnum nodeLogLevel) {
         for (Map.Entry<Future<Void>, AbstractNode> futureEntry : futureMap.entrySet()) {
             ProcessException processException = null;
             BusinessException businessException = null;
@@ -379,7 +379,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                 future.get(timeout, TimeUnit.MILLISECONDS);
                 abstractNode.onSuccess(nodeChainContext);
             } catch (TimeoutException e) {
-                if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)){
+                if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
                     abstractNode.onTimeoutFail(nodeChainContext);
                 }
                 exception = e;
@@ -388,24 +388,24 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                 log.error("nodeChainLog {} execute timeout nodeName={} timeout={} cancel={}", nodeChainContext.getLogStr(), nodeName, timeout, cancel);
                 processException = new ProcessException(ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);
             } catch (ExecutionException e) {
-                if (e.getCause() instanceof ProcessException){
-                    if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)){
+                if (e.getCause() instanceof ProcessException) {
+                    if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
                         abstractNode.onUnknowFail(nodeChainContext);
                     }
                     exception = e;
                     log.error("nodeChainLog {} execute process fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, getExceptionLog(e));
                     processException = (ProcessException) e.getCause();
-                }else if (e.getCause() instanceof BusinessException){
+                } else if (e.getCause() instanceof BusinessException) {
                     exception = e;
                     log.error("nodeChainLog {} execute business fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, getExceptionLog(e));
-                    if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)){
+                    if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
                         abstractNode.onBusinessFail(nodeChainContext);
                         throw (BusinessException) e.getCause();
                     } else {
                         businessException = (BusinessException) e.getCause();
                     }
-                }else {
-                    if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)){
+                } else {
+                    if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
                         abstractNode.onUnknowFail(nodeChainContext);
                     }
                     exception = e;
@@ -414,7 +414,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                     processException = new ProcessException(ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
                 }
             } catch (Exception e) {
-                if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)){
+                if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
                     abstractNode.onUnknowFail(nodeChainContext);
                 }
                 exception = e;
@@ -422,26 +422,26 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                 log.error("nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, exceptionLog);
                 processException = new ProcessException(ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
             } finally {
-                if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)){
+                if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
                     abstractNode.afterProcess(nodeChainContext);
                 }
             }
 
             // 降级处理
             if (Objects.nonNull(processException) || Objects.nonNull(businessException)) {
-                if (AbstractNode.FailHandleEnum.INTERRUPT.getCode().equals(failHandle)){
+                if (AbstractNode.FailHandleEnum.INTERRUPT.getCode().equals(failHandle)) {
                     log.error("nodeChainLog {} execute fail interrupt nodeName={} timeout={}", nodeChainContext.getLogStr(), nodeName, timeout);
                     throw processException;
-                } else if (AbstractNode.FailHandleEnum.ABANDON.getCode().equals(failHandle)){
+                } else if (AbstractNode.FailHandleEnum.ABANDON.getCode().equals(failHandle)) {
                     log.error("nodeChainLog {} execute fail abandon nodeName={} timeout={}", nodeChainContext.getLogStr(), nodeName, timeout);
-                } else if (AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)){
+                } else if (AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
                     List<AbstractNode> retryAbstractNodeList = new ArrayList<>();
                     retryAbstractNodeList.add(abstractNode);
 
                     // 当前重试次数
                     int nowRetryCount;
-                    if (retriedMap.containsKey(nodeName)){
-                        if (retriedMap.get(nodeName) >= retryTimes){
+                    if (retriedMap.containsKey(nodeName)) {
+                        if (retriedMap.get(nodeName) >= retryTimes) {
                             // 打印上一次重试失败
                             log.error("nodeChainLog {} execute fail retry fail nodeName={} timeout={} retryTimes={} retriedTimes={}", nodeChainContext.getLogStr(), nodeName, timeout, retryTimes, retriedMap.get(nodeName));
 
@@ -473,7 +473,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                         retriedMap.put(nodeName, retriedMap.get(nodeName) + 1);
                         nowRetryCount = retriedMap.get(nodeName) + 1;
                         Map<Future<Void>, AbstractNode> retryFutureMap = getFutureMap(nodeChainContext, threadPoolExecutor, retryAbstractNodeList, nodeLogLevel);
-                        waitFutureExecute(nodeChainContext, threadPoolExecutor , retryFutureMap, retriedMap, nodeLogLevel);
+                        waitFutureExecute(nodeChainContext, threadPoolExecutor, retryFutureMap, retriedMap, nodeLogLevel);
                     } else {
                         // 第一次重试
                         retriedMap.put(nodeName, 1);
@@ -482,7 +482,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                         waitFutureExecute(nodeChainContext, threadPoolExecutor, retryFutureMap, retriedMap, nodeLogLevel);
                     }
 
-                    if (retriedMap.containsKey(nodeName) && retriedMap.get(nodeName) == nowRetryCount){
+                    if (retriedMap.containsKey(nodeName) && retriedMap.get(nodeName) == nowRetryCount) {
                         // 打印本次重试成功
                         log.info("nodeChainLog {} execute fail retry success nodeName={} timeout={} retryTimes={} retriedTimes={}", nodeChainContext.getLogStr(), nodeName, timeout, retryTimes, nowRetryCount);
                         abstractNode.afterProcess(nodeChainContext);
@@ -502,15 +502,15 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
      * @param e e
      * @return String
      */
-    private String getExceptionLog(Exception e){
-        if (Objects.nonNull(e)){
+    private String getExceptionLog(Exception e) {
+        if (Objects.nonNull(e)) {
             StringBuilder stringBuffer = new StringBuilder("\n");
-            if (Objects.nonNull(e.getMessage())){
+            if (Objects.nonNull(e.getMessage())) {
                 stringBuffer.append("[").append(getMDCLogId()).append("]").append("-").append(e.getMessage()).append("\n");
             }
-            if (Objects.nonNull(e.getCause())){
+            if (Objects.nonNull(e.getCause())) {
                 StackTraceElement[] stackTrace = e.getCause().getStackTrace();
-                if (Objects.nonNull(stackTrace) && stackTrace.length > 0){
+                if (Objects.nonNull(stackTrace) && stackTrace.length > 0) {
                     for (StackTraceElement stackTraceElement : stackTrace) {
                         stringBuffer.append("[").append(getMDCLogId()).append("]").append("-").append(stackTraceElement.toString()).append("\n");
                     }

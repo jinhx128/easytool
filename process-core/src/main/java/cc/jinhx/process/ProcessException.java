@@ -19,18 +19,18 @@ public class ProcessException extends RuntimeException {
     private String msg;
     private Integer code;
 
-    public ProcessException(MsgEnum msgEnum, Throwable e){
+    public ProcessException(MsgEnum msgEnum, Throwable e) {
         super(msgEnum.getMsg(), e);
         this.msg = msgEnum.getMsg();
         this.code = ProcessResult.BaseEnum.UNKNOW_FAIL.getCode();
     }
 
-    public ProcessException(MsgEnum msgEnum){
+    public ProcessException(MsgEnum msgEnum) {
         msg = msgEnum.getMsg();
         this.code = ProcessResult.BaseEnum.UNKNOW_FAIL.getCode();
     }
 
-    public ProcessException(String msg){
+    public ProcessException(String msg) {
         this.msg = msg;
         this.code = ProcessResult.BaseEnum.UNKNOW_FAIL.getCode();
     }
@@ -50,8 +50,7 @@ public class ProcessException extends RuntimeException {
         NODE_CHAIN_UNREGISTERED("节点链未注册"),
 
         LOGIC_HANDLER_BASE_INFO_NOT_NULL("逻辑处理器基础信息不能为空"),
-        LOGIC_HANDLER_LOG_STR_NOT_NULL("逻辑处理器日志不能为空")
-        ;
+        LOGIC_HANDLER_LOG_STR_NOT_NULL("逻辑处理器日志不能为空");
 
         private final String msg;
 

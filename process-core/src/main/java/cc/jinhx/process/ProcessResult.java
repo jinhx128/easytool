@@ -26,29 +26,29 @@ public class ProcessResult<T> implements Serializable {
 
     private String msg;
 
-    private ProcessResult(){
+    private ProcessResult() {
     }
 
-    public ProcessResult(T data){
+    public ProcessResult(T data) {
         this.data = data;
         this.code = BaseEnum.SUCCESS.getCode();
         this.msg = BaseEnum.SUCCESS.getMsg();
     }
 
-    public ProcessResult(Integer code, String msg){
+    public ProcessResult(Integer code, String msg) {
         this.code = code;
         this.msg = msg;
     }
 
-    public boolean isSuccess(){
+    public boolean isSuccess() {
         return BaseEnum.SUCCESS.getCode().equals(this.code);
     }
 
-    public boolean isBusinessFail(){
+    public boolean isBusinessFail() {
         return BaseEnum.BUSINESS_FAIL.getCode().equals(this.code);
     }
 
-    public boolean isUnknowFail(){
+    public boolean isUnknowFail() {
         return BaseEnum.UNKNOW_FAIL.getCode().equals(this.code);
     }
 
@@ -59,8 +59,7 @@ public class ProcessResult<T> implements Serializable {
 
         SUCCESS(1, "success"),
         BUSINESS_FAIL(0, "business fail"),
-        UNKNOW_FAIL(-1, "unknown fail")
-        ;
+        UNKNOW_FAIL(-1, "unknown fail");
 
         private final Integer code;
         private final String msg;

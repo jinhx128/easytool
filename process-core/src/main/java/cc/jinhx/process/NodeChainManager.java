@@ -29,24 +29,24 @@ public class NodeChainManager {
     /**
      * 从全局唯一MAP获取实例，不存在则反射创建返回，并存入MAP
      *
-     * @param clazz clazz
+     * @param clazz    clazz
      * @param logLevel logLevel
      * @return AbstractNode
      */
     public static AbstractNodeChain getNodeChain(Class<? extends AbstractNodeChain> clazz, AbstractNodeChain.LogLevelEnum logLevel) {
         String key = clazz.getName() + ":";
-        if (Objects.isNull(logLevel)){
+        if (Objects.isNull(logLevel)) {
             key += null;
-        }else {
+        } else {
             key += logLevel.getCode();
         }
 
-        if (MAP.containsKey(key)){
+        if (MAP.containsKey(key)) {
             return MAP.get(key);
         }
 
         AbstractNodeChain abstractNodeChain = createNodeChain(clazz, logLevel);
-        if (Objects.nonNull(abstractNodeChain)){
+        if (Objects.nonNull(abstractNodeChain)) {
             MAP.put(key, abstractNodeChain);
         }
 
@@ -56,7 +56,7 @@ public class NodeChainManager {
     /**
      * 反射创建单例，并且自动从spring获取bean注入，指的是同种类型的不同属性，比如相同的logLevel属性只会存在一个，不同的会存在多个
      *
-     * @param clazz clazz
+     * @param clazz    clazz
      * @param logLevel logLevel
      * @return AbstractNode
      */
@@ -70,7 +70,7 @@ public class NodeChainManager {
             // 跳过了访问检查，并提高效率
             setNodeInfoMethod.setAccessible(true);
             setNodeInfoMethod.invoke(abstractNodeChain);
-            if (Objects.nonNull(logLevel) && AbstractNodeChain.LogLevelEnum.containsCode(logLevel.getCode())){
+            if (Objects.nonNull(logLevel) && AbstractNodeChain.LogLevelEnum.containsCode(logLevel.getCode())) {
                 Method setLogLevelMethod = clazz.getMethod("setLogLevel", AbstractNodeChain.LogLevelEnum.class);
                 // 跳过了访问检查，并提高效率
                 setLogLevelMethod.setAccessible(true);
@@ -80,7 +80,7 @@ public class NodeChainManager {
             for (Field declaredField : clazz.getDeclaredFields()) {
                 // 跳过了访问检查，并提高效率
                 declaredField.setAccessible(true);
-                if (Objects.isNull(declaredField.get(abstractNodeChain))){
+                if (Objects.isNull(declaredField.get(abstractNodeChain))) {
                     if (Objects.nonNull(declaredField.getAnnotation(Resource.class))) {
                         declaredField.set(abstractNodeChain, SpringUtils.getBean(declaredField.getName(), declaredField.getType()));
                     } else if (Objects.nonNull(declaredField.getAnnotation(Autowired.class))) {
@@ -90,7 +90,7 @@ public class NodeChainManager {
             }
 
             return abstractNodeChain;
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("createNodeChain reflex create object fail clazz={} logLevel={} error={}", clazz, logLevel, e);
             return null;
         }
