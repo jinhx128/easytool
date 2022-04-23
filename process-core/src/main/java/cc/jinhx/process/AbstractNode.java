@@ -48,37 +48,11 @@ public abstract class AbstractNode<T> {
     private RetryTimesEnum retryTimes = RetryTimesEnum.ONE;
 
     /**
-     * 获取上下文信息
+     * 参数校验
      *
      * @param nodeChainContext nodeChainContext
      */
-    protected <T> T getContextInfo(NodeChainContext<T> nodeChainContext){
-        return nodeChainContext.getContextInfo();
-    }
-
-    /**
-     * 业务失败
-     *
-     * @param code code
-     * @param msg msg
-     */
-    protected void businessFail(Integer code, String msg){
-        throw new BusinessException(code, msg);
-    }
-
-    /**
-     * 业务失败
-     *
-     * @param msg msg
-     */
-    protected void businessFail(String msg){
-        throw new BusinessException(ProcessResult.BaseEnum.BUSINESS_FAIL.getCode(), msg);
-    }
-
-    /**
-     * 参数校验
-     */
-    protected void checkParams(){
+    protected void checkParams(NodeChainContext<T> nodeChainContext){
     }
 
     /**
@@ -107,13 +81,12 @@ public abstract class AbstractNode<T> {
 
             // 耗时计算
             long startTime = System.currentTimeMillis();
-            beforeLog();
 
             if (isSkip(nodeChainContext)) {
                 buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, TRUE), logLevel, LogLevelEnum.BASE, false);
             } else {
                 try {
-                    checkParams();
+                    checkParams(nodeChainContext);
 //            log.info(logStr + " checkParams success");
                 } catch (ProcessException e) {
 //                    log.error(logStr + " checkParams process fail msg=", e);
@@ -142,7 +115,6 @@ public abstract class AbstractNode<T> {
                 }
             }
 
-            afterLog();
             long endTime = System.currentTimeMillis();
 
             buildLogInfo(logInfo, Arrays.asList(AFTER_EXECUTE_PARAMS, nodeChainContext.toString()), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
@@ -185,39 +157,73 @@ public abstract class AbstractNode<T> {
     }
 
     /**
-     * 节点执行后打印日志，执行失败则不打印
+     * 业务失败
+     *
+     * @param code code
+     * @param msg msg
      */
-    protected void afterLog() {
+    protected void businessFail(Integer code, String msg){
+        throw new BusinessException(code, msg);
     }
 
     /**
-     * 节点执行前打印日志
+     * 业务失败
+     *
+     * @param msg msg
      */
-    protected void beforeLog() {
+    protected void businessFail(String msg){
+        throw new BusinessException(ProcessResult.BaseEnum.BUSINESS_FAIL.getCode(), msg);
+    }
+
+    /**
+     * 获取上下文信息
+     *
+     * @param nodeChainContext nodeChainContext
+     * @return T
+     */
+    protected <T> T getContextInfo(NodeChainContext<T> nodeChainContext){
+        if (Objects.isNull(nodeChainContext)){
+            return null;
+        }
+        return nodeChainContext.getContextInfo();
     }
 
     /**
      * 成功时执行
+     *
+     * @param nodeChainContext nodeChainContext
      */
-    protected void onSuccess() {
+    protected void onSuccess(NodeChainContext<T> nodeChainContext) {
     }
 
     /**
      * 未知失败时执行
+     *
+     * @param nodeChainContext nodeChainContext
      */
-    protected void onUnknowFail() {
+    protected void onUnknowFail(NodeChainContext<T> nodeChainContext) {
     }
 
     /**
      * 业务失败时执行
+     *
+     * @param nodeChainContext nodeChainContext
      */
-    protected void onBusinessFail() {
+    protected void onBusinessFail(NodeChainContext<T> nodeChainContext) {
     }
 
     /**
      * 超时失败时执行
+     *
+     * @param nodeChainContext nodeChainContext
      */
-    protected void onTimeoutFail() {
+    protected void onTimeoutFail(NodeChainContext<T> nodeChainContext) {
+    }
+
+    /**
+     * 无论成功失败，最后都会执行
+     */
+    protected void afterProcess(NodeChainContext<T> nodeChainContext) {
     }
 
     /**

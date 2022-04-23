@@ -26,12 +26,39 @@ public class TestGetC2ByBNode extends AbstractNode<TestContext> {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+
         System.out.println(Thread.currentThread().getName() + "start4");
         if ("B".equals(contextInfo.getB()) && "C1".equals(contextInfo.getC1())){
             contextInfo.setC2(testService.getC() + "2");
         } else {
             int i = 1/0;
+//            businessFail(-1, "出错了");
         }
+    }
+
+    @Override
+    public void onSuccess(NodeChainContext<TestContext> testNodeChainContext) {
+        System.out.println("onSuccess：" + testNodeChainContext.toString());
+    }
+
+    @Override
+    public void onTimeoutFail(NodeChainContext<TestContext> testNodeChainContext) {
+        System.out.println("onTimeoutFail：" + testNodeChainContext.toString());
+    }
+
+    @Override
+    public void onUnknowFail(NodeChainContext<TestContext> testNodeChainContext) {
+        System.out.println("onUnknowFail：" + testNodeChainContext.toString());
+    }
+
+    @Override
+    public void onBusinessFail(NodeChainContext<TestContext> testNodeChainContext) {
+        System.out.println("onBusinessFail：" + testNodeChainContext.toString());
+    }
+
+    @Override
+    public void afterProcess(NodeChainContext<TestContext> testNodeChainContext) {
+        System.out.println("afterProcess：" + testNodeChainContext.toString());
     }
 
 }

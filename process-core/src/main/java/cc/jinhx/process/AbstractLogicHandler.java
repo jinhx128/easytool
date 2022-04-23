@@ -41,6 +41,12 @@ public abstract class AbstractLogicHandler<T> {
         init(logicHandlerBaseInfo, logStr);
     }
 
+    /**
+     * 初始化，将当前方法名写入日志字段
+     *
+     * @param logicHandlerBaseInfo logicHandlerBaseInfo
+     * @param logStr logStr
+     */
     private void init(LogicHandlerBaseInfo logicHandlerBaseInfo, String logStr){
         this.logicHandlerBaseInfo = logicHandlerBaseInfo;
         if (StringUtils.isEmpty(logStr)){
@@ -48,6 +54,93 @@ public abstract class AbstractLogicHandler<T> {
         }else {
             logicHandlerBaseInfo.setLogStr(logStr + " act=" + Thread.currentThread().getStackTrace()[4].getMethodName());
         }
+    }
+
+    /**
+     * 参数校验
+     */
+    protected abstract void checkParams();
+
+    /**
+     * 执行方法
+     */
+    protected abstract ProcessResult<T> process();
+
+    public ProcessResult<T> execute() {
+        return doExecute();
+    }
+
+    private ProcessResult<T> doExecute() {
+        try {
+            checkParams();
+            log.info("handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString());
+        } catch (ProcessException e) {
+            log.error("handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
+            return buildFailResult(e.getCode(), e.getMsg());
+        } catch (BusinessException e) {
+            log.error("handlerLog {} checkParams business fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString(), e.getMsg());
+            return buildBusinessFailResult(e.getCode(), e.getMsg());
+        } catch (Exception e) {
+            String exceptionLog = getExceptionLog(e);
+            log.error("handlerLog {} checkParams fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString(), exceptionLog);
+            return buildUnknownFailResult(exceptionLog);
+        }
+
+        try {
+            // 耗时计算
+            long startTime = System.currentTimeMillis();
+
+            ProcessResult<T> result = process();
+
+            long endTime = System.currentTimeMillis();
+            log.info("handlerLog {} execute success time={} rsp={}", logicHandlerBaseInfo.getLogStr(), endTime - startTime, result.toString());
+            onSuccess();
+            return result;
+        } catch (ProcessException e) {
+            // 用节点链的情况
+            onUnknowFail();
+            log.error("handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
+            return buildFailResult(e.getCode(), e.getMsg());
+        } catch (BusinessException e) {
+            // 用节点链的情况
+            onBusinessFail();
+            log.error("handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
+            return buildBusinessFailResult(e.getCode(), e.getMsg());
+        } catch (Exception e) {
+            // 没用节点链的情况
+            onUnknowFail();
+            String exceptionLog = getExceptionLog(e);
+            log.error("handlerLog {} execute fail msg={}", logicHandlerBaseInfo.getLogStr(), exceptionLog);
+            return buildUnknownFailResult(exceptionLog);
+        } finally {
+            afterProcess();
+        }
+    }
+
+    /**
+     * 拼接错误日志
+     *
+     * @param e e
+     * @return String
+     */
+    private String getExceptionLog(Exception e){
+        if (Objects.nonNull(e)){
+            StringBuilder stringBuffer = new StringBuilder("\n");
+            if (Objects.nonNull(e.getMessage())){
+                stringBuffer.append(e.getMessage()).append("\n");
+            }
+            if (Objects.nonNull(e.getCause())){
+                StackTraceElement[] stackTrace = e.getCause().getStackTrace();
+                if (Objects.nonNull(stackTrace) && stackTrace.length > 0){
+                    for (StackTraceElement stackTraceElement : stackTrace) {
+                        stringBuffer.append(stackTraceElement.toString()).append("\n");
+                    }
+                    return stringBuffer.toString();
+                }
+            }
+        }
+
+        return null;
     }
 
     protected void executeNodeChain(Class<? extends AbstractNodeChain> clazz, NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor) {
@@ -97,11 +190,6 @@ public abstract class AbstractLogicHandler<T> {
     }
 
     /**
-     * 参数校验
-     */
-    protected abstract void checkParams();
-
-    /**
      * 业务失败
      *
      * @param code code
@@ -119,8 +207,6 @@ public abstract class AbstractLogicHandler<T> {
     protected void businessFail(String msg){
         throw new BusinessException(ProcessResult.BaseEnum.BUSINESS_FAIL.getCode(), msg);
     }
-
-    protected abstract ProcessResult<T> process();
 
     /**
      * 无论成功失败，最后都会执行
@@ -186,80 +272,6 @@ public abstract class AbstractLogicHandler<T> {
      * 业务失败时执行
      */
     protected void onBusinessFail() {
-    }
-
-    public ProcessResult<T> execute() {
-        return doExecute();
-    }
-
-    private ProcessResult<T> doExecute() {
-        try {
-            checkParams();
-            log.info("handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString());
-        } catch (ProcessException e) {
-            log.error("handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
-            return buildFailResult(e.getCode(), e.getMsg());
-        } catch (BusinessException e) {
-            log.error("handlerLog {} checkParams business fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString(), e.getMsg());
-            return buildBusinessFailResult(e.getCode(), e.getMsg());
-        } catch (Exception e) {
-            String exceptionLog = getExceptionLog(e);
-            log.error("handlerLog {} checkParams fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString(), exceptionLog);
-            return buildUnknownFailResult(exceptionLog);
-        }
-
-        try {
-            // 耗时计算
-            long startTime = System.currentTimeMillis();
-
-            ProcessResult<T> result = process();
-
-            long endTime = System.currentTimeMillis();
-            log.info("handlerLog {} execute success time={} rsp={}", logicHandlerBaseInfo.getLogStr(), endTime - startTime, result.toString());
-            onSuccess();
-            return result;
-        } catch (ProcessException e) {
-            onUnknowFail();
-            log.error("handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
-            return buildFailResult(e.getCode(), e.getMsg());
-        } catch (BusinessException e) {
-            onBusinessFail();
-            log.error("handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
-            return buildBusinessFailResult(e.getCode(), e.getMsg());
-        } catch (Exception e) {
-            onUnknowFail();
-            String exceptionLog = getExceptionLog(e);
-            log.error("handlerLog {} execute fail msg={}", logicHandlerBaseInfo.getLogStr(), exceptionLog);
-            return buildUnknownFailResult(exceptionLog);
-        } finally {
-            afterProcess();
-        }
-    }
-
-    /**
-     * 拼接错误日志
-     *
-     * @param e e
-     * @return String
-     */
-    private String getExceptionLog(Exception e){
-        if (Objects.nonNull(e)){
-            StringBuilder stringBuffer = new StringBuilder("\n");
-            if (Objects.nonNull(e.getMessage())){
-                stringBuffer.append(e.getMessage()).append("\n");
-            }
-            if (Objects.nonNull(e.getCause())){
-                StackTraceElement[] stackTrace = e.getCause().getStackTrace();
-                if (Objects.nonNull(stackTrace) && stackTrace.length > 0){
-                    for (StackTraceElement stackTraceElement : stackTrace) {
-                        stringBuffer.append(stackTraceElement.toString()).append("\n");
-                    }
-                    return stringBuffer.toString();
-                }
-            }
-        }
-
-        return null;
     }
 
 }

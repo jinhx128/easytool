@@ -6,7 +6,10 @@ import cc.jinhx.process.AbstractLogicHandler;
 import cc.jinhx.process.NodeChainContext;
 import cc.jinhx.process.ProcessResult;
 import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.UUID;
 
 @SpringBootTest
 class ProcessDemoApplicationTests {
@@ -35,6 +38,7 @@ class ProcessDemoApplicationTests {
 
 	@Test
 	void Test2() {
+		MDC.put("traceId", UUID.randomUUID().toString());
 		ProcessResult<TestContext> processResult = new AbstractLogicHandler<TestContext>() {
 
 			NodeChainContext<TestContext> testNodeChainContext = buildNodeChainContext(TestContext.class);
