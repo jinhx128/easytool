@@ -18,7 +18,7 @@ public class TestGetC2ByBNode extends AbstractNode<TestContext> {
     private TestService testService;
 
     @Override
-    public void process(NodeChainContext<TestContext> testNodeChainContext) {
+    protected void process(NodeChainContext<TestContext> testNodeChainContext) {
         TestContext contextInfo = testNodeChainContext.getContextInfo();
         System.out.println(Thread.currentThread().getName() + "start3");
         try {
@@ -37,27 +37,27 @@ public class TestGetC2ByBNode extends AbstractNode<TestContext> {
     }
 
     @Override
-    public void onSuccess(NodeChainContext<TestContext> testNodeChainContext) {
+    protected void onSuccess(NodeChainContext<TestContext> testNodeChainContext) {
         System.out.println("onSuccess：" + testNodeChainContext.toString());
     }
 
     @Override
-    public void onTimeoutFail(NodeChainContext<TestContext> testNodeChainContext) {
+    protected void onTimeoutFail(NodeChainContext<TestContext> testNodeChainContext) {
         System.out.println("onTimeoutFail：" + testNodeChainContext.toString());
     }
 
     @Override
-    public void onUnknowFail(NodeChainContext<TestContext> testNodeChainContext) {
+    protected void onUnknowFail(NodeChainContext<TestContext> testNodeChainContext) {
         System.out.println("onUnknowFail：" + testNodeChainContext.toString());
     }
 
     @Override
-    public void onBusinessFail(NodeChainContext<TestContext> testNodeChainContext) {
+    protected void onBusinessFail(NodeChainContext<TestContext> testNodeChainContext) {
         System.out.println("onBusinessFail：" + testNodeChainContext.toString());
     }
 
     @Override
-    public void afterProcess(NodeChainContext<TestContext> testNodeChainContext) {
+    protected void afterProcess(NodeChainContext<TestContext> testNodeChainContext) {
         System.out.println("afterProcess：" + testNodeChainContext.toString());
     }
 

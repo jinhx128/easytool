@@ -18,7 +18,7 @@ public class TestGetBByReqNode extends AbstractNode<TestContext> {
     private TestService testService;
 
     @Override
-    public void process(NodeChainContext<TestContext> testNodeChainContext) {
+    protected void process(NodeChainContext<TestContext> testNodeChainContext) {
         TestContext contextInfo = testNodeChainContext.getContextInfo();
         if ("req".equals(contextInfo.getReq())){
             contextInfo.setB(testService.getB());

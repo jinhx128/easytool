@@ -18,7 +18,7 @@ public class TestGetEByAllNode extends AbstractNode<TestContext> {
     private TestService testService;
 
     @Override
-    public void process(NodeChainContext<TestContext> testNodeChainContext) {
+    protected void process(NodeChainContext<TestContext> testNodeChainContext) {
         TestContext contextInfo = testNodeChainContext.getContextInfo();
         if ("A".equals(contextInfo.getA()) && "B".equals(contextInfo.getB()) && "C1".equals(contextInfo.getC1())
                 && "C2".equals(contextInfo.getC2()) && "D".equals(contextInfo.getD())){

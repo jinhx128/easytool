@@ -18,7 +18,7 @@ public class TestGetC1ByANode extends AbstractNode<TestContext> {
     private TestService testService;
 
     @Override
-    public void process(NodeChainContext<TestContext> testNodeChainContext) {
+    protected void process(NodeChainContext<TestContext> testNodeChainContext) {
         System.out.println(Thread.currentThread().getName() + "start1");
         try {
             Thread.sleep(700L);
