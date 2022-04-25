@@ -80,11 +80,45 @@ public class NodeChainManager {
             for (Field declaredField : clazz.getDeclaredFields()) {
                 // 跳过了访问检查，并提高效率
                 declaredField.setAccessible(true);
+                String name = declaredField.getName();
+                Class<?> type = declaredField.getType();
                 if (Objects.isNull(declaredField.get(abstractNodeChain))) {
                     if (Objects.nonNull(declaredField.getAnnotation(Resource.class))) {
-                        declaredField.set(abstractNodeChain, SpringUtils.getBean(declaredField.getName(), declaredField.getType()));
+                        Object bean = null;
+
+                        try {
+                            if (SpringUtils.containsBean(name) && SpringUtils.isTypeMatch(name, type)){
+                                bean = SpringUtils.getBean(name, type);
+                            }
+                        } catch (Exception e){
+                            log.error("createNodeChain getBeanByNameAndType fail clazz={} name={} error={}", clazz.getName(), name, e);
+                        }
+
+                        try {
+                            bean = SpringUtils.getBean(type);
+                        } catch (Exception e){
+                            log.error("createNodeChain getBeanByType fail clazz={} name={} error={}", clazz.getName(), name, e);
+                        }
+
+                        declaredField.set(abstractNodeChain, bean);
                     } else if (Objects.nonNull(declaredField.getAnnotation(Autowired.class))) {
-                        declaredField.set(abstractNodeChain, SpringUtils.getBean(declaredField.getType()));
+                        Object bean = null;
+
+                        try {
+                            if (SpringUtils.containsBean(name) && SpringUtils.isTypeMatch(name, type)){
+                                bean = SpringUtils.getBean(name, type);
+                            }
+                        } catch (Exception e){
+                            log.error("createNodeChain getBeanByNameAndType fail clazz={} name={} error={}", clazz.getName(), name, e);
+                        }
+
+                        try {
+                            bean = SpringUtils.getBean(type);
+                        } catch (Exception e){
+                            log.error("createNodeChain getBeanByType fail clazz={} name={} error={}", clazz.getName(), name, e);
+                        }
+
+                        declaredField.set(abstractNodeChain, bean);
                     }
                 }
             }

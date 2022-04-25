@@ -72,7 +72,7 @@ public class SpringUtils implements ApplicationContextAware {
     }
 
     /**
-     * 根据名称获取bean
+     * 根据名称获取bean，如果bean不能创建，抛出BeansException
      *
      * @param name name
      * @return T
@@ -82,7 +82,7 @@ public class SpringUtils implements ApplicationContextAware {
     }
 
     /**
-     * 根据类型获取bean
+     * 根据类型获取bean，如果bean不能创建，抛出BeansException
      *
      * @param clazz clazz
      * @return T
@@ -92,7 +92,7 @@ public class SpringUtils implements ApplicationContextAware {
     }
 
     /**
-     * 根据类型和名称获取bean
+     * 根据类型和名称获取bean，如果bean不能创建，抛出BeansException
      *
      * @param name  name
      * @param clazz clazz
@@ -100,6 +100,36 @@ public class SpringUtils implements ApplicationContextAware {
      */
     public static <T> T getBean(String name, Class<T> clazz) {
         return getApplicationContext().getBean(name, clazz);
+    }
+
+    /**
+     * 根据名称判断是否存在bean
+     *
+     * @param name  name
+     * @return boolean
+     */
+    public static boolean containsBean(String name) {
+        return getApplicationContext().containsBean(name);
+    }
+
+    /**
+     * 根据名称判断是否是单例，如果没有给定名称的Bean，抛出NoSuchBeanDefinitionException
+     *
+     * @param name  name
+     * @return boolean
+     */
+    public static boolean isSingleton(String name) {
+        return getApplicationContext().isSingleton(name);
+    }
+
+    /**
+     * 根据名称判断是否是指定类型，如果没有给定名称的Bean，抛出NoSuchBeanDefinitionException
+     *
+     * @param name  name
+     * @return boolean
+     */
+    public static boolean isTypeMatch(String name, Class<?> clazz) {
+        return getApplicationContext().isTypeMatch(name, clazz);
     }
 
     /**
