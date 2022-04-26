@@ -48,12 +48,12 @@ public abstract class AbstractNode<T> {
     private RetryTimesEnum retryTimes = RetryTimesEnum.ONE;
 
     /**
-     * 获取是否跳过当前节点
+     * 是否跳过当前节点
      *
      * @param nodeChainContext nodeChainContext
      * @return 是否跳过当前执行方法
      */
-    protected abstract boolean getSkip(NodeChainContext<T> nodeChainContext);
+    protected abstract boolean isSkip(NodeChainContext<T> nodeChainContext);
 
     /**
      * 参数校验
@@ -90,7 +90,7 @@ public abstract class AbstractNode<T> {
             // 耗时计算
             long startTime = System.currentTimeMillis();
 
-            if (getSkip(nodeChainContext)) {
+            if (isSkip(nodeChainContext)) {
                 buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, TRUE), logLevel, LogLevelEnum.BASE, false);
             } else {
                 try {
