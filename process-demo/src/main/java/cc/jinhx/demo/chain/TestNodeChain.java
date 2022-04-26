@@ -40,9 +40,14 @@ public class TestNodeChain extends AbstractNodeChain {
     }
 
     @Override
-    protected ThreadPoolExecutor getThreadPoolExecutor() {
+    protected ThreadPoolExecutor getExecuteThreadPoolExecutor() {
         // 返回执行这个节点链的默认线程池
         return new ThreadPoolExecutor(10, 30, 10, TimeUnit.MINUTES, new LinkedBlockingQueue<>(1024));
+    }
+
+    @Override
+    protected String getMDCLogIdKey() {
+        return null;
     }
 
 }

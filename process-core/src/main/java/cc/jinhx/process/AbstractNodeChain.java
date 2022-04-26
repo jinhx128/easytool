@@ -27,6 +27,8 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
 
     private static final String LOG_ID = "traceId";
 
+    private static final String LOG_SUFFIX = "-process";
+
     private LogLevelEnum logLevel = LogLevelEnum.BASE_AND_TIME_AND_FIRST_AND_LAST_NODES_PARAMS;
 
     private boolean asyncLastNode = false;
@@ -260,7 +262,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
      * @param nodeChainContext nodeChainContext
      */
     public void execute(NodeChainContext<?> nodeChainContext) {
-        execute(nodeChainContext, getThreadPoolExecutor());
+        execute(nodeChainContext, getMyExecuteThreadPoolExecutor());
     }
 
     /**
@@ -270,10 +272,9 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
      * @param threadPoolExecutor threadPoolExecutor
      */
     public void execute(NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor) {
-        String logId = MDC.get(getMDCLogIdKey());
-        if (!StringUtils.isEmpty(logId) && !logId.contains("-process")) {
-            MDC.put(getMDCLogIdKey(), logId + "-process");
-        }
+        // 设置MDC日志
+        putMDCLogId();
+
         // 通过节点链日志设置节点日志级别
         AbstractNode.LogLevelEnum nodeLogLevel = null;
         LogLevelEnum nodeChainLogLevel = this.logLevel;
@@ -327,25 +328,24 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
      */
     private Map<Future<Void>, AbstractNode> getFutureMap(NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor,
                                                          List<AbstractNode> abstractNodeList, AbstractNode.LogLevelEnum nodeLogLevel) {
-        String processLogId = MDC.get(getMDCLogIdKey());
         Map<Future<Void>, AbstractNode> futureMap = new HashMap<>();
         // 同组单/多个节点并行执行
         for (AbstractNode abstractNode : abstractNodeList) {
             String nodeChainName = this.getClass().getName();
             if (Objects.nonNull(threadPoolExecutor)) {
                 futureMap.put(CompletableFuture.supplyAsync(() -> {
-                    MDC.put(getMDCLogIdKey(), processLogId);
+                    putMDCLogId();
                     abstractNode.execute(nodeChainContext, nodeLogLevel, nodeChainName);
-                    MDC.remove(getMDCLogIdKey());
+                    removeMDCLogId();
                     return null;
                 }, threadPoolExecutor), abstractNode);
-            } else if (Objects.nonNull(getThreadPoolExecutor())) {
+            } else if (Objects.nonNull(getMyExecuteThreadPoolExecutor())) {
                 futureMap.put(CompletableFuture.supplyAsync(() -> {
-                    MDC.put(getMDCLogIdKey(), processLogId);
+                    putMDCLogId();
                     abstractNode.execute(nodeChainContext, nodeLogLevel, nodeChainName);
-                    MDC.remove(getMDCLogIdKey());
+                    removeMDCLogId();
                     return null;
-                }, getThreadPoolExecutor()), abstractNode);
+                }, getMyExecuteThreadPoolExecutor()), abstractNode);
             } else {
                 throw new ProcessException(ProcessException.MsgEnum.NODE_CHAIN_THREAD_POOL_EXECUTOR_NOT_NULL.getMsg() + "=" + nodeChainName);
             }
@@ -523,30 +523,76 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     }
 
     /**
-     * 获取节点链默认线程池，内置异步线程池
+     * 获取执行节点链线程池
      *
      * @return ThreadPoolExecutor
      */
-    protected ThreadPoolExecutor getThreadPoolExecutor() {
+    protected abstract ThreadPoolExecutor getExecuteThreadPoolExecutor();
+
+    /**
+     * 获取执行节点链线程池，为空的话使用默认异步线程池
+     *
+     * @return ThreadPoolExecutor
+     */
+    private ThreadPoolExecutor getMyExecuteThreadPoolExecutor() {
+        ThreadPoolExecutor threadPoolExecutor = getExecuteThreadPoolExecutor();
+        if (Objects.nonNull(threadPoolExecutor)){
+            return threadPoolExecutor;
+        }
+
         return ThreadPoolManager.COMMON_NODE_CHAIN_THREAD_POOL;
     }
+    
+    /**
+     * 获取MDC日志id的key
+     *
+     * @return String
+     */
+    protected abstract String getMDCLogIdKey();
 
     /**
      * 获取MDC日志id的key
      *
      * @return String
      */
-    protected String getMDCLogIdKey() {
-        return LOG_ID;
+    private String getMyMDCLogIdKey(){
+        String mdcLogIdKey = getMDCLogIdKey();
+        if (StringUtils.isEmpty(mdcLogIdKey)){
+            mdcLogIdKey = LOG_ID;
+        }
+
+        return mdcLogIdKey;
     }
 
     /**
-     * 获取MDC日志id
+     * 获取日志id
      *
      * @return String
      */
-    protected String getMDCLogId() {
-        return MDC.get(getMDCLogIdKey());
+    private String getMDCLogId() {
+        return MDC.get(getMyMDCLogIdKey());
+    }
+
+    /**
+     * 设置链路特殊的MDC日志id
+     */
+    private void putMDCLogId() {
+        String mdcLogIdKey = getMyMDCLogIdKey();
+        String logId = MDC.get(mdcLogIdKey);
+
+        if (!StringUtils.isEmpty(logId)) {
+            if (!logId.contains(LOG_SUFFIX)){
+                logId += LOG_SUFFIX;
+            }
+            MDC.put(mdcLogIdKey, logId);
+        }
+    }
+
+    /**
+     * 清除线程的MDC日志id
+     */
+    private void removeMDCLogId() {
+        MDC.remove(getMyMDCLogIdKey());
     }
 
 
