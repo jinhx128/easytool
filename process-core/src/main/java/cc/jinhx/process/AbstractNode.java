@@ -48,6 +48,14 @@ public abstract class AbstractNode<T> {
     private RetryTimesEnum retryTimes = RetryTimesEnum.ONE;
 
     /**
+     * 获取是否跳过当前节点
+     *
+     * @param nodeChainContext nodeChainContext
+     * @return 是否跳过当前执行方法
+     */
+    protected abstract boolean getSkip(NodeChainContext<T> nodeChainContext);
+
+    /**
      * 参数校验
      *
      * @param nodeChainContext nodeChainContext
@@ -82,7 +90,7 @@ public abstract class AbstractNode<T> {
             // 耗时计算
             long startTime = System.currentTimeMillis();
 
-            if (isSkip(nodeChainContext)) {
+            if (getSkip(nodeChainContext)) {
                 buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, TRUE), logLevel, LogLevelEnum.BASE, false);
             } else {
                 try {
@@ -197,11 +205,11 @@ public abstract class AbstractNode<T> {
     }
 
     /**
-     * 未知失败时执行
+     * 超时失败时执行
      *
      * @param nodeChainContext nodeChainContext
      */
-    protected abstract void onUnknowFail(NodeChainContext<T> nodeChainContext, Exception e);
+    protected abstract void onTimeoutFail(NodeChainContext<T> nodeChainContext);
 
     /**
      * 业务失败时执行
@@ -211,26 +219,16 @@ public abstract class AbstractNode<T> {
     protected abstract void onBusinessFail(NodeChainContext<T> nodeChainContext, BusinessException e);
 
     /**
-     * 超时失败时执行
+     * 未知失败时执行
      *
      * @param nodeChainContext nodeChainContext
      */
-    protected abstract void onTimeoutFail(NodeChainContext<T> nodeChainContext);
+    protected abstract void onUnknowFail(NodeChainContext<T> nodeChainContext, Exception e);
 
     /**
      * 无论成功失败，最后都会执行
      */
     protected void afterProcess(NodeChainContext<T> nodeChainContext) {
-    }
-
-    /**
-     * 是否跳过当前执行方法，默认不跳过
-     *
-     * @param nodeChainContext nodeChainContext
-     * @return 是否跳过当前执行方法
-     */
-    protected boolean isSkip(NodeChainContext<T> nodeChainContext) {
-        return false;
     }
 
 

@@ -266,15 +266,15 @@ public abstract class AbstractLogicHandler<T> {
     }
 
     /**
-     * 未知失败时执行
-     */
-    protected void onUnknowFail(Exception e) {
-    }
-
-    /**
      * 业务失败时执行
      */
     protected void onBusinessFail(BusinessException e) {
+    }
+
+    /**
+     * 未知失败时执行
+     */
+    protected void onUnknowFail(Exception e) {
     }
 
 }
