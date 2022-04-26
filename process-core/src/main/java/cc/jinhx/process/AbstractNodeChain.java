@@ -390,7 +390,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
             } catch (ExecutionException e) {
                 if (e.getCause() instanceof ProcessException) {
                     if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
-                        abstractNode.onUnknowFail(nodeChainContext);
+                        abstractNode.onUnknowFail(nodeChainContext, (Exception) e.getCause());
                     }
                     exception = e;
                     log.error("nodeChainLog {} execute process fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, getExceptionLog(e));
@@ -399,14 +399,14 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                     exception = e;
                     log.error("nodeChainLog {} execute business fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, getExceptionLog(e));
                     if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
-                        abstractNode.onBusinessFail(nodeChainContext);
+                        abstractNode.onBusinessFail(nodeChainContext, (BusinessException) e.getCause());
                         throw (BusinessException) e.getCause();
                     } else {
                         businessException = (BusinessException) e.getCause();
                     }
                 } else {
                     if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
-                        abstractNode.onUnknowFail(nodeChainContext);
+                        abstractNode.onUnknowFail(nodeChainContext, (Exception) e.getCause());
                     }
                     exception = e;
                     String exceptionLog = getExceptionLog(e);
@@ -415,7 +415,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                 }
             } catch (Exception e) {
                 if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
-                    abstractNode.onUnknowFail(nodeChainContext);
+                    abstractNode.onUnknowFail(nodeChainContext, e);
                 }
                 exception = e;
                 String exceptionLog = getExceptionLog(e);
@@ -449,16 +449,16 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                                 abstractNode.onTimeoutFail(nodeChainContext);
                             } else if (exception instanceof ExecutionException) {
                                 if (exception.getCause() instanceof ProcessException) {
-                                    abstractNode.onUnknowFail(nodeChainContext);
+                                    abstractNode.onUnknowFail(nodeChainContext, (Exception) exception.getCause());
                                 } else if (exception.getCause() instanceof BusinessException) {
-                                    abstractNode.onBusinessFail(nodeChainContext);
+                                    abstractNode.onBusinessFail(nodeChainContext, (BusinessException) exception.getCause());
                                     abstractNode.afterProcess(nodeChainContext);
                                     throw (BusinessException) exception.getCause();
                                 } else {
-                                    abstractNode.onUnknowFail(nodeChainContext);
+                                    abstractNode.onUnknowFail(nodeChainContext, (Exception) exception.getCause());
                                 }
                             } else {
-                                abstractNode.onUnknowFail(nodeChainContext);
+                                abstractNode.onUnknowFail(nodeChainContext, exception);
                             }
 
                             // 直接中断的两种考虑

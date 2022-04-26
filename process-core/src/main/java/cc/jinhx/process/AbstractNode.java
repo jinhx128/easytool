@@ -201,24 +201,21 @@ public abstract class AbstractNode<T> {
      *
      * @param nodeChainContext nodeChainContext
      */
-    protected void onUnknowFail(NodeChainContext<T> nodeChainContext) {
-    }
+    protected abstract void onUnknowFail(NodeChainContext<T> nodeChainContext, Exception e);
 
     /**
      * 业务失败时执行
      *
      * @param nodeChainContext nodeChainContext
      */
-    protected void onBusinessFail(NodeChainContext<T> nodeChainContext) {
-    }
+    protected abstract void onBusinessFail(NodeChainContext<T> nodeChainContext, BusinessException e);
 
     /**
      * 超时失败时执行
      *
      * @param nodeChainContext nodeChainContext
      */
-    protected void onTimeoutFail(NodeChainContext<T> nodeChainContext) {
-    }
+    protected abstract void onTimeoutFail(NodeChainContext<T> nodeChainContext);
 
     /**
      * 无论成功失败，最后都会执行

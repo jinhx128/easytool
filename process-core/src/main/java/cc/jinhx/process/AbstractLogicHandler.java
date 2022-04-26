@@ -76,13 +76,16 @@ public abstract class AbstractLogicHandler<T> {
             log.info("handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString());
         } catch (ProcessException e) {
             log.error("handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
+            onUnknowFail(e);
             return buildFailResult(e.getCode(), e.getMsg());
         } catch (BusinessException e) {
             log.error("handlerLog {} checkParams business fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString(), e.getMsg());
+            onBusinessFail(e);
             return buildBusinessFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
             String exceptionLog = getExceptionLog(e);
             log.error("handlerLog {} checkParams fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), logicHandlerBaseInfo.toString(), exceptionLog);
+            onUnknowFail(e);
             return buildUnknownFailResult(exceptionLog);
         }
 
@@ -98,19 +101,19 @@ public abstract class AbstractLogicHandler<T> {
             return result;
         } catch (ProcessException e) {
             // 用节点链的情况
-            onUnknowFail();
             log.error("handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
+            onUnknowFail(e);
             return buildFailResult(e.getCode(), e.getMsg());
         } catch (BusinessException e) {
             // 用节点链的情况
-            onBusinessFail();
             log.error("handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
+            onBusinessFail(e);
             return buildBusinessFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
             // 没用节点链的情况
-            onUnknowFail();
             String exceptionLog = getExceptionLog(e);
             log.error("handlerLog {} execute fail msg={}", logicHandlerBaseInfo.getLogStr(), exceptionLog);
+            onUnknowFail(e);
             return buildUnknownFailResult(exceptionLog);
         } finally {
             afterProcess();
@@ -265,15 +268,13 @@ public abstract class AbstractLogicHandler<T> {
     /**
      * 未知失败时执行
      */
-    protected void onUnknowFail() {
+    protected void onUnknowFail(Exception e) {
     }
-
-    ;
 
     /**
      * 业务失败时执行
      */
-    protected void onBusinessFail() {
+    protected void onBusinessFail(BusinessException e) {
     }
 
 }

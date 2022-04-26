@@ -1,6 +1,7 @@
 package cc.jinhx.demo.node;
 
 import cc.jinhx.process.AbstractNode;
+import cc.jinhx.process.BusinessException;
 import cc.jinhx.process.NodeChainContext;
 import cc.jinhx.demo.context.TestContext;
 import cc.jinhx.demo.service.TestService;
@@ -21,6 +22,21 @@ public class TestGetDNode extends AbstractNode<TestContext> {
     protected void process(NodeChainContext<TestContext> testNodeChainContext) {
         TestContext contextInfo = testNodeChainContext.getContextInfo();
         contextInfo.setD(testService.getD());
+    }
+
+    @Override
+    protected void onUnknowFail(NodeChainContext<TestContext> nodeChainContext, Exception e) {
+
+    }
+
+    @Override
+    protected void onBusinessFail(NodeChainContext<TestContext> nodeChainContext, BusinessException e) {
+
+    }
+
+    @Override
+    protected void onTimeoutFail(NodeChainContext<TestContext> nodeChainContext) {
+
     }
 
 }

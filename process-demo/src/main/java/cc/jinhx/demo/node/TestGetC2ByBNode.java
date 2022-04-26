@@ -3,8 +3,11 @@ package cc.jinhx.demo.node;
 import cc.jinhx.demo.context.TestContext;
 import cc.jinhx.demo.service.TestService;
 import cc.jinhx.process.AbstractNode;
+import cc.jinhx.process.BusinessException;
 import cc.jinhx.process.NodeChainContext;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Arrays;
 
 /**
  * TestGetC1ByANode
@@ -42,18 +45,18 @@ public class TestGetC2ByBNode extends AbstractNode<TestContext> {
     }
 
     @Override
+    protected void onUnknowFail(NodeChainContext<TestContext> testNodeChainContext, Exception e) {
+        System.out.println("onUnknowFail：" + testNodeChainContext.toString() + Arrays.toString(e.getStackTrace()));
+    }
+
+    @Override
+    protected void onBusinessFail(NodeChainContext<TestContext> testNodeChainContext, BusinessException e) {
+        System.out.println("onBusinessFail：" + testNodeChainContext.toString() + e.getMsg());
+    }
+
+    @Override
     protected void onTimeoutFail(NodeChainContext<TestContext> testNodeChainContext) {
         System.out.println("onTimeoutFail：" + testNodeChainContext.toString());
-    }
-
-    @Override
-    protected void onUnknowFail(NodeChainContext<TestContext> testNodeChainContext) {
-        System.out.println("onUnknowFail：" + testNodeChainContext.toString());
-    }
-
-    @Override
-    protected void onBusinessFail(NodeChainContext<TestContext> testNodeChainContext) {
-        System.out.println("onBusinessFail：" + testNodeChainContext.toString());
     }
 
     @Override
