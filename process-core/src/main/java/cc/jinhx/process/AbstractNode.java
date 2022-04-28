@@ -85,7 +85,7 @@ public abstract class AbstractNode<T> {
             StringBuilder logInfo = new StringBuilder(logStr);
 
             buildLogInfo(logInfo, Arrays.asList(LOG_END, NODE_CHAIN_NAME, nodeChainName, NODE_NAME, nodeName), logLevel, LogLevelEnum.BASE, false);
-            buildLogInfo(logInfo, Arrays.asList(BEFORE_EXECUTE_PARAMS, nodeChainContext.toString()), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
+            buildLogInfo(logInfo, Arrays.asList(BEFORE_EXECUTE_PARAMS, JsonUtils.objectConvertToJson(nodeChainContext)), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
 
             // 耗时计算
             long startTime = System.currentTimeMillis();
@@ -125,7 +125,7 @@ public abstract class AbstractNode<T> {
 
             long endTime = System.currentTimeMillis();
 
-            buildLogInfo(logInfo, Arrays.asList(AFTER_EXECUTE_PARAMS, nodeChainContext.toString()), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
+            buildLogInfo(logInfo, Arrays.asList(AFTER_EXECUTE_PARAMS, JsonUtils.objectConvertToJson(nodeChainContext)), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
             buildLogInfo(logInfo, Arrays.asList(LOG_TIME, endTime - startTime), logLevel, LogLevelEnum.BASE_AND_TIME, true);
         } catch (ProcessException e) {
 //                    log.error(logStr + " checkParams business fail msg=", e);

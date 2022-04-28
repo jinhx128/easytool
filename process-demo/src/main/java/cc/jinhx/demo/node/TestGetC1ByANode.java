@@ -19,6 +19,11 @@ public class TestGetC1ByANode extends AbstractNode<TestContext> {
     private TestService testService;
 
     @Override
+    protected boolean isSkip(NodeChainContext<TestContext> nodeChainContext) {
+        return false;
+    }
+
+    @Override
     protected void process(NodeChainContext<TestContext> testNodeChainContext) {
         System.out.println(Thread.currentThread().getName() + "start1");
         try {

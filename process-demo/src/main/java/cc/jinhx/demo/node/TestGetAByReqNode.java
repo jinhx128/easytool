@@ -19,6 +19,11 @@ public class TestGetAByReqNode extends AbstractNode<TestContext> {
     private TestService testService;
 
     @Override
+    protected boolean isSkip(NodeChainContext<TestContext> nodeChainContext) {
+        return false;
+    }
+
+    @Override
     protected void process(NodeChainContext<TestContext> testNodeChainContext) {
         TestContext contextInfo = testNodeChainContext.getContextInfo();
         if ("req".equals(contextInfo.getReq())){
