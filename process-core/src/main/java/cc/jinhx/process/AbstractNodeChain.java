@@ -270,9 +270,6 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
      * @param threadPoolExecutor threadPoolExecutor
      */
     public void execute(NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor) {
-        // 设置MDC日志
-        putMDCLogId();
-
         // 通过节点链日志设置节点日志级别
         AbstractNode.LogLevelEnum nodeLogLevel = null;
         LogLevelEnum nodeChainLogLevel = this.logLevel;
@@ -504,13 +501,13 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
         if (Objects.nonNull(e)) {
             StringBuilder stringBuffer = new StringBuilder("\n");
             if (Objects.nonNull(e.getMessage())) {
-                stringBuffer.append("[").append(getMDCLogId()).append("]").append("-").append(e.getMessage()).append("\n");
+                stringBuffer.append("[").append(getMDCLogId()).append("]").append(" process ").append(e.getMessage()).append("\n");
             }
             if (Objects.nonNull(e.getCause())) {
                 StackTraceElement[] stackTrace = e.getCause().getStackTrace();
                 if (Objects.nonNull(stackTrace) && stackTrace.length > 0) {
                     for (StackTraceElement stackTraceElement : stackTrace) {
-                        stringBuffer.append("[").append(getMDCLogId()).append("]").append("-").append(stackTraceElement.toString()).append("\n");
+                        stringBuffer.append("[").append(getMDCLogId()).append("]").append(" process ").append(stackTraceElement.toString()).append("\n");
                     }
                     return stringBuffer.toString();
                 }
@@ -572,7 +569,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     }
 
     /**
-     * 设置链路特殊的MDC日志id
+     * 设置链路的MDC日志id
      */
     private void putMDCLogId() {
         MDC.put(getMyMDCLogIdKey(), getMDCLogId());

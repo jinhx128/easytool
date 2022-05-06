@@ -130,13 +130,13 @@ public abstract class AbstractLogicHandler<T> {
         if (Objects.nonNull(e)) {
             StringBuilder stringBuffer = new StringBuilder("\n");
             if (Objects.nonNull(e.getMessage())) {
-                stringBuffer.append(e.getMessage()).append("\n");
+                stringBuffer.append("process ").append(e.getMessage()).append("\n");
             }
             if (Objects.nonNull(e.getCause())) {
                 StackTraceElement[] stackTrace = e.getCause().getStackTrace();
                 if (Objects.nonNull(stackTrace) && stackTrace.length > 0) {
                     for (StackTraceElement stackTraceElement : stackTrace) {
-                        stringBuffer.append(stackTraceElement.toString()).append("\n");
+                        stringBuffer.append("process ").append(stackTraceElement.toString()).append("\n");
                     }
                     return stringBuffer.toString();
                 }
