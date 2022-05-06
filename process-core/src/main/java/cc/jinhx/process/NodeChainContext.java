@@ -106,7 +106,7 @@ public class NodeChainContext<T> implements Serializable {
             constructor.setAccessible(true);
             return constructor.newInstance();
         } catch (Exception e) {
-            log.error("createNodeChainContext reflex create object fail clazz={} error=", clazz, e);
+            log.error("process createNodeChainContext reflex create object fail clazz={} error=", clazz, e);
             return null;
         }
     }

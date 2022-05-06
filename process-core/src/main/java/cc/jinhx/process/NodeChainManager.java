@@ -91,13 +91,13 @@ public class NodeChainManager {
                                 bean = SpringUtils.getBean(name, type);
                             }
                         } catch (Exception e){
-                            log.error("createNodeChain getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
+                            log.error("process createNodeChain getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
                         try {
                             bean = SpringUtils.getBean(type);
                         } catch (Exception e){
-                            log.error("createNodeChain getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
+                            log.error("process createNodeChain getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
                         declaredField.set(abstractNodeChain, bean);
@@ -109,13 +109,13 @@ public class NodeChainManager {
                                 bean = SpringUtils.getBean(name, type);
                             }
                         } catch (Exception e){
-                            log.error("createNodeChain getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
+                            log.error("process createNodeChain getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
                         try {
                             bean = SpringUtils.getBean(type);
                         } catch (Exception e){
-                            log.error("createNodeChain getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
+                            log.error("process createNodeChain getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
                         declaredField.set(abstractNodeChain, bean);
@@ -125,7 +125,7 @@ public class NodeChainManager {
 
             return abstractNodeChain;
         } catch (Exception e) {
-            log.error("createNodeChain reflex create object fail clazz={} logLevel={} error=", clazz, logLevel, e);
+            log.error("process createNodeChain reflex create object fail clazz={} logLevel={} error=", clazz, logLevel, e);
             return null;
         }
     }

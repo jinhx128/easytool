@@ -28,7 +28,7 @@ public class ThreadPoolManager {
             10, TimeUnit.MINUTES,
             new LinkedBlockingQueue<>(1024),
             (Runnable r) -> new Thread(r, "asyncCommonNodeChain_thread_" + COMMON_NODE_CHAIN_THREAD_POOL_COUNTER.incrementAndGet()),
-            (r, executor) -> log.error("async common node chain has bean rejected" + r));
+            (r, executor) -> log.error("process async common node chain has bean rejected" + r));
 
 }
 

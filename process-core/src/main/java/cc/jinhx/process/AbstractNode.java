@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class AbstractNode<T> {
 
-    private final String NODE_LOG = "nodeLog ";
+    private final String NODE_LOG = "process nodeLog ";
     private final String LOG_END = " execute success";
     private final String NODE_CHAIN_NAME = " nodeChainName=";
     private final String NODE_NAME = " nodeName=";

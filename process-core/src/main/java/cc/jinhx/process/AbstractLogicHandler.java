@@ -73,18 +73,18 @@ public abstract class AbstractLogicHandler<T> {
     private ProcessResult<T> doExecute() {
         try {
             checkParams();
-            log.info("handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectConvertToJson(logicHandlerBaseInfo));
+            log.info("process handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectConvertToJson(logicHandlerBaseInfo));
         } catch (ProcessException e) {
-            log.error("handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
+            log.error("process handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
             onUnknowFail(e);
             return buildFailResult(e.getCode(), e.getMsg());
         } catch (BusinessException e) {
-            log.error("handlerLog {} checkParams business fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectConvertToJson(logicHandlerBaseInfo), e.getMsg());
+            log.error("process handlerLog {} checkParams business fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectConvertToJson(logicHandlerBaseInfo), e.getMsg());
             onBusinessFail(e);
             return buildBusinessFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
             String exceptionLog = getExceptionLog(e);
-            log.error("handlerLog {} checkParams fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectConvertToJson(logicHandlerBaseInfo), exceptionLog);
+            log.error("process handlerLog {} checkParams fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectConvertToJson(logicHandlerBaseInfo), exceptionLog);
             onUnknowFail(e);
             return buildUnknownFailResult(exceptionLog);
         }
@@ -96,23 +96,23 @@ public abstract class AbstractLogicHandler<T> {
             ProcessResult<T> result = process();
 
             long endTime = System.currentTimeMillis();
-            log.info("handlerLog {} execute success time={} rsp={}", logicHandlerBaseInfo.getLogStr(), endTime - startTime, JsonUtils.objectConvertToJson(result));
+            log.info("process handlerLog {} execute success time={} rsp={}", logicHandlerBaseInfo.getLogStr(), endTime - startTime, JsonUtils.objectConvertToJson(result));
             onSuccess();
             return result;
         } catch (ProcessException e) {
             // 用节点链的情况
-            log.error("handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
+            log.error("process handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
             onUnknowFail(e);
             return buildFailResult(e.getCode(), e.getMsg());
         } catch (BusinessException e) {
             // 用节点链的情况
-            log.error("handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
+            log.error("process handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
             onBusinessFail(e);
             return buildBusinessFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
             // 没用节点链的情况
             String exceptionLog = getExceptionLog(e);
-            log.error("handlerLog {} execute fail msg={}", logicHandlerBaseInfo.getLogStr(), exceptionLog);
+            log.error("process handlerLog {} execute fail msg={}", logicHandlerBaseInfo.getLogStr(), exceptionLog);
             onUnknowFail(e);
             return buildUnknownFailResult(exceptionLog);
         } finally {

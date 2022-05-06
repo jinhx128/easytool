@@ -24,7 +24,7 @@ public class SpringUtils implements ApplicationContextAware {
     private static ApplicationContext applicationContext;
 
     public SpringUtils() {
-        log.info("SpringUtils init");
+        log.info("process SpringUtils init");
     }
 
     /**
