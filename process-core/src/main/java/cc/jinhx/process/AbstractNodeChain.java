@@ -323,20 +323,21 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
      */
     private Map<Future<Void>, AbstractNode> getFutureMap(NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor,
                                                          List<AbstractNode> abstractNodeList, AbstractNode.LogLevelEnum nodeLogLevel) {
+        String mdcLogId = getMDCLogId();
         Map<Future<Void>, AbstractNode> futureMap = new HashMap<>();
         // 同组单/多个节点并行执行
         for (AbstractNode abstractNode : abstractNodeList) {
             String nodeChainName = this.getClass().getName();
             if (Objects.nonNull(threadPoolExecutor)) {
                 futureMap.put(CompletableFuture.supplyAsync(() -> {
-                    putMDCLogId();
+                    putMDCLogId(mdcLogId);
                     abstractNode.execute(nodeChainContext, nodeLogLevel, nodeChainName);
                     removeMDCLogId();
                     return null;
                 }, threadPoolExecutor), abstractNode);
             } else if (Objects.nonNull(getMyExecuteThreadPoolExecutor())) {
                 futureMap.put(CompletableFuture.supplyAsync(() -> {
-                    putMDCLogId();
+                    putMDCLogId(mdcLogId);
                     abstractNode.execute(nodeChainContext, nodeLogLevel, nodeChainName);
                     removeMDCLogId();
                     return null;
@@ -570,9 +571,11 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
 
     /**
      * 设置链路的MDC日志id
+     *
+     * @param mdcLogId mdcLogId
      */
-    private void putMDCLogId() {
-        MDC.put(getMyMDCLogIdKey(), getMDCLogId());
+    private void putMDCLogId(String mdcLogId) {
+        MDC.put(getMyMDCLogIdKey(), mdcLogId);
     }
 
     /**
