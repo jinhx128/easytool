@@ -75,16 +75,16 @@ public abstract class AbstractLogicHandler<T> {
             checkParams();
             log.info("process handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectConvertToJson(logicHandlerBaseInfo));
         } catch (ProcessException e) {
-            log.error("process handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
+            log.info("process handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
             onUnknowFail(e);
             return buildFailResult(e.getCode(), e.getMsg());
         } catch (BusinessException e) {
-            log.error("process handlerLog {} checkParams business fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectConvertToJson(logicHandlerBaseInfo), e.getMsg());
+            log.info("process handlerLog {} checkParams business fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectConvertToJson(logicHandlerBaseInfo), e.getMsg());
             onBusinessFail(e);
             return buildBusinessFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
             String exceptionLog = getExceptionLog(e);
-            log.error("process handlerLog {} checkParams fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectConvertToJson(logicHandlerBaseInfo), exceptionLog);
+            log.info("process handlerLog {} checkParams fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectConvertToJson(logicHandlerBaseInfo), exceptionLog);
             onUnknowFail(e);
             return buildUnknownFailResult(exceptionLog);
         }
@@ -101,18 +101,18 @@ public abstract class AbstractLogicHandler<T> {
             return result;
         } catch (ProcessException e) {
             // 用节点链的情况
-            log.error("process handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
+            log.info("process handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
             onUnknowFail(e);
             return buildFailResult(e.getCode(), e.getMsg());
         } catch (BusinessException e) {
             // 用节点链的情况
-            log.error("process handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
+            log.info("process handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
             onBusinessFail(e);
             return buildBusinessFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
             // 没用节点链的情况
             String exceptionLog = getExceptionLog(e);
-            log.error("process handlerLog {} execute fail msg={}", logicHandlerBaseInfo.getLogStr(), exceptionLog);
+            log.info("process handlerLog {} execute fail msg={}", logicHandlerBaseInfo.getLogStr(), exceptionLog);
             onUnknowFail(e);
             return buildUnknownFailResult(exceptionLog);
         } finally {

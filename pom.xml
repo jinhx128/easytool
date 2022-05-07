@@ -5,7 +5,7 @@
 
     <groupId>cc.jinhx</groupId>
     <artifactId>spring-boot-starter-process</artifactId>
-    <version>1.0.39</version>
+    <version>1.0.41</version>
     <packaging>pom</packaging>
 
     <properties>

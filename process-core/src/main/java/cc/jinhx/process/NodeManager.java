@@ -111,13 +111,13 @@ public class NodeManager {
                                 bean = SpringUtils.getBean(name, type);
                             }
                         } catch (Exception e){
-                            log.error("process createNode getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), declaredField.getName(), e);
+                            log.info("process createNode getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), declaredField.getName(), e);
                         }
 
                         try {
                             bean = SpringUtils.getBean(type);
                         } catch (Exception e){
-                            log.error("process createNode getBeanByType fail clazz={} name={} error=", clazz.getName(), declaredField.getName(), e);
+                            log.info("process createNode getBeanByType fail clazz={} name={} error=", clazz.getName(), declaredField.getName(), e);
                         }
 
                         declaredField.set(abstractNode, bean);
@@ -129,13 +129,13 @@ public class NodeManager {
                                 bean = SpringUtils.getBean(name, type);
                             }
                         } catch (Exception e){
-                            log.error("process createNode getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
+                            log.info("process createNode getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
                         try {
                             bean = SpringUtils.getBean(type);
                         } catch (Exception e){
-                            log.error("process createNode getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
+                            log.info("process createNode getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
                         declaredField.set(abstractNode, bean);
@@ -145,7 +145,7 @@ public class NodeManager {
 
             return abstractNode;
         } catch (Exception e) {
-            log.error("process createNode reflex create object fail clazz={} failHandle={} timeout={} error=", clazz, failHandle, timeout, e);
+            log.info("process createNode reflex create object fail clazz={} failHandle={} timeout={} error=", clazz, failHandle, timeout, e);
             return null;
         }
     }

@@ -381,7 +381,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                 exception = e;
                 // 中断超时线程，不一定成功
                 boolean cancel = future.cancel(true);
-                log.error("process nodeChainLog {} execute timeout nodeName={} timeout={} cancel={}", nodeChainContext.getLogStr(), nodeName, timeout, cancel);
+                log.info("process nodeChainLog {} execute timeout nodeName={} timeout={} cancel={}", nodeChainContext.getLogStr(), nodeName, timeout, cancel);
                 processException = new ProcessException(ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);
             } catch (ExecutionException e) {
                 if (e.getCause() instanceof ProcessException) {
@@ -389,11 +389,11 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                         abstractNode.onUnknowFail(nodeChainContext, (Exception) e.getCause());
                     }
                     exception = e;
-                    log.error("process nodeChainLog {} execute process fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, getExceptionLog(e));
+                    log.info("process nodeChainLog {} execute process fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, getExceptionLog(e));
                     processException = (ProcessException) e.getCause();
                 } else if (e.getCause() instanceof BusinessException) {
                     exception = e;
-                    log.error("process nodeChainLog {} execute business fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, getExceptionLog(e));
+                    log.info("process nodeChainLog {} execute business fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, getExceptionLog(e));
                     if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
                         abstractNode.onBusinessFail(nodeChainContext, (BusinessException) e.getCause());
                         throw (BusinessException) e.getCause();
@@ -406,7 +406,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                     }
                     exception = e;
                     String exceptionLog = getExceptionLog(e);
-                    log.error("process nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, exceptionLog);
+                    log.info("process nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, exceptionLog);
                     processException = new ProcessException(ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
                 }
             } catch (Exception e) {
@@ -415,7 +415,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                 }
                 exception = e;
                 String exceptionLog = getExceptionLog(e);
-                log.error("process nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, exceptionLog);
+                log.info("process nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, exceptionLog);
                 processException = new ProcessException(ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
             } finally {
                 if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
@@ -426,10 +426,10 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
             // 降级处理
             if (Objects.nonNull(processException) || Objects.nonNull(businessException)) {
                 if (AbstractNode.FailHandleEnum.INTERRUPT.getCode().equals(failHandle)) {
-                    log.error("process nodeChainLog {} execute fail interrupt nodeName={} timeout={}", nodeChainContext.getLogStr(), nodeName, timeout);
+                    log.info("process nodeChainLog {} execute fail interrupt nodeName={} timeout={}", nodeChainContext.getLogStr(), nodeName, timeout);
                     throw processException;
                 } else if (AbstractNode.FailHandleEnum.ABANDON.getCode().equals(failHandle)) {
-                    log.error("process nodeChainLog {} execute fail abandon nodeName={} timeout={}", nodeChainContext.getLogStr(), nodeName, timeout);
+                    log.info("process nodeChainLog {} execute fail abandon nodeName={} timeout={}", nodeChainContext.getLogStr(), nodeName, timeout);
                 } else if (AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
                     List<AbstractNode> retryAbstractNodeList = new ArrayList<>();
                     retryAbstractNodeList.add(abstractNode);
@@ -439,7 +439,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                     if (retriedMap.containsKey(nodeName)) {
                         if (retriedMap.get(nodeName) >= retryTimes) {
                             // 打印上一次重试失败
-                            log.error("process nodeChainLog {} execute fail retry fail nodeName={} timeout={} retryTimes={} retriedTimes={}", nodeChainContext.getLogStr(), nodeName, timeout, retryTimes, retriedMap.get(nodeName));
+                            log.info("process nodeChainLog {} execute fail retry fail nodeName={} timeout={} retryTimes={} retriedTimes={}", nodeChainContext.getLogStr(), nodeName, timeout, retryTimes, retriedMap.get(nodeName));
 
                             if (exception instanceof TimeoutException) {
                                 abstractNode.onTimeoutFail(nodeChainContext);
@@ -485,7 +485,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                     }
                 } else {
                     // 默认中断
-                    log.error("process nodeChainLog {} execute fail default interrupt nodeName={} timeout={}", nodeChainContext.getLogStr(), nodeName, timeout);
+                    log.info("process nodeChainLog {} execute fail default interrupt nodeName={} timeout={}", nodeChainContext.getLogStr(), nodeName, timeout);
                     throw processException;
                 }
             }
