@@ -48,7 +48,7 @@ public class JsonUtils {
         try {
             return obj instanceof String ? (String) obj : objectMapper.writeValueAsString(obj);
         } catch (Exception e) {
-            log.info("process objectConvertToJson fail error={}", e);
+            log.error("JsonUtils objectConvertToJson fail error=", e);
             return null;
         }
     }
@@ -68,7 +68,7 @@ public class JsonUtils {
         try {
             return clazz.equals(String.class) ? (T) src : objectMapper.readValue(src, clazz);
         } catch (Exception e) {
-            log.info("process jsonConvertToObject fail error=", e);
+            log.error("JsonUtils jsonConvertToObject fail error=", e);
             return null;
         }
     }
@@ -98,7 +98,7 @@ public class JsonUtils {
         try {
             return objectMapper.readValue(src, Map.class);
         } catch (Exception e) {
-            log.info("process jsonConvertToMap fail error=", e);
+            log.error("JsonUtils jsonConvertToMap fail error=", e);
             return Collections.emptyMap();
         }
     }
@@ -118,7 +118,7 @@ public class JsonUtils {
         try{
             return objectMapper.readValue(src, objectMapper.getTypeFactory().constructParametricType(ArrayList.class, clazz));
         }catch (Exception e) {
-            log.info("process jsonConvertToList fail error=", e);
+            log.error("JsonUtils jsonConvertToList fail error=", e);
             return Collections.emptyList();
         }
     }
