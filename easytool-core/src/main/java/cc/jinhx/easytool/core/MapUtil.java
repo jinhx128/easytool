@@ -1,4 +1,4 @@
-package cc.jinhx.easytool.process;
+package cc.jinhx.easytool.core;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,13 +10,13 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * MapUtils
+ * MapUtil
  *
  * @author jinhx
  * @since 2022-05-06
  */
 @Slf4j
-public class MapUtils{
+public class MapUtil {
 
     /**
      * object转换map
@@ -38,7 +38,7 @@ public class MapUtils{
             }
             return map;
         } catch (Exception e) {
-            log.error("MapUtils objectToMap fail error=", e);
+            log.error("MapUtil objectToMap fail error=", e);
             return Collections.emptyMap();
         }
     }
@@ -68,7 +68,7 @@ public class MapUtils{
             }
             return obj;
         } catch (Exception e) {
-            log.error("MapUtils mapToObject fail error=", e);
+            log.error("MapUtil mapToObject fail error=", e);
             return null;
         }
     }

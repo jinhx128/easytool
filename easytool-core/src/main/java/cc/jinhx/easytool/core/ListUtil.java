@@ -1,4 +1,4 @@
-package cc.jinhx.easytool.process;
+package cc.jinhx.easytool.core;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -9,13 +9,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * ListUtils
+ * ListUtil
  *
  * @author jinhx
  * @since 2022-01-10
  */
 @Slf4j
-public class ListUtils {
+public class ListUtil {
 
     /**
      * 分割list集合

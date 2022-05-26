@@ -87,15 +87,15 @@ public class NodeChainManager {
                         Object bean = null;
 
                         try {
-                            if (SpringUtils.containsBean(name) && SpringUtils.isTypeMatch(name, type)){
-                                bean = SpringUtils.getBean(name, type);
+                            if (SpringUtil.containsBean(name) && SpringUtil.isTypeMatch(name, type)){
+                                bean = SpringUtil.getBean(name, type);
                             }
                         } catch (Exception e){
                             log.info("process createNodeChain getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
                         try {
-                            bean = SpringUtils.getBean(type);
+                            bean = SpringUtil.getBean(type);
                         } catch (Exception e){
                             log.info("process createNodeChain getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
@@ -105,15 +105,15 @@ public class NodeChainManager {
                         Object bean = null;
 
                         try {
-                            if (SpringUtils.containsBean(name) && SpringUtils.isTypeMatch(name, type)){
-                                bean = SpringUtils.getBean(name, type);
+                            if (SpringUtil.containsBean(name) && SpringUtil.isTypeMatch(name, type)){
+                                bean = SpringUtil.getBean(name, type);
                             }
                         } catch (Exception e){
                             log.info("process createNodeChain getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
                         try {
-                            bean = SpringUtils.getBean(type);
+                            bean = SpringUtil.getBean(type);
                         } catch (Exception e){
                             log.info("process createNodeChain getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }

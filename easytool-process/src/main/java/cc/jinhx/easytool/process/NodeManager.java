@@ -107,15 +107,15 @@ public class NodeManager {
                         Object bean = null;
 
                         try {
-                            if (SpringUtils.containsBean(name) && SpringUtils.isTypeMatch(name, type)){
-                                bean = SpringUtils.getBean(name, type);
+                            if (SpringUtil.containsBean(name) && SpringUtil.isTypeMatch(name, type)){
+                                bean = SpringUtil.getBean(name, type);
                             }
                         } catch (Exception e){
                             log.info("process createNode getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), declaredField.getName(), e);
                         }
 
                         try {
-                            bean = SpringUtils.getBean(type);
+                            bean = SpringUtil.getBean(type);
                         } catch (Exception e){
                             log.info("process createNode getBeanByType fail clazz={} name={} error=", clazz.getName(), declaredField.getName(), e);
                         }
@@ -125,15 +125,15 @@ public class NodeManager {
                         Object bean = null;
 
                         try {
-                            if (SpringUtils.containsBean(name) && SpringUtils.isTypeMatch(name, type)){
-                                bean = SpringUtils.getBean(name, type);
+                            if (SpringUtil.containsBean(name) && SpringUtil.isTypeMatch(name, type)){
+                                bean = SpringUtil.getBean(name, type);
                             }
                         } catch (Exception e){
                             log.info("process createNode getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
                         try {
-                            bean = SpringUtils.getBean(type);
+                            bean = SpringUtil.getBean(type);
                         } catch (Exception e){
                             log.info("process createNode getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }

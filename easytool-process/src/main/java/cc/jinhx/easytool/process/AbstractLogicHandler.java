@@ -1,5 +1,6 @@
 package cc.jinhx.easytool.process;
 
+import cc.jinhx.easytool.core.JsonUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
@@ -73,18 +74,18 @@ public abstract class AbstractLogicHandler<T> {
     private ProcessResult<T> doExecute() {
         try {
             checkParams();
-            log.info("process handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectConvertToJson(logicHandlerBaseInfo));
+            log.info("process handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), JsonUtil.objectConvertToJson(logicHandlerBaseInfo));
         } catch (ProcessException e) {
             log.info("process handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
             onUnknowFail(e);
             return buildFailResult(e.getCode(), e.getMsg());
         } catch (BusinessException e) {
-            log.info("process handlerLog {} checkParams business fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectConvertToJson(logicHandlerBaseInfo), e.getMsg());
+            log.info("process handlerLog {} checkParams business fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtil.objectConvertToJson(logicHandlerBaseInfo), e.getMsg());
             onBusinessFail(e);
             return buildBusinessFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
             String exceptionLog = getExceptionLog(e);
-            log.info("process handlerLog {} checkParams fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtils.objectConvertToJson(logicHandlerBaseInfo), exceptionLog);
+            log.info("process handlerLog {} checkParams fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtil.objectConvertToJson(logicHandlerBaseInfo), exceptionLog);
             onUnknowFail(e);
             return buildUnknownFailResult(exceptionLog);
         }
@@ -96,7 +97,7 @@ public abstract class AbstractLogicHandler<T> {
             ProcessResult<T> result = process();
 
             long endTime = System.currentTimeMillis();
-            log.info("process handlerLog {} execute success time={} rsp={}", logicHandlerBaseInfo.getLogStr(), endTime - startTime, JsonUtils.objectConvertToJson(result));
+            log.info("process handlerLog {} execute success time={} rsp={}", logicHandlerBaseInfo.getLogStr(), endTime - startTime, JsonUtil.objectConvertToJson(result));
             onSuccess();
             return result;
         } catch (ProcessException e) {

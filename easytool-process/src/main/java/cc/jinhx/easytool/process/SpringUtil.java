@@ -19,12 +19,12 @@ import java.util.Objects;
  */
 @Component
 @Slf4j
-public class SpringUtils implements ApplicationContextAware {
+public class SpringUtil implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;
 
-    public SpringUtils() {
-        log.info("process SpringUtils init");
+    public SpringUtil() {
+        log.info("EasyTool SpringUtil init");
     }
 
     /**
@@ -34,7 +34,7 @@ public class SpringUtils implements ApplicationContextAware {
      */
     @Override
     public void setApplicationContext(ApplicationContext context) {
-        SpringUtils.applicationContext = context;
+        SpringUtil.applicationContext = context;
     }
 
     /**
@@ -43,7 +43,7 @@ public class SpringUtils implements ApplicationContextAware {
      * @param context context
      */
     public static void load(ApplicationContext context) {
-        SpringUtils.applicationContext = context;
+        SpringUtil.applicationContext = context;
     }
 
     /**

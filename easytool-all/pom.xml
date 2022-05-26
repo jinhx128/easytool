@@ -27,6 +27,12 @@
             <artifactId>easytool-process</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>cc.jinhx</groupId>
+            <artifactId>easytool-crypto</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

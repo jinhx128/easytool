@@ -11,19 +11,19 @@
         <version>1.0.1</version>
     </parent>
 
-    <artifactId>easytool-core</artifactId>
+    <artifactId>easytool-crypto</artifactId>
     <name>${artifactId}</name>
     <description>${artifactId}</description>
 
+    <properties>
+        <jbcrypt.version>0.4</jbcrypt.version>
+    </properties>
+
     <dependencies>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>${jbcrypt.version}</version>
         </dependency>
     </dependencies>
 

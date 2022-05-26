@@ -22,13 +22,6 @@
         </dependency>
 
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <optional>true</optional>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>cc.jinhx</groupId>
             <artifactId>easytool-core</artifactId>
             <version>${project.parent.version}</version>
