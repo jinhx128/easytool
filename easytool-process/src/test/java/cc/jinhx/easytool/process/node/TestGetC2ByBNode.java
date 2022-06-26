@@ -1,10 +1,9 @@
 package cc.jinhx.easytool.process.node;
 
 import cc.jinhx.easytool.process.context.TestContext;
+import cc.jinhx.easytool.process.topology.TopologyContext;
 import cc.jinhx.easytool.process.service.TestService;
-import cc.jinhx.easytool.process.AbstractNode;
 import cc.jinhx.easytool.process.BusinessException;
-import cc.jinhx.easytool.process.NodeChainContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
@@ -21,13 +20,13 @@ public class TestGetC2ByBNode extends AbstractNode<TestContext> {
     private TestService testService;
 
     @Override
-    protected boolean isSkip(NodeChainContext<TestContext> nodeChainContext) {
+    protected boolean isSkip(TopologyContext<TestContext> topologyContext) {
         return false;
     }
 
     @Override
-    protected void process(NodeChainContext<TestContext> testNodeChainContext) {
-        TestContext contextInfo = testNodeChainContext.getContextInfo();
+    protected void process(TopologyContext<TestContext> topologyContext) {
+        TestContext contextInfo = topologyContext.getContextInfo();
         System.out.println(Thread.currentThread().getName() + "start3");
         try {
             Thread.sleep(180L);
@@ -45,28 +44,28 @@ public class TestGetC2ByBNode extends AbstractNode<TestContext> {
     }
 
     @Override
-    protected void onSuccess(NodeChainContext<TestContext> testNodeChainContext) {
-        System.out.println("onSuccess：" + testNodeChainContext.toString());
+    public void onSuccess(TopologyContext<TestContext> testTopologyContext) {
+        System.out.println("onSuccess：" + testTopologyContext.toString());
     }
 
     @Override
-    protected void onUnknowFail(NodeChainContext<TestContext> testNodeChainContext, Exception e) {
-        System.out.println("onUnknowFail：" + testNodeChainContext.toString() + Arrays.toString(e.getStackTrace()));
+    public void onUnknowFail(TopologyContext<TestContext> testTopologyContext, Exception e) {
+        System.out.println("onUnknowFail：" + testTopologyContext.toString() + Arrays.toString(e.getStackTrace()));
     }
 
     @Override
-    protected void onBusinessFail(NodeChainContext<TestContext> testNodeChainContext, BusinessException e) {
-        System.out.println("onBusinessFail：" + testNodeChainContext.toString() + e.getMsg());
+    public void onBusinessFail(TopologyContext<TestContext> testTopologyContext, BusinessException e) {
+        System.out.println("onBusinessFail：" + testTopologyContext.toString() + e.getMsg());
     }
 
     @Override
-    protected void onTimeoutFail(NodeChainContext<TestContext> testNodeChainContext) {
-        System.out.println("onTimeoutFail：" + testNodeChainContext.toString());
+    public void onTimeoutFail(TopologyContext<TestContext> testTopologyContext) {
+        System.out.println("onTimeoutFail：" + testTopologyContext.toString());
     }
 
     @Override
-    protected void afterProcess(NodeChainContext<TestContext> testNodeChainContext) {
-        System.out.println("afterProcess：" + testNodeChainContext.toString());
+    public void afterProcess(TopologyContext<TestContext> testTopologyContext) {
+        System.out.println("afterProcess：" + testTopologyContext.toString());
     }
 
 }

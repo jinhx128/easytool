@@ -1,59 +1,56 @@
-package cc.jinhx.easytool.process;
+package cc.jinhx.easytool.process.handler;
 
 import cc.jinhx.easytool.core.JsonUtil;
+import cc.jinhx.easytool.process.BusinessException;
+import cc.jinhx.easytool.process.ProcessException;
+import cc.jinhx.easytool.process.ProcessResult;
+import cc.jinhx.easytool.process.topology.AbstractTopology;
+import cc.jinhx.easytool.process.topology.TopologyContext;
+import cc.jinhx.easytool.process.topology.TopologyManager;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
 import java.util.Objects;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
 
 /**
- * 抽象逻辑处理器
+ * 抽象处理器
  *
  * @author jinhx
  * @since 2022-03-21
  */
 @Slf4j
-public abstract class AbstractLogicHandler<T> {
+public abstract class AbstractHandler<T> {
 
-    private LogicHandlerBaseInfo logicHandlerBaseInfo;
+    private static final String LOG_PREFIX = "process handlerLog ";
 
-    protected AbstractLogicHandler() {
-        init(new LogicHandlerBaseInfo(), null);
+    private HandlerBaseInfo handlerBaseInfo;
+
+    protected AbstractHandler() {
+        init(new HandlerBaseInfo(), null);
     }
 
-    protected AbstractLogicHandler(LogicHandlerBaseInfo logicHandlerBaseInfo) {
-        if (Objects.isNull(logicHandlerBaseInfo)) {
-            throw new ProcessException(ProcessException.MsgEnum.LOGIC_HANDLER_BASE_INFO_NOT_NULL);
-        }
-
-        init(logicHandlerBaseInfo, null);
+    protected AbstractHandler(@NonNull HandlerBaseInfo handlerBaseInfo) {
+        init(handlerBaseInfo, null);
     }
 
-    protected AbstractLogicHandler(LogicHandlerBaseInfo logicHandlerBaseInfo, String logStr) {
-        if (Objects.isNull(logicHandlerBaseInfo)) {
-            throw new ProcessException(ProcessException.MsgEnum.LOGIC_HANDLER_BASE_INFO_NOT_NULL);
-        }
-
-        if (StringUtils.isEmpty(logStr)) {
-            throw new ProcessException(ProcessException.MsgEnum.LOGIC_HANDLER_LOG_STR_NOT_NULL);
-        }
-
-        init(logicHandlerBaseInfo, logStr);
+    protected AbstractHandler(@NonNull HandlerBaseInfo handlerBaseInfo, @NonNull String logStr) {
+        init(handlerBaseInfo, logStr);
     }
 
     /**
      * 初始化，将当前方法名写入日志字段
      *
-     * @param logicHandlerBaseInfo logicHandlerBaseInfo
+     * @param handlerBaseInfo handlerBaseInfo
      * @param logStr               logStr
      */
-    private void init(LogicHandlerBaseInfo logicHandlerBaseInfo, String logStr) {
-        this.logicHandlerBaseInfo = logicHandlerBaseInfo;
+    private void init(HandlerBaseInfo handlerBaseInfo, String logStr) {
+        this.handlerBaseInfo = handlerBaseInfo;
         if (StringUtils.isEmpty(logStr)) {
-            logicHandlerBaseInfo.setLogStr("act=" + Thread.currentThread().getStackTrace()[4].getMethodName());
+            handlerBaseInfo.setLogStr("method [" + Thread.currentThread().getStackTrace()[4].getMethodName() + "]");
         } else {
-            logicHandlerBaseInfo.setLogStr(logStr + " act=" + Thread.currentThread().getStackTrace()[4].getMethodName());
+            handlerBaseInfo.setLogStr(logStr + " method [" + Thread.currentThread().getStackTrace()[4].getMethodName() + "]");
         }
     }
 
@@ -72,20 +69,21 @@ public abstract class AbstractLogicHandler<T> {
     }
 
     private ProcessResult<T> doExecute() {
+        String logStr = LOG_PREFIX + handlerBaseInfo.getLogStr();
         try {
             checkParams();
-            log.info("process handlerLog {} checkParams success req={}", logicHandlerBaseInfo.getLogStr(), JsonUtil.objectConvertToJson(logicHandlerBaseInfo));
+            log.info("{} checkParams success req={}", logStr, JsonUtil.objectConvertToJson(handlerBaseInfo));
         } catch (ProcessException e) {
-            log.info("process handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
+            log.info("{} execute process fail msg={}", logStr, e.getMsg());
             onUnknowFail(e);
             return buildFailResult(e.getCode(), e.getMsg());
         } catch (BusinessException e) {
-            log.info("process handlerLog {} checkParams business fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtil.objectConvertToJson(logicHandlerBaseInfo), e.getMsg());
+            log.info("{} checkParams business fail req={} msg={}", logStr, JsonUtil.objectConvertToJson(handlerBaseInfo), e.getMsg());
             onBusinessFail(e);
             return buildBusinessFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
             String exceptionLog = getExceptionLog(e);
-            log.info("process handlerLog {} checkParams fail req={} msg={}", logicHandlerBaseInfo.getLogStr(), JsonUtil.objectConvertToJson(logicHandlerBaseInfo), exceptionLog);
+            log.info("{} checkParams fail req={} msg={}", logStr, JsonUtil.objectConvertToJson(handlerBaseInfo), exceptionLog);
             onUnknowFail(e);
             return buildUnknownFailResult(exceptionLog);
         }
@@ -97,23 +95,23 @@ public abstract class AbstractLogicHandler<T> {
             ProcessResult<T> result = process();
 
             long endTime = System.currentTimeMillis();
-            log.info("process handlerLog {} execute success time={} rsp={}", logicHandlerBaseInfo.getLogStr(), endTime - startTime, JsonUtil.objectConvertToJson(result));
+            log.info("{} execute success time={} rsp={}", logStr, endTime - startTime, JsonUtil.objectConvertToJson(result));
             onSuccess();
             return result;
         } catch (ProcessException e) {
-            // 用节点链的情况
-            log.info("process handlerLog {} execute process fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
+            // 用拓扑图的情况
+            log.info("{} execute process fail msg={}", logStr, e.getMsg());
             onUnknowFail(e);
             return buildFailResult(e.getCode(), e.getMsg());
         } catch (BusinessException e) {
-            // 用节点链的情况
-            log.info("process handlerLog {} execute business fail msg={}", logicHandlerBaseInfo.getLogStr(), e.getMsg());
+            // 用拓扑图的情况
+            log.info("{} execute business fail msg={}", logStr, e.getMsg());
             onBusinessFail(e);
             return buildBusinessFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
-            // 没用节点链的情况
+            // 没用拓扑图的情况
             String exceptionLog = getExceptionLog(e);
-            log.info("process handlerLog {} execute fail msg={}", logicHandlerBaseInfo.getLogStr(), exceptionLog);
+            log.info("{} execute fail msg={}", logStr, exceptionLog);
             onUnknowFail(e);
             return buildUnknownFailResult(exceptionLog);
         } finally {
@@ -147,50 +145,50 @@ public abstract class AbstractLogicHandler<T> {
         return null;
     }
 
-    protected void executeNodeChain(Class<? extends AbstractNodeChain> clazz, NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor) {
-        executeNodeChain(clazz, null, nodeChainContext, threadPoolExecutor);
+    protected void executeTopology(@NonNull Class<? extends AbstractTopology> clazz, @NonNull TopologyContext<?> topologyContext, @NonNull ExecutorService executorService) {
+        executeTopology(clazz, null, topologyContext, executorService);
     }
 
-    protected void executeNodeChain(Class<? extends AbstractNodeChain> clazz, NodeChainContext<?> nodeChainContext) {
-        executeNodeChain(clazz, null, nodeChainContext);
+    protected void executeTopology(@NonNull Class<? extends AbstractTopology> clazz, @NonNull TopologyContext<?> topologyContext) {
+        executeTopology(clazz, null, topologyContext);
     }
 
     /**
-     * 执行指定节点链
+     * 执行指定拓扑图
      *
      * @param clazz              clazz
      * @param logLevel           logLevel
-     * @param nodeChainContext   nodeChainContext
-     * @param threadPoolExecutor threadPoolExecutor
+     * @param topologyContext   topologyContext
+     * @param executorService executorService
      */
-    protected void executeNodeChain(Class<? extends AbstractNodeChain> clazz, AbstractNodeChain.LogLevelEnum logLevel, NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor) {
-        getNodeChain(clazz, logLevel).execute(nodeChainContext, threadPoolExecutor);
+    protected void executeTopology(@NonNull Class<? extends AbstractTopology> clazz, AbstractTopology.LogLevelEnum logLevel, @NonNull TopologyContext<?> topologyContext, @NonNull ExecutorService executorService) {
+        getTopology(clazz, logLevel).execute(topologyContext, executorService);
     }
 
     /**
-     * 执行指定节点链
+     * 执行指定拓扑图
      *
      * @param clazz            clazz
      * @param logLevel         logLevel
-     * @param nodeChainContext nodeChainContext
+     * @param topologyContext topologyContext
      */
-    protected void executeNodeChain(Class<? extends AbstractNodeChain> clazz, AbstractNodeChain.LogLevelEnum logLevel, NodeChainContext<?> nodeChainContext) {
-        getNodeChain(clazz, logLevel).execute(nodeChainContext);
+    protected void executeTopology(@NonNull Class<? extends AbstractTopology> clazz, AbstractTopology.LogLevelEnum logLevel, @NonNull TopologyContext<?> topologyContext) {
+        getTopology(clazz, logLevel).execute(topologyContext);
     }
 
     /**
-     * 获取指定节点链
+     * 获取指定拓扑图
      *
      * @param clazz    clazz
      * @param logLevel logLevel
      */
-    private AbstractNodeChain getNodeChain(Class<? extends AbstractNodeChain> clazz, AbstractNodeChain.LogLevelEnum logLevel) {
-        AbstractNodeChain abstractNodeChain = NodeChainManager.getNodeChain(clazz, logLevel);
-        if (Objects.isNull(abstractNodeChain)) {
-            throw new ProcessException(ProcessException.MsgEnum.NODE_CHAIN_UNREGISTERED.getMsg() + "=" + clazz.getName());
+    private AbstractTopology getTopology(Class<? extends AbstractTopology> clazz, AbstractTopology.LogLevelEnum logLevel) {
+        AbstractTopology abstractTopology = TopologyManager.getTopology(clazz, logLevel);
+        if (Objects.isNull(abstractTopology)) {
+            throw new ProcessException(ProcessException.MsgEnum.TOPOLOGY_UNREGISTERED.getMsg() + "=" + clazz.getName());
         }
 
-        return abstractNodeChain;
+        return abstractTopology;
     }
 
     /**
@@ -221,8 +219,8 @@ public abstract class AbstractLogicHandler<T> {
     /**
      * 构建上下文
      */
-    protected <T> NodeChainContext<T> buildNodeChainContext(Class<T> clazz) {
-        return NodeChainContext.create(clazz);
+    protected <T> TopologyContext<T> buildTopologyContext(Class<T> clazz) {
+        return TopologyContext.create(clazz);
     }
 
     /**

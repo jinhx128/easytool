@@ -1,5 +1,7 @@
-package cc.jinhx.easytool.process;
+package cc.jinhx.easytool.process.topology;
 
+import cc.jinhx.easytool.process.SpringUtil;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -12,18 +14,18 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 节点链管理器
+ * 拓扑图管理器
  *
  * @author jinhx
  * @since 2022-03-21
  */
 @Slf4j
-public class NodeChainManager {
+public class TopologyManager {
 
-    private static Map<String, AbstractNodeChain> MAP = new HashMap<>();
+    private static Map<String, AbstractTopology> MAP = new HashMap<>();
 
-    public void addNodeChain(String key, AbstractNodeChain abstractNodeChain) {
-        MAP.put(key, abstractNodeChain);
+    public void addTopology(String key, AbstractTopology abstractTopology) {
+        MAP.put(key, abstractTopology);
     }
 
     /**
@@ -33,7 +35,7 @@ public class NodeChainManager {
      * @param logLevel logLevel
      * @return AbstractNode
      */
-    public static AbstractNodeChain getNodeChain(Class<? extends AbstractNodeChain> clazz, AbstractNodeChain.LogLevelEnum logLevel) {
+    public static AbstractTopology getTopology(@NonNull Class<? extends AbstractTopology> clazz, AbstractTopology.LogLevelEnum logLevel) {
         String key = clazz.getName() + ":";
         if (Objects.isNull(logLevel)) {
             key += null;
@@ -45,12 +47,12 @@ public class NodeChainManager {
             return MAP.get(key);
         }
 
-        AbstractNodeChain abstractNodeChain = createNodeChain(clazz, logLevel);
-        if (Objects.nonNull(abstractNodeChain)) {
-            MAP.put(key, abstractNodeChain);
+        AbstractTopology abstractTopology = createTopology(clazz, logLevel);
+        if (Objects.nonNull(abstractTopology)) {
+            MAP.put(key, abstractTopology);
         }
 
-        return abstractNodeChain;
+        return abstractTopology;
     }
 
     /**
@@ -60,21 +62,21 @@ public class NodeChainManager {
      * @param logLevel logLevel
      * @return AbstractNode
      */
-    private static AbstractNodeChain createNodeChain(Class<? extends AbstractNodeChain> clazz, AbstractNodeChain.LogLevelEnum logLevel) {
+    private static AbstractTopology createTopology(Class<? extends AbstractTopology> clazz, AbstractTopology.LogLevelEnum logLevel) {
         try {
-            Constructor<? extends AbstractNodeChain> constructor = clazz.getDeclaredConstructor();
+            Constructor<? extends AbstractTopology> constructor = clazz.getDeclaredConstructor();
             // 跳过了访问检查，并提高效率
             constructor.setAccessible(true);
-            AbstractNodeChain abstractNodeChain = constructor.newInstance();
+            AbstractTopology abstractTopology = constructor.newInstance();
             Method setNodeInfoMethod = clazz.getDeclaredMethod("setNodeInfo");
             // 跳过了访问检查，并提高效率
             setNodeInfoMethod.setAccessible(true);
-            setNodeInfoMethod.invoke(abstractNodeChain);
-            if (Objects.nonNull(logLevel) && AbstractNodeChain.LogLevelEnum.containsCode(logLevel.getCode())) {
-                Method setLogLevelMethod = clazz.getMethod("setLogLevel", AbstractNodeChain.LogLevelEnum.class);
+            setNodeInfoMethod.invoke(abstractTopology);
+            if (Objects.nonNull(logLevel) && AbstractTopology.LogLevelEnum.containsCode(logLevel.getCode())) {
+                Method setLogLevelMethod = clazz.getMethod("setLogLevel", AbstractTopology.LogLevelEnum.class);
                 // 跳过了访问检查，并提高效率
                 setLogLevelMethod.setAccessible(true);
-                setLogLevelMethod.invoke(abstractNodeChain, logLevel);
+                setLogLevelMethod.invoke(abstractTopology, logLevel);
             }
 
             for (Field declaredField : clazz.getDeclaredFields()) {
@@ -82,7 +84,7 @@ public class NodeChainManager {
                 declaredField.setAccessible(true);
                 String name = declaredField.getName();
                 Class<?> type = declaredField.getType();
-                if (Objects.isNull(declaredField.get(abstractNodeChain))) {
+                if (Objects.isNull(declaredField.get(abstractTopology))) {
                     if (Objects.nonNull(declaredField.getAnnotation(Resource.class))) {
                         Object bean = null;
 
@@ -91,16 +93,16 @@ public class NodeChainManager {
                                 bean = SpringUtil.getBean(name, type);
                             }
                         } catch (Exception e){
-                            log.info("process createNodeChain getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
+                            log.info("process createTopology getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
                         try {
                             bean = SpringUtil.getBean(type);
                         } catch (Exception e){
-                            log.info("process createNodeChain getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
+                            log.info("process createTopology getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
-                        declaredField.set(abstractNodeChain, bean);
+                        declaredField.set(abstractTopology, bean);
                     } else if (Objects.nonNull(declaredField.getAnnotation(Autowired.class))) {
                         Object bean = null;
 
@@ -109,23 +111,23 @@ public class NodeChainManager {
                                 bean = SpringUtil.getBean(name, type);
                             }
                         } catch (Exception e){
-                            log.info("process createNodeChain getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
+                            log.info("process createTopology getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
                         try {
                             bean = SpringUtil.getBean(type);
                         } catch (Exception e){
-                            log.info("process createNodeChain getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
+                            log.info("process createTopology getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
-                        declaredField.set(abstractNodeChain, bean);
+                        declaredField.set(abstractTopology, bean);
                     }
                 }
             }
 
-            return abstractNodeChain;
+            return abstractTopology;
         } catch (Exception e) {
-            log.info("process createNodeChain reflex create object fail clazz={} logLevel={} error=", clazz, logLevel, e);
+            log.info("process createTopology reflex create object fail clazz={} logLevel={} error=", clazz, logLevel, e);
             return null;
         }
     }

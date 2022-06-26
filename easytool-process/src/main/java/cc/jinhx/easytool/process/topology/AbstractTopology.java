@@ -1,19 +1,20 @@
-package cc.jinhx.easytool.process;
+package cc.jinhx.easytool.process.topology;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import cc.jinhx.easytool.process.BusinessException;
+import cc.jinhx.easytool.process.ProcessException;
+import cc.jinhx.easytool.process.ThreadPoolManager;
+import cc.jinhx.easytool.process.node.AbstractNode;
+import cc.jinhx.easytool.process.node.NodeManager;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
-import org.springframework.util.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
- * 抽象节点链
+ * 抽象拓扑图
  *
  * @author jinhx
  * @since 2022-03-21
@@ -21,11 +22,11 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Slf4j
-public abstract class AbstractNodeChain extends LinkedHashMap<String, List<AbstractNode>> {
+public abstract class AbstractTopology extends LinkedHashMap<String, List<AbstractNode>> {
 
     private static final long serialVersionUID = 4780080785208529405L;
 
-    private static final String LOG_ID = "traceId";
+    private static final String LOG_PREFIX = "process topologyLog ";
 
     private LogLevelEnum logLevel = LogLevelEnum.BASE_AND_TIME_AND_FIRST_AND_LAST_NODES_PARAMS;
 
@@ -33,102 +34,102 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
 
     private String lastNodeName;
 
-    public void addSyncNode(Class<? extends AbstractNode> node) {
+    public void addSyncNode(@NonNull Class<? extends AbstractNode> node) {
         addSyncNode(node, null, null, null);
     }
 
-    public void addSyncNode(Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle) {
+    public void addSyncNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle) {
         addSyncNode(node, failHandle, null, null);
     }
 
-    public void addSyncNode(Class<? extends AbstractNode> node, Long timeout) {
+    public void addSyncNode(@NonNull Class<? extends AbstractNode> node, Long timeout) {
         addSyncNode(node, null, timeout, null);
     }
 
-    public void addSyncNode(Class<? extends AbstractNode> node, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addSyncNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.RetryTimesEnum retryTimes) {
         addSyncNode(node, null, null, retryTimes);
     }
 
-    public void addSyncNode(Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout) {
+    public void addSyncNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout) {
         addSyncNode(node, failHandle, timeout, null);
     }
 
-    public void addSyncNode(Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addSyncNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, AbstractNode.RetryTimesEnum retryTimes) {
         addSyncNode(node, failHandle, null, retryTimes);
     }
 
-    public void addSyncNode(Class<? extends AbstractNode> node, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addSyncNode(@NonNull Class<? extends AbstractNode> node, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
         addSyncNode(node, null, timeout, retryTimes);
     }
 
-    public void addSyncNode(Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addSyncNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
         add(node.getName(), node, failHandle, timeout, retryTimes);
         if (this.asyncLastNode) {
             this.asyncLastNode = false;
         }
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node) {
+    public void addAsyncNode(@NonNull Class<? extends AbstractNode> node) {
         addAsyncNode(node, null, null, null, false);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle) {
+    public void addAsyncNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle) {
         addAsyncNode(node, failHandle, null, null, false);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, Long timeout) {
+    public void addAsyncNode(@NonNull Class<? extends AbstractNode> node, Long timeout) {
         addAsyncNode(node, null, timeout, null, false);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addAsyncNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.RetryTimesEnum retryTimes) {
         addAsyncNode(node, null, null, retryTimes, false);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout) {
+    public void addAsyncNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout) {
         addAsyncNode(node, failHandle, timeout, null, false);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addAsyncNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, AbstractNode.RetryTimesEnum retryTimes) {
         addAsyncNode(node, failHandle, null, retryTimes, false);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addAsyncNode(@NonNull Class<? extends AbstractNode> node, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
         addAsyncNode(node, null, timeout, retryTimes, false);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addAsyncNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
         addAsyncNode(node, failHandle, timeout, retryTimes, false);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, boolean restartAsyncGroup) {
+    public void addAsyncNode(@NonNull Class<? extends AbstractNode> node, boolean restartAsyncGroup) {
         addAsyncNode(node, null, null, null, restartAsyncGroup);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, boolean restartAsyncGroup) {
+    public void addAsyncNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, boolean restartAsyncGroup) {
         addAsyncNode(node, failHandle, null, null, restartAsyncGroup);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, Long timeout, boolean restartAsyncGroup) {
+    public void addAsyncNode(@NonNull Class<? extends AbstractNode> node, Long timeout, boolean restartAsyncGroup) {
         addAsyncNode(node, null, timeout, null, restartAsyncGroup);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
+    public void addAsyncNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
         addAsyncNode(node, null, null, retryTimes, restartAsyncGroup);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout, boolean restartAsyncGroup) {
+    public void addAsyncNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout, boolean restartAsyncGroup) {
         addAsyncNode(node, failHandle, timeout, null, restartAsyncGroup);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
+    public void addAsyncNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
         addAsyncNode(node, failHandle, null, retryTimes, restartAsyncGroup);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, Long timeout, AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
+    public void addAsyncNode(@NonNull Class<? extends AbstractNode> node, Long timeout, AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
         addAsyncNode(node, null, timeout, retryTimes, restartAsyncGroup);
     }
 
-    public void addAsyncNode(Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout,
+    public void addAsyncNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout,
                              AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
         if (restartAsyncGroup && this.asyncLastNode) {
             this.asyncLastNode = false;
@@ -143,63 +144,63 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
         }
     }
 
-    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes) {
+    public void addAsyncNodeList(@NonNull List<Class<? extends AbstractNode>> nodes) {
         addAsyncNodeList(nodes, null, null, null, false);
     }
 
-    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, AbstractNode.FailHandleEnum failHandle) {
+    public void addAsyncNodeList(@NonNull List<Class<? extends AbstractNode>> nodes, AbstractNode.FailHandleEnum failHandle) {
         addAsyncNodeList(nodes, failHandle, null, null, false);
     }
 
-    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, Long timeout) {
+    public void addAsyncNodeList(@NonNull List<Class<? extends AbstractNode>> nodes, Long timeout) {
         addAsyncNodeList(nodes, null, timeout, null, false);
     }
 
-    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addAsyncNodeList(@NonNull List<Class<? extends AbstractNode>> nodes, AbstractNode.RetryTimesEnum retryTimes) {
         addAsyncNodeList(nodes, null, null, retryTimes, false);
     }
 
-    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, AbstractNode.FailHandleEnum failHandle, Long timeout) {
+    public void addAsyncNodeList(@NonNull List<Class<? extends AbstractNode>> nodes, AbstractNode.FailHandleEnum failHandle, Long timeout) {
         addAsyncNodeList(nodes, failHandle, timeout, null, false);
     }
 
-    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, AbstractNode.FailHandleEnum failHandle, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addAsyncNodeList(@NonNull List<Class<? extends AbstractNode>> nodes, AbstractNode.FailHandleEnum failHandle, AbstractNode.RetryTimesEnum retryTimes) {
         addAsyncNodeList(nodes, failHandle, null, retryTimes, false);
     }
 
-    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addAsyncNodeList(@NonNull List<Class<? extends AbstractNode>> nodes, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
         addAsyncNodeList(nodes, null, timeout, retryTimes, false);
     }
 
-    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, boolean restartAsyncGroup) {
+    public void addAsyncNodeList(@NonNull List<Class<? extends AbstractNode>> nodes, boolean restartAsyncGroup) {
         addAsyncNodeList(nodes, null, null, null, restartAsyncGroup);
     }
 
-    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, AbstractNode.FailHandleEnum failHandle, boolean restartAsyncGroup) {
+    public void addAsyncNodeList(@NonNull List<Class<? extends AbstractNode>> nodes, AbstractNode.FailHandleEnum failHandle, boolean restartAsyncGroup) {
         addAsyncNodeList(nodes, failHandle, null, null, restartAsyncGroup);
     }
 
-    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, Long timeout, boolean restartAsyncGroup) {
+    public void addAsyncNodeList(@NonNull List<Class<? extends AbstractNode>> nodes, Long timeout, boolean restartAsyncGroup) {
         addAsyncNodeList(nodes, null, timeout, null, restartAsyncGroup);
     }
 
-    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
+    public void addAsyncNodeList(@NonNull List<Class<? extends AbstractNode>> nodes, AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
         addAsyncNodeList(nodes, null, null, retryTimes, restartAsyncGroup);
     }
 
-    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, AbstractNode.FailHandleEnum failHandle, Long timeout, boolean restartAsyncGroup) {
+    public void addAsyncNodeList(@NonNull List<Class<? extends AbstractNode>> nodes, AbstractNode.FailHandleEnum failHandle, Long timeout, boolean restartAsyncGroup) {
         addAsyncNodeList(nodes, failHandle, timeout, null, restartAsyncGroup);
     }
 
-    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, AbstractNode.FailHandleEnum failHandle, AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
+    public void addAsyncNodeList(@NonNull List<Class<? extends AbstractNode>> nodes, AbstractNode.FailHandleEnum failHandle, AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
         addAsyncNodeList(nodes, failHandle, null, retryTimes, restartAsyncGroup);
     }
 
-    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, Long timeout, AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
+    public void addAsyncNodeList(@NonNull List<Class<? extends AbstractNode>> nodes, Long timeout, AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
         addAsyncNodeList(nodes, null, timeout, retryTimes, restartAsyncGroup);
     }
 
-    public void addAsyncNodeList(List<Class<? extends AbstractNode>> nodes, AbstractNode.FailHandleEnum failHandle, Long timeout, AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
+    public void addAsyncNodeList(@NonNull List<Class<? extends AbstractNode>> nodes, AbstractNode.FailHandleEnum failHandle, Long timeout, AbstractNode.RetryTimesEnum retryTimes, boolean restartAsyncGroup) {
         if (restartAsyncGroup && this.asyncLastNode) {
             this.asyncLastNode = false;
         }
@@ -220,7 +221,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     }
 
     /**
-     * 添加指定组节点，一个链路按理说只有一类型的节点，如果有多个，默认覆盖前面的，使用最后一个
+     * 添加指定组节点，一个拓扑图按理说只有一类型的节点，如果有多个，默认覆盖前面的，使用最后一个
      *
      * @param groupName  groupName
      * @param node       node
@@ -245,7 +246,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
 
     /**
      * 配置节点信息
-     * 1. 通过内部addxxx方法，添加节点到节点链，执行顺序按照添加顺序
+     * 1. 通过内部addxxx方法，添加节点到拓扑图，执行顺序按照添加顺序
      * 2. 组内异步，与组外同步
      * 3. 添加一个同步节点，自己属于一个组，且组内只能有自己
      * 4. 添加一个异步节点/节点组
@@ -255,34 +256,34 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     protected abstract void setNodeInfo();
 
     /**
-     * 执行当前节点链，利用LinkedHashMap特性，按照添加顺序执行，使用默认线程池
+     * 执行当前拓扑图，利用LinkedHashMap特性，按照添加顺序执行，使用默认线程池
      *
-     * @param nodeChainContext nodeChainContext
+     * @param topologyContext topologyContext
      */
-    public void execute(NodeChainContext<?> nodeChainContext) {
-        execute(nodeChainContext, getMyExecuteThreadPoolExecutor());
+    public void execute(@NonNull TopologyContext<?> topologyContext) {
+        execute(topologyContext, getThreadPool());
     }
 
     /**
-     * 执行当前节点链，利用LinkedHashMap特性，按照添加顺序执行，指定线程池，如果为空则使用默认配置的线程池
+     * 执行当前拓扑图，利用LinkedHashMap特性，按照添加顺序执行，指定线程池，如果为空则使用默认配置的线程池
      *
-     * @param nodeChainContext   nodeChainContext
-     * @param threadPoolExecutor threadPoolExecutor
+     * @param topologyContext   topologyContext
+     * @param executorService executorService
      */
-    public void execute(NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor) {
-        // 通过节点链日志设置节点日志级别
+    public void execute(@NonNull TopologyContext<?> topologyContext, @NonNull ExecutorService executorService) {
+        // 通过拓扑图日志设置节点日志级别
         AbstractNode.LogLevelEnum nodeLogLevel = null;
-        LogLevelEnum nodeChainLogLevel = this.logLevel;
+        LogLevelEnum topologyLogLevel = this.logLevel;
         boolean baseAndTimeAndFirstAndLastNodesParamsLogLevel = false;
-        if (LogLevelEnum.NO.getCode().equals(nodeChainLogLevel.getCode())) {
+        if (LogLevelEnum.NO.getCode().equals(topologyLogLevel.getCode())) {
             nodeLogLevel = AbstractNode.LogLevelEnum.NO;
-        } else if (LogLevelEnum.BASE.getCode().equals(nodeChainLogLevel.getCode())) {
+        } else if (LogLevelEnum.BASE.getCode().equals(topologyLogLevel.getCode())) {
             nodeLogLevel = AbstractNode.LogLevelEnum.BASE;
-        } else if (LogLevelEnum.BASE_AND_TIME.getCode().equals(nodeChainLogLevel.getCode())) {
+        } else if (LogLevelEnum.BASE_AND_TIME.getCode().equals(topologyLogLevel.getCode())) {
             nodeLogLevel = AbstractNode.LogLevelEnum.BASE_AND_TIME;
-        } else if (LogLevelEnum.BASE_AND_TIME_AND_FIRST_AND_LAST_NODES_PARAMS.getCode().equals(nodeChainLogLevel.getCode())) {
+        } else if (LogLevelEnum.BASE_AND_TIME_AND_FIRST_AND_LAST_NODES_PARAMS.getCode().equals(topologyLogLevel.getCode())) {
             baseAndTimeAndFirstAndLastNodesParamsLogLevel = true;
-        } else if (LogLevelEnum.BASE_AND_TIME_AND_ALL_NODES_PARAMS.getCode().equals(nodeChainLogLevel.getCode())) {
+        } else if (LogLevelEnum.BASE_AND_TIME_AND_ALL_NODES_PARAMS.getCode().equals(topologyLogLevel.getCode())) {
             nodeLogLevel = AbstractNode.LogLevelEnum.BASE_AND_TIME_AND_PARAMS;
         } else {
             nodeLogLevel = AbstractNode.LogLevelEnum.BASE_AND_TIME;
@@ -290,7 +291,7 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
 
         int count = 1;
         for (Map.Entry<String, List<AbstractNode>> nodesEntry : this.entrySet()) {
-            // 通过节点链日志设置节点日志级别
+            // 通过拓扑图日志设置节点日志级别
             if (baseAndTimeAndFirstAndLastNodesParamsLogLevel) {
                 if (count == 1 || count == this.entrySet().size()) {
                     nodeLogLevel = AbstractNode.LogLevelEnum.BASE_AND_TIME_AND_PARAMS;
@@ -301,12 +302,12 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
             }
 
             // 获取整组的执行future
-            Map<Future<Void>, AbstractNode> futureMap = getFutureMap(nodeChainContext, threadPoolExecutor, nodesEntry.getValue(), nodeLogLevel);
+            Map<Future<Void>, AbstractNode> futureMap = getFutureMap(topologyContext, executorService, nodesEntry.getValue(), nodeLogLevel);
             // 等待整组的future执行完
-            waitFutureExecute(nodeChainContext, threadPoolExecutor, futureMap, new HashMap<>(), nodeLogLevel);
+            waitFutureExecute(topologyContext, executorService, futureMap, new HashMap<>(), nodeLogLevel);
 
             // 是否需要执行下一组节点
-            if (Objects.nonNull(nodeChainContext.getExNextNodeGroup()) && !nodeChainContext.getExNextNodeGroup()) {
+            if (!topologyContext.getExecuteNextNodeGroup()) {
                 return;
             }
         }
@@ -315,36 +316,37 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     /**
      * 获取整组的执行future
      *
-     * @param nodeChainContext   nodeChainContext
-     * @param threadPoolExecutor threadPoolExecutor
+     * @param topologyContext   topologyContext
+     * @param executorService executorService
      * @param abstractNodeList   abstractNodeList
      * @param nodeLogLevel       nodeLogLevel
      * @return Map<Future < Void>, AbstractNode>
      */
-    private Map<Future<Void>, AbstractNode> getFutureMap(NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor,
+    private Map<Future<Void>, AbstractNode> getFutureMap(TopologyContext<?> topologyContext, ExecutorService executorService,
                                                          List<AbstractNode> abstractNodeList, AbstractNode.LogLevelEnum nodeLogLevel) {
-        String mdcLogId = getMDCLogId();
+        Map<Object, AbstractThreadContextConfig> paramMap = new HashMap<>();
+        Set<AbstractThreadContextConfig> threadContextInitConfigs = getThreadContextInitConfigs();
+        if (!CollectionUtils.isEmpty(threadContextInitConfigs)){
+            for (AbstractThreadContextConfig item : threadContextInitConfigs) {
+                if (Objects.nonNull(item)){
+                    if (item instanceof KeyThreadContextConfig){
+                        paramMap.put(((KeyThreadContextConfig) item).getGetContextByKey().apply(((KeyThreadContextConfig) item).getKey()), item);
+                    } else if (item instanceof SingletonThreadContextConfig){
+                        paramMap.put(((SingletonThreadContextConfig) item).getGetContext().get(), item);
+                    }
+                }
+            }
+        }
+
         Map<Future<Void>, AbstractNode> futureMap = new HashMap<>();
         // 同组单/多个节点并行执行
         for (AbstractNode abstractNode : abstractNodeList) {
-            String nodeChainName = this.getClass().getName();
-            if (Objects.nonNull(threadPoolExecutor)) {
-                futureMap.put(CompletableFuture.supplyAsync(() -> {
-                    putMDCLogId(mdcLogId);
-                    abstractNode.execute(nodeChainContext, nodeLogLevel, nodeChainName);
-                    removeMDCLogId();
-                    return null;
-                }, threadPoolExecutor), abstractNode);
-            } else if (Objects.nonNull(getMyExecuteThreadPoolExecutor())) {
-                futureMap.put(CompletableFuture.supplyAsync(() -> {
-                    putMDCLogId(mdcLogId);
-                    abstractNode.execute(nodeChainContext, nodeLogLevel, nodeChainName);
-                    removeMDCLogId();
-                    return null;
-                }, getMyExecuteThreadPoolExecutor()), abstractNode);
-            } else {
-                throw new ProcessException(ProcessException.MsgEnum.NODE_CHAIN_THREAD_POOL_EXECUTOR_NOT_NULL.getMsg() + "=" + nodeChainName);
-            }
+            futureMap.put(CompletableFuture.supplyAsync(() -> {
+                initThreadContext(paramMap);
+                abstractNode.execute(topologyContext, nodeLogLevel, this.getClass().getName());
+                removeThreadContext(threadContextInitConfigs);
+                return null;
+            }, executorService), abstractNode);
         }
 
         return futureMap;
@@ -353,14 +355,15 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     /**
      * 等待整组的future执行完
      *
-     * @param nodeChainContext   nodeChainContext
-     * @param threadPoolExecutor threadPoolExecutor
+     * @param topologyContext   topologyContext
+     * @param executorService executorService
      * @param futureMap          futureMap
      * @param retriedMap         retriedMap
      * @param nodeLogLevel       nodeLogLevel
      */
-    private void waitFutureExecute(NodeChainContext<?> nodeChainContext, ThreadPoolExecutor threadPoolExecutor, Map<Future<Void>, AbstractNode> futureMap,
+    private void waitFutureExecute(TopologyContext<?> topologyContext, ExecutorService executorService, Map<Future<Void>, AbstractNode> futureMap,
                                    Map<String, Integer> retriedMap, AbstractNode.LogLevelEnum nodeLogLevel) {
+        String logStr = LOG_PREFIX + topologyContext.getLogStr();
         for (Map.Entry<Future<Void>, AbstractNode> futureEntry : futureMap.entrySet()) {
             ProcessException processException = null;
             BusinessException businessException = null;
@@ -373,63 +376,63 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
             String nodeName = abstractNode.getClass().getName();
             try {
                 future.get(timeout, TimeUnit.MILLISECONDS);
-                abstractNode.onSuccess(nodeChainContext);
+                abstractNode.onSuccess(topologyContext);
             } catch (TimeoutException e) {
                 if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
-                    abstractNode.onTimeoutFail(nodeChainContext);
+                    abstractNode.onTimeoutFail(topologyContext);
                 }
                 exception = e;
                 // 中断超时线程，不一定成功
                 boolean cancel = future.cancel(true);
-                log.info("process nodeChainLog {} execute timeout nodeName={} timeout={} cancel={}", nodeChainContext.getLogStr(), nodeName, timeout, cancel);
+                log.info("{} execute timeout node [{}] timeout={} cancel={}", logStr, nodeName, timeout, cancel);
                 processException = new ProcessException(ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);
             } catch (ExecutionException e) {
                 if (e.getCause() instanceof ProcessException) {
                     if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
-                        abstractNode.onUnknowFail(nodeChainContext, (Exception) e.getCause());
+                        abstractNode.onUnknowFail(topologyContext, (Exception) e.getCause());
                     }
                     exception = e;
-                    log.info("process nodeChainLog {} execute process fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, getExceptionLog(e));
+                    log.info("{} execute process fail node [{}] msg={}", logStr, nodeName, getExceptionLog(e));
                     processException = (ProcessException) e.getCause();
                 } else if (e.getCause() instanceof BusinessException) {
                     exception = e;
-                    log.info("process nodeChainLog {} execute business fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, getExceptionLog(e));
+                    log.info("{} execute business fail node [{}] msg={}", logStr, nodeName, getExceptionLog(e));
                     if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
-                        abstractNode.onBusinessFail(nodeChainContext, (BusinessException) e.getCause());
+                        abstractNode.onBusinessFail(topologyContext, (BusinessException) e.getCause());
                         throw (BusinessException) e.getCause();
                     } else {
                         businessException = (BusinessException) e.getCause();
                     }
                 } else {
                     if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
-                        abstractNode.onUnknowFail(nodeChainContext, (Exception) e.getCause());
+                        abstractNode.onUnknowFail(topologyContext, (Exception) e.getCause());
                     }
                     exception = e;
                     String exceptionLog = getExceptionLog(e);
-                    log.info("process nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, exceptionLog);
+                    log.info("{} execute fail node [{}] msg={}", logStr, nodeName, exceptionLog);
                     processException = new ProcessException(ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
                 }
             } catch (Exception e) {
                 if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
-                    abstractNode.onUnknowFail(nodeChainContext, e);
+                    abstractNode.onUnknowFail(topologyContext, e);
                 }
                 exception = e;
                 String exceptionLog = getExceptionLog(e);
-                log.info("process nodeChainLog {} execute fail nodeName={} msg={}", nodeChainContext.getLogStr(), nodeName, exceptionLog);
+                log.info("{} execute fail node [{}] msg={}", logStr, nodeName, exceptionLog);
                 processException = new ProcessException(ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
             } finally {
                 if (!AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
-                    abstractNode.afterProcess(nodeChainContext);
+                    abstractNode.afterProcess(topologyContext);
                 }
             }
 
             // 降级处理
             if (Objects.nonNull(processException) || Objects.nonNull(businessException)) {
                 if (AbstractNode.FailHandleEnum.INTERRUPT.getCode().equals(failHandle)) {
-                    log.info("process nodeChainLog {} execute fail interrupt nodeName={} timeout={}", nodeChainContext.getLogStr(), nodeName, timeout);
+                    log.info("{} execute fail interrupt node [{}] timeout={}", logStr, nodeName, timeout);
                     throw processException;
                 } else if (AbstractNode.FailHandleEnum.ABANDON.getCode().equals(failHandle)) {
-                    log.info("process nodeChainLog {} execute fail abandon nodeName={} timeout={}", nodeChainContext.getLogStr(), nodeName, timeout);
+                    log.info("{} execute fail abandon node [{}] timeout={}", logStr, nodeName, timeout);
                 } else if (AbstractNode.FailHandleEnum.RETRY.getCode().equals(failHandle)) {
                     List<AbstractNode> retryAbstractNodeList = new ArrayList<>();
                     retryAbstractNodeList.add(abstractNode);
@@ -439,53 +442,53 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
                     if (retriedMap.containsKey(nodeName)) {
                         if (retriedMap.get(nodeName) >= retryTimes) {
                             // 打印上一次重试失败
-                            log.info("process nodeChainLog {} execute fail retry fail nodeName={} timeout={} retryTimes={} retriedTimes={}", nodeChainContext.getLogStr(), nodeName, timeout, retryTimes, retriedMap.get(nodeName));
+                            log.info("{} execute fail retry fail node [{}] timeout={} retryTimes={} retriedTimes={}", logStr, nodeName, timeout, retryTimes, retriedMap.get(nodeName));
 
                             if (exception instanceof TimeoutException) {
-                                abstractNode.onTimeoutFail(nodeChainContext);
+                                abstractNode.onTimeoutFail(topologyContext);
                             } else if (exception instanceof ExecutionException) {
                                 if (exception.getCause() instanceof ProcessException) {
-                                    abstractNode.onUnknowFail(nodeChainContext, (Exception) exception.getCause());
+                                    abstractNode.onUnknowFail(topologyContext, (Exception) exception.getCause());
                                 } else if (exception.getCause() instanceof BusinessException) {
-                                    abstractNode.onBusinessFail(nodeChainContext, (BusinessException) exception.getCause());
-                                    abstractNode.afterProcess(nodeChainContext);
+                                    abstractNode.onBusinessFail(topologyContext, (BusinessException) exception.getCause());
+                                    abstractNode.afterProcess(topologyContext);
                                     throw (BusinessException) exception.getCause();
                                 } else {
-                                    abstractNode.onUnknowFail(nodeChainContext, (Exception) exception.getCause());
+                                    abstractNode.onUnknowFail(topologyContext, (Exception) exception.getCause());
                                 }
                             } else {
-                                abstractNode.onUnknowFail(nodeChainContext, exception);
+                                abstractNode.onUnknowFail(topologyContext, exception);
                             }
 
                             // 直接中断的两种考虑
                             // 1. 既然是需要重试的节点，那么肯定是比较重要的数据，不可缺失
                             // 2. 防止一组里面有多个一样的节点互相影响重试次数，也可以通过清掉key解决
-                            abstractNode.afterProcess(nodeChainContext);
+                            abstractNode.afterProcess(topologyContext);
                             throw processException;
                         }
 
                         // 打印上一次重试失败
-                        log.info("process nodeChainLog {} execute fail retry nodeName={} timeout={} retryTimes={} retriedTimes={}", nodeChainContext.getLogStr(), nodeName, timeout, retryTimes, retriedMap.get(nodeName));
+                        log.info("{} execute fail retry node [{}] timeout={} retryTimes={} retriedTimes={}", logStr, nodeName, timeout, retryTimes, retriedMap.get(nodeName));
                         retriedMap.put(nodeName, retriedMap.get(nodeName) + 1);
                         nowRetryCount = retriedMap.get(nodeName) + 1;
-                        Map<Future<Void>, AbstractNode> retryFutureMap = getFutureMap(nodeChainContext, threadPoolExecutor, retryAbstractNodeList, nodeLogLevel);
-                        waitFutureExecute(nodeChainContext, threadPoolExecutor, retryFutureMap, retriedMap, nodeLogLevel);
+                        Map<Future<Void>, AbstractNode> retryFutureMap = getFutureMap(topologyContext, executorService, retryAbstractNodeList, nodeLogLevel);
+                        waitFutureExecute(topologyContext, executorService, retryFutureMap, retriedMap, nodeLogLevel);
                     } else {
                         // 第一次重试
                         retriedMap.put(nodeName, 1);
                         nowRetryCount = 1;
-                        Map<Future<Void>, AbstractNode> retryFutureMap = getFutureMap(nodeChainContext, threadPoolExecutor, retryAbstractNodeList, nodeLogLevel);
-                        waitFutureExecute(nodeChainContext, threadPoolExecutor, retryFutureMap, retriedMap, nodeLogLevel);
+                        Map<Future<Void>, AbstractNode> retryFutureMap = getFutureMap(topologyContext, executorService, retryAbstractNodeList, nodeLogLevel);
+                        waitFutureExecute(topologyContext, executorService, retryFutureMap, retriedMap, nodeLogLevel);
                     }
 
                     if (retriedMap.containsKey(nodeName) && retriedMap.get(nodeName) == nowRetryCount) {
                         // 打印本次重试成功
-                        log.info("process nodeChainLog {} execute fail retry success nodeName={} timeout={} retryTimes={} retriedTimes={}", nodeChainContext.getLogStr(), nodeName, timeout, retryTimes, nowRetryCount);
-                        abstractNode.afterProcess(nodeChainContext);
+                        log.info("{} execute fail retry success node [{}] timeout={} retryTimes={} retriedTimes={}", logStr, nodeName, timeout, retryTimes, nowRetryCount);
+                        abstractNode.afterProcess(topologyContext);
                     }
                 } else {
                     // 默认中断
-                    log.info("process nodeChainLog {} execute fail default interrupt nodeName={} timeout={}", nodeChainContext.getLogStr(), nodeName, timeout);
+                    log.info("{} execute fail default interrupt node [{}] timeout={}", logStr, nodeName, timeout);
                     throw processException;
                 }
             }
@@ -502,13 +505,13 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
         if (Objects.nonNull(e)) {
             StringBuilder stringBuffer = new StringBuilder("\n");
             if (Objects.nonNull(e.getMessage())) {
-                stringBuffer.append("[").append(getMDCLogId()).append("]").append(" process ").append(e.getMessage()).append("\n");
+                stringBuffer.append("process ").append(e.getMessage()).append("\n");
             }
             if (Objects.nonNull(e.getCause())) {
                 StackTraceElement[] stackTrace = e.getCause().getStackTrace();
                 if (Objects.nonNull(stackTrace) && stackTrace.length > 0) {
                     for (StackTraceElement stackTraceElement : stackTrace) {
-                        stringBuffer.append("[").append(getMDCLogId()).append("]").append(" process ").append(stackTraceElement.toString()).append("\n");
+                        stringBuffer.append("process ").append(stackTraceElement.toString()).append("\n");
                     }
                     return stringBuffer.toString();
                 }
@@ -519,70 +522,60 @@ public abstract class AbstractNodeChain extends LinkedHashMap<String, List<Abstr
     }
 
     /**
-     * 获取执行节点链线程池
+     * 获取执行拓扑图线程池
      *
-     * @return ThreadPoolExecutor
+     * @return ExecutorService
      */
-    protected abstract ThreadPoolExecutor getExecuteThreadPoolExecutor();
+    @NonNull
+    protected ExecutorService getThreadPool(){
+        return ThreadPoolManager.COMMON_TOPOLOGY_THREAD_POOL;
+    }
 
     /**
-     * 获取执行节点链线程池，为空的话使用默认异步线程池
+     * 获取拓扑图线程上下文配置
      *
-     * @return ThreadPoolExecutor
+     * @return String
      */
-    private ThreadPoolExecutor getMyExecuteThreadPoolExecutor() {
-        ThreadPoolExecutor threadPoolExecutor = getExecuteThreadPoolExecutor();
-        if (Objects.nonNull(threadPoolExecutor)){
-            return threadPoolExecutor;
+    protected Set<AbstractThreadContextConfig> getThreadContextInitConfigs(){
+        return Collections.emptySet();
+    }
+
+    /**
+     * 初始化拓扑图线程上下文配置
+     *
+     * @param paramMap paramMap
+     */
+    private void initThreadContext(Map<Object, AbstractThreadContextConfig> paramMap){
+        if (!CollectionUtils.isEmpty(paramMap)){
+            paramMap.forEach((k, v) -> {
+                if (Objects.nonNull(v)){
+                    if (v instanceof KeyThreadContextConfig){
+                        ((KeyThreadContextConfig) v).getSetContextByKey().accept(((KeyThreadContextConfig) v).getKey(), k);
+                    } else if (v instanceof SingletonThreadContextConfig){
+                        ((SingletonThreadContextConfig) v).getSetContext().accept(k);
+                    }
+                }
+            });
         }
-
-        return ThreadPoolManager.COMMON_NODE_CHAIN_THREAD_POOL;
     }
-    
-    /**
-     * 获取MDC日志id的key
-     *
-     * @return String
-     */
-    protected abstract String getMDCLogIdKey();
 
     /**
-     * 获取MDC日志id的key
+     * 清除拓扑图线程上下文配置
      *
-     * @return String
+     * @param threadContextInitConfigs threadContextInitConfigs
      */
-    private String getMyMDCLogIdKey(){
-        String mdcLogIdKey = getMDCLogIdKey();
-        if (StringUtils.isEmpty(mdcLogIdKey)){
-            mdcLogIdKey = LOG_ID;
+    private void removeThreadContext(Set<AbstractThreadContextConfig> threadContextInitConfigs){
+        if (!CollectionUtils.isEmpty(threadContextInitConfigs)){
+            for (AbstractThreadContextConfig item : threadContextInitConfigs) {
+                if (Objects.nonNull(item)){
+                    if (item instanceof KeyThreadContextConfig){
+                        ((KeyThreadContextConfig) item).getRemoveContextByKey().accept(((KeyThreadContextConfig) item).getKey());
+                    } else if (item instanceof SingletonThreadContextConfig){
+                        ((SingletonThreadContextConfig) item).getRemoveContext().run();
+                    }
+                }
+            }
         }
-
-        return mdcLogIdKey;
-    }
-
-    /**
-     * 获取日志id
-     *
-     * @return String
-     */
-    private String getMDCLogId() {
-        return MDC.get(getMyMDCLogIdKey());
-    }
-
-    /**
-     * 设置链路的MDC日志id
-     *
-     * @param mdcLogId mdcLogId
-     */
-    private void putMDCLogId(String mdcLogId) {
-        MDC.put(getMyMDCLogIdKey(), mdcLogId);
-    }
-
-    /**
-     * 清除线程的MDC日志id
-     */
-    private void removeMDCLogId() {
-        MDC.remove(getMyMDCLogIdKey());
     }
 
 

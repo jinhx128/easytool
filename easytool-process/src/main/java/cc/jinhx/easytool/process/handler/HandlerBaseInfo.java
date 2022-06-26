@@ -1,4 +1,4 @@
-package cc.jinhx.easytool.process;
+package cc.jinhx.easytool.process.handler;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +8,7 @@ import org.springframework.util.StringUtils;
 import java.io.Serializable;
 
 /**
- * 逻辑处理器基础信息
+ * 处理器基础信息
  *
  * @author jinhx
  * @since 2022-03-21
@@ -16,7 +16,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LogicHandlerBaseInfo implements Serializable {
+public class HandlerBaseInfo implements Serializable {
 
     private static final long serialVersionUID = 4035426155692378372L;
 

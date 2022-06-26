@@ -1,25 +1,20 @@
-package cc.jinhx.easytool.process.chain;
+package cc.jinhx.easytool.process.topology;
 
 import cc.jinhx.easytool.process.node.*;
-import cc.jinhx.easytool.process.AbstractNode;
-import cc.jinhx.easytool.process.AbstractNodeChain;
 
 import java.util.Arrays;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
- * TestNodeChain
+ * TestTopology
  *
  * @author jinhx
  * @since 2022-03-29
  */
-public class TestNodeChain extends AbstractNodeChain {
+public class TestTopology extends AbstractTopology {
 
     /**
      * 配置节点信息
-     * 1. 通过内部addxxx方法，添加节点到节点链，执行顺序按照添加顺序
+     * 1. 通过内部addxxx方法，添加节点到拓扑图，执行顺序按照添加顺序
      * 2. 组内异步，与组外同步
      * 3. 添加一个同步节点，自己属于一个组，且组内只能有自己
      * 4. 添加一个异步节点/节点组
@@ -37,17 +32,6 @@ public class TestNodeChain extends AbstractNodeChain {
         this.addAsyncNode(TestGetDNode.class);
         // 添加一个同步执行的节点，自己属于一个组，且组内只能有自己
         this.addSyncNode(TestGetEByAllNode.class);
-    }
-
-    @Override
-    protected ThreadPoolExecutor getExecuteThreadPoolExecutor() {
-        // 返回执行这个节点链的默认线程池
-        return new ThreadPoolExecutor(10, 30, 10, TimeUnit.MINUTES, new LinkedBlockingQueue<>(1024));
-    }
-
-    @Override
-    protected String getMDCLogIdKey() {
-        return null;
     }
 
 }

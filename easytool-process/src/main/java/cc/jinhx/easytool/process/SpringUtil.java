@@ -24,7 +24,7 @@ public class SpringUtil implements ApplicationContextAware {
     private static ApplicationContext applicationContext;
 
     public SpringUtil() {
-        log.info("EasyTool SpringUtil init");
+        log.info("EasyTool SpringUtil Init");
     }
 
     /**

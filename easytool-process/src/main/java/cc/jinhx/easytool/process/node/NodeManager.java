@@ -1,5 +1,8 @@
-package cc.jinhx.easytool.process;
+package cc.jinhx.easytool.process.node;
 
+import cc.jinhx.easytool.process.SpringUtil;
+import cc.jinhx.easytool.process.node.AbstractNode;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -34,7 +37,7 @@ public class NodeManager {
      * @param timeout    timeout
      * @return AbstractNode
      */
-    public static AbstractNode getNode(Class<? extends AbstractNode> clazz, AbstractNode.FailHandleEnum failHandle,
+    public static AbstractNode getNode(@NonNull Class<? extends AbstractNode> clazz, AbstractNode.FailHandleEnum failHandle,
                                        Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
         String key = clazz.getName() + ":";
         if (Objects.isNull(failHandle)) {

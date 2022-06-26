@@ -1,9 +1,14 @@
-package cc.jinhx.easytool.process;
+package cc.jinhx.easytool.process.node;
 
 import cc.jinhx.easytool.core.JsonUtil;
+import cc.jinhx.easytool.process.BusinessException;
+import cc.jinhx.easytool.process.ProcessException;
+import cc.jinhx.easytool.process.ProcessResult;
+import cc.jinhx.easytool.process.topology.TopologyContext;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
@@ -22,10 +27,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class AbstractNode<T> {
 
-    private final String NODE_LOG = "process nodeLog ";
+    private final String LOG_PREFIX = "process nodeLog ";
     private final String LOG_END = " execute success";
-    private final String NODE_CHAIN_NAME = " nodeChainName=";
-    private final String NODE_NAME = " nodeName=";
+    private final String TOPOLOGY = " topology ";
+    private final String NODE = " node ";
     private final String LOG_SKIP = " skip=";
     private final String LOG_TIME = " time=";
     private final String BEFORE_EXECUTE_PARAMS = " beforeExecuteParams=";
@@ -51,51 +56,50 @@ public abstract class AbstractNode<T> {
     /**
      * 是否跳过当前节点
      *
-     * @param nodeChainContext nodeChainContext
+     * @param topologyContext topologyContext
      * @return 是否跳过当前执行方法
      */
-    protected abstract boolean isSkip(NodeChainContext<T> nodeChainContext);
+    protected abstract boolean isSkip(TopologyContext<T> topologyContext);
 
     /**
      * 参数校验
      *
-     * @param nodeChainContext nodeChainContext
+     * @param topologyContext topologyContext
      */
-    protected void checkParams(NodeChainContext<T> nodeChainContext) {
+    protected void checkParams(TopologyContext<T> topologyContext) {
     }
 
     /**
      * 节点执行方法
      *
-     * @param nodeChainContext nodeChainContext
+     * @param topologyContext topologyContext
      */
-    protected abstract void process(NodeChainContext<T> nodeChainContext);
+    protected abstract void process(TopologyContext<T> topologyContext);
 
     /**
      * 通用执行方法
      *
-     * @param nodeChainContext nodeChainContext
+     * @param topologyContext topologyContext
      * @param logLevel         logLevel
-     * @param nodeChainName    nodeChainName
+     * @param topologyName    topologyName
      */
-    public void execute(NodeChainContext<T> nodeChainContext, LogLevelEnum logLevel, String nodeChainName) {
-        String logStr = NODE_LOG + nodeChainContext.getLogStr();
-        String nodeName = this.getClass().getName();
+    public void execute(@NonNull TopologyContext<T> topologyContext, LogLevelEnum logLevel, String topologyName) {
+        String logStr = LOG_PREFIX + topologyContext.getLogStr();
         try {
             // 日志
             StringBuilder logInfo = new StringBuilder(logStr);
 
-            buildLogInfo(logInfo, Arrays.asList(LOG_END, NODE_CHAIN_NAME, nodeChainName, NODE_NAME, nodeName), logLevel, LogLevelEnum.BASE, false);
-            buildLogInfo(logInfo, Arrays.asList(BEFORE_EXECUTE_PARAMS, JsonUtil.objectConvertToJson(nodeChainContext)), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
+            buildLogInfo(logInfo, Arrays.asList(LOG_END, TOPOLOGY, "[" + topologyName + "]", NODE, "[" + this.getClass().getName()+ "]"), logLevel, LogLevelEnum.BASE, false);
+            buildLogInfo(logInfo, Arrays.asList(BEFORE_EXECUTE_PARAMS, JsonUtil.objectConvertToJson(topologyContext)), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
 
             // 耗时计算
             long startTime = System.currentTimeMillis();
 
-            if (isSkip(nodeChainContext)) {
+            if (isSkip(topologyContext)) {
                 buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, TRUE), logLevel, LogLevelEnum.BASE, false);
             } else {
                 try {
-                    checkParams(nodeChainContext);
+                    checkParams(topologyContext);
 //            log.info(logStr + " checkParams success");
                 } catch (ProcessException e) {
 //                    log.info(logStr + " checkParams process fail msg=", e);
@@ -111,31 +115,31 @@ public abstract class AbstractNode<T> {
                 buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, FALSE), logLevel, LogLevelEnum.BASE, false);
 
                 try {
-                    process(nodeChainContext);
+                    process(topologyContext);
                 } catch (ProcessException e) {
 //                    log.info(logStr + " execute process fail msg=", e);
                     throw e;
                 } catch (BusinessException e) {
-//                    log.info(logStr + " execute business fail nodeName={} msg=", nodeName, e);
+//                    log.info(logStr + " execute business fail node [{}] msg=", nodeName, e);
                     throw e;
                 } catch (Exception e) {
-//                    log.info(logStr + " execute fail nodeName={} msg=", nodeName, e);
+//                    log.info(logStr + " execute fail node [{}] msg=", nodeName, e);
                     throw e;
                 }
             }
 
             long endTime = System.currentTimeMillis();
 
-            buildLogInfo(logInfo, Arrays.asList(AFTER_EXECUTE_PARAMS, JsonUtil.objectConvertToJson(nodeChainContext)), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
+            buildLogInfo(logInfo, Arrays.asList(AFTER_EXECUTE_PARAMS, JsonUtil.objectConvertToJson(topologyContext)), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
             buildLogInfo(logInfo, Arrays.asList(LOG_TIME, endTime - startTime), logLevel, LogLevelEnum.BASE_AND_TIME, true);
         } catch (ProcessException e) {
 //                    log.info(logStr + " checkParams business fail msg=", e);
             throw e;
         } catch (BusinessException e) {
-//            log.info(logStr + " execute business fail nodeName={} msg=", nodeName, e);
+//            log.info(logStr + " execute business fail node [{}] msg=", nodeName, e);
             throw e;
         } catch (Exception e) {
-//            log.info(logStr + " execute fail nodeName={} msg=", nodeName, e);
+//            log.info(logStr + " execute fail node [{}] msg=", nodeName, e);
             throw e;
         }
     }
@@ -187,49 +191,49 @@ public abstract class AbstractNode<T> {
     /**
      * 获取上下文信息
      *
-     * @param nodeChainContext nodeChainContext
+     * @param topologyContext topologyContext
      * @return T
      */
-    protected <T> T getContextInfo(NodeChainContext<T> nodeChainContext) {
-        if (Objects.isNull(nodeChainContext)) {
+    protected <T> T getContextInfo(TopologyContext<T> topologyContext) {
+        if (Objects.isNull(topologyContext)) {
             return null;
         }
-        return nodeChainContext.getContextInfo();
+        return topologyContext.getContextInfo();
     }
 
     /**
      * 成功时执行
      *
-     * @param nodeChainContext nodeChainContext
+     * @param topologyContext topologyContext
      */
-    protected void onSuccess(NodeChainContext<T> nodeChainContext) {
+    public void onSuccess(@NonNull TopologyContext<T> topologyContext) {
     }
 
     /**
      * 超时失败时执行
      *
-     * @param nodeChainContext nodeChainContext
+     * @param topologyContext topologyContext
      */
-    protected abstract void onTimeoutFail(NodeChainContext<T> nodeChainContext);
+    public abstract void onTimeoutFail(@NonNull TopologyContext<T> topologyContext);
 
     /**
      * 业务失败时执行
      *
-     * @param nodeChainContext nodeChainContext
+     * @param topologyContext topologyContext
      */
-    protected abstract void onBusinessFail(NodeChainContext<T> nodeChainContext, BusinessException e);
+    public abstract void onBusinessFail(@NonNull TopologyContext<T> topologyContext, @NonNull BusinessException e);
 
     /**
      * 未知失败时执行
      *
-     * @param nodeChainContext nodeChainContext
+     * @param topologyContext topologyContext
      */
-    protected abstract void onUnknowFail(NodeChainContext<T> nodeChainContext, Exception e);
+    public abstract void onUnknowFail(@NonNull TopologyContext<T> topologyContext, @NonNull Exception e);
 
     /**
      * 无论成功失败，最后都会执行
      */
-    protected void afterProcess(NodeChainContext<T> nodeChainContext) {
+    public void afterProcess(@NonNull TopologyContext<T> topologyContext) {
     }
 
 
@@ -320,7 +324,7 @@ public abstract class AbstractNode<T> {
     @Getter
     public enum FailHandleEnum {
 
-        INTERRUPT(1, "中断链路"),
+        INTERRUPT(1, "中断拓扑图"),
         ABANDON(2, "抛弃节点"),
         RETRY(3, "重试节点"),
         ;
@@ -364,7 +368,8 @@ public abstract class AbstractNode<T> {
         TWO(2),
         THREE(3),
         FOUR(4),
-        FIVE(5);
+        FIVE(5),
+        TEN(10);
 
         private final Integer code;
 

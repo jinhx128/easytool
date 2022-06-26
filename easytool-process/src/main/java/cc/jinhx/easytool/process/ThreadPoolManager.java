@@ -16,19 +16,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class ThreadPoolManager {
 
-    private static final AtomicInteger COMMON_NODE_CHAIN_THREAD_POOL_COUNTER = new AtomicInteger(0);
+    private static final AtomicInteger COMMON_TOPOLOGY_THREAD_POOL_COUNTER = new AtomicInteger(0);
 
     private static final int CPU_NUM = Runtime.getRuntime().availableProcessors();
 
     /**
-     * 公共异步节点链线程池
+     * 公共异步拓扑图线程池
      */
-    public static final ThreadPoolExecutor COMMON_NODE_CHAIN_THREAD_POOL = new ThreadPoolExecutor(
+    public static final ThreadPoolExecutor COMMON_TOPOLOGY_THREAD_POOL = new ThreadPoolExecutor(
             2, CPU_NUM * 2,
             10, TimeUnit.MINUTES,
             new LinkedBlockingQueue<>(1024),
-            (Runnable r) -> new Thread(r, "asyncCommonNodeChain_thread_" + COMMON_NODE_CHAIN_THREAD_POOL_COUNTER.incrementAndGet()),
-            (r, executor) -> log.info("process async common node chain has bean rejected" + r));
+            (Runnable r) -> new Thread(r, "asyncCommonTopology_thread_" + COMMON_TOPOLOGY_THREAD_POOL_COUNTER.incrementAndGet()),
+            (r, executor) -> log.info("process async common topology has bean rejected" + r));
 
 }
 
