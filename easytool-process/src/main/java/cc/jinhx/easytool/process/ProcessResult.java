@@ -22,7 +22,7 @@ public class ProcessResult<T> implements Serializable {
 
     private T data;
 
-    private Integer code;
+    private int code;
 
     private String msg;
 
@@ -35,21 +35,21 @@ public class ProcessResult<T> implements Serializable {
         this.msg = BaseEnum.SUCCESS.getMsg();
     }
 
-    public ProcessResult(Integer code, String msg) {
+    public ProcessResult(int code, String msg) {
         this.code = code;
         this.msg = msg;
     }
 
     public boolean isSuccess() {
-        return BaseEnum.SUCCESS.getCode().equals(this.code);
+        return BaseEnum.SUCCESS.getCode() == this.code;
     }
 
     public boolean isBusinessFail() {
-        return BaseEnum.BUSINESS_FAIL.getCode().equals(this.code);
+        return BaseEnum.BUSINESS_FAIL.getCode() == this.code;
     }
 
     public boolean isUnknowFail() {
-        return BaseEnum.UNKNOW_FAIL.getCode().equals(this.code);
+        return BaseEnum.UNKNOW_FAIL.getCode() == this.code;
     }
 
 
@@ -61,7 +61,7 @@ public class ProcessResult<T> implements Serializable {
         BUSINESS_FAIL(0, "business fail"),
         UNKNOW_FAIL(-1, "unknown fail");
 
-        private final Integer code;
+        private final int code;
         private final String msg;
 
         private static final Map<Integer, BaseEnum> MAP;
@@ -70,11 +70,11 @@ public class ProcessResult<T> implements Serializable {
             MAP = Arrays.stream(BaseEnum.values()).collect(Collectors.toMap(BaseEnum::getCode, obj -> obj));
         }
 
-        public static Boolean containsCode(Integer code) {
+        public static Boolean containsCode(int code) {
             return MAP.containsKey(code);
         }
 
-        public static String getMsg(Integer code) {
+        public static String getMsg(int code) {
             if (!MAP.containsKey(code)) {
                 return null;
             }
@@ -82,7 +82,7 @@ public class ProcessResult<T> implements Serializable {
             return MAP.get(code).getMsg();
         }
 
-        public static BaseEnum getEnum(Integer code) {
+        public static BaseEnum getEnum(int code) {
             if (!MAP.containsKey(code)) {
                 return null;
             }

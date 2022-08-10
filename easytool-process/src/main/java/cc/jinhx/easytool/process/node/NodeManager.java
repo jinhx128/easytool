@@ -1,7 +1,6 @@
 package cc.jinhx.easytool.process.node;
 
 import cc.jinhx.easytool.process.SpringUtil;
-import cc.jinhx.easytool.process.node.AbstractNode;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * 节点管理器
@@ -79,6 +79,7 @@ public class NodeManager {
             // 跳过了访问检查，并提高效率
             constructor.setAccessible(true);
             AbstractNode abstractNode = constructor.newInstance();
+
             if (Objects.nonNull(failHandle) && AbstractNode.FailHandleEnum.containsCode(failHandle.getCode())) {
                 Method setFailHandleMethod = clazz.getMethod("setFailHandle", AbstractNode.FailHandleEnum.class);
                 // 跳过了访问检查，并提高效率
@@ -110,16 +111,16 @@ public class NodeManager {
                         Object bean = null;
 
                         try {
-                            if (SpringUtil.containsBean(name) && SpringUtil.isTypeMatch(name, type)){
+                            if (SpringUtil.containsBean(name) && SpringUtil.isTypeMatch(name, type)) {
                                 bean = SpringUtil.getBean(name, type);
                             }
-                        } catch (Exception e){
+                        } catch (Exception e) {
                             log.info("process createNode getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), declaredField.getName(), e);
                         }
 
                         try {
                             bean = SpringUtil.getBean(type);
-                        } catch (Exception e){
+                        } catch (Exception e) {
                             log.info("process createNode getBeanByType fail clazz={} name={} error=", clazz.getName(), declaredField.getName(), e);
                         }
 
@@ -128,16 +129,16 @@ public class NodeManager {
                         Object bean = null;
 
                         try {
-                            if (SpringUtil.containsBean(name) && SpringUtil.isTypeMatch(name, type)){
+                            if (SpringUtil.containsBean(name) && SpringUtil.isTypeMatch(name, type)) {
                                 bean = SpringUtil.getBean(name, type);
                             }
-                        } catch (Exception e){
+                        } catch (Exception e) {
                             log.info("process createNode getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
                         try {
                             bean = SpringUtil.getBean(type);
-                        } catch (Exception e){
+                        } catch (Exception e) {
                             log.info("process createNode getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 

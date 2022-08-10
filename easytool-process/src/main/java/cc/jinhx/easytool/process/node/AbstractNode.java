@@ -4,17 +4,14 @@ import cc.jinhx.easytool.core.JsonUtil;
 import cc.jinhx.easytool.process.BusinessException;
 import cc.jinhx.easytool.process.ProcessException;
 import cc.jinhx.easytool.process.ProcessResult;
-import cc.jinhx.easytool.process.topology.TopologyContext;
+import cc.jinhx.easytool.process.chain.ChainContext;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -29,7 +26,7 @@ public abstract class AbstractNode<T> {
 
     private final String LOG_PREFIX = "process nodeLog ";
     private final String LOG_END = " execute success";
-    private final String TOPOLOGY = " topology ";
+    private final String CHAIN = " chain ";
     private final String NODE = " node ";
     private final String LOG_SKIP = " skip=";
     private final String LOG_TIME = " time=";
@@ -54,52 +51,59 @@ public abstract class AbstractNode<T> {
     private RetryTimesEnum retryTimes = RetryTimesEnum.ONE;
 
     /**
+     * 获取依赖节点集合
+     *
+     * @return 依赖节点集合
+     */
+    public abstract Set<Class<? extends AbstractNode>> getDependsOnNodes();
+
+    /**
      * 是否跳过当前节点
      *
-     * @param topologyContext topologyContext
+     * @param chainContext chainContext
      * @return 是否跳过当前执行方法
      */
-    protected abstract boolean isSkip(TopologyContext<T> topologyContext);
+    protected abstract boolean isSkip(ChainContext<T> chainContext);
 
     /**
      * 参数校验
      *
-     * @param topologyContext topologyContext
+     * @param chainContext chainContext
      */
-    protected void checkParams(TopologyContext<T> topologyContext) {
+    protected void checkParams(ChainContext<T> chainContext) {
     }
 
     /**
      * 节点执行方法
      *
-     * @param topologyContext topologyContext
+     * @param chainContext chainContext
      */
-    protected abstract void process(TopologyContext<T> topologyContext);
+    protected abstract void process(ChainContext<T> chainContext);
 
     /**
      * 通用执行方法
      *
-     * @param topologyContext topologyContext
-     * @param logLevel         logLevel
-     * @param topologyName    topologyName
+     * @param chainContext chainContext
+     * @param logLevel     logLevel
+     * @param chainName    chainName
      */
-    public void execute(@NonNull TopologyContext<T> topologyContext, LogLevelEnum logLevel, String topologyName) {
-        String logStr = LOG_PREFIX + topologyContext.getLogStr();
+    public void execute(@NonNull ChainContext<T> chainContext, LogLevelEnum logLevel, String chainName) {
+        String logStr = LOG_PREFIX + chainContext.getLogStr();
         try {
             // 日志
             StringBuilder logInfo = new StringBuilder(logStr);
 
-            buildLogInfo(logInfo, Arrays.asList(LOG_END, TOPOLOGY, "[" + topologyName + "]", NODE, "[" + this.getClass().getName()+ "]"), logLevel, LogLevelEnum.BASE, false);
-            buildLogInfo(logInfo, Arrays.asList(BEFORE_EXECUTE_PARAMS, JsonUtil.objectConvertToJson(topologyContext)), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
+            buildLogInfo(logInfo, Arrays.asList(LOG_END, CHAIN, "[" + chainName + "]", NODE, "[" + this.getClass().getName() + "]"), logLevel, LogLevelEnum.BASE, false);
+            buildLogInfo(logInfo, Arrays.asList(BEFORE_EXECUTE_PARAMS, JsonUtil.objectConvertToJson(chainContext)), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
 
             // 耗时计算
             long startTime = System.currentTimeMillis();
 
-            if (isSkip(topologyContext)) {
+            if (isSkip(chainContext)) {
                 buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, TRUE), logLevel, LogLevelEnum.BASE, false);
             } else {
                 try {
-                    checkParams(topologyContext);
+                    checkParams(chainContext);
 //            log.info(logStr + " checkParams success");
                 } catch (ProcessException e) {
 //                    log.info(logStr + " checkParams process fail msg=", e);
@@ -115,7 +119,7 @@ public abstract class AbstractNode<T> {
                 buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, FALSE), logLevel, LogLevelEnum.BASE, false);
 
                 try {
-                    process(topologyContext);
+                    process(chainContext);
                 } catch (ProcessException e) {
 //                    log.info(logStr + " execute process fail msg=", e);
                     throw e;
@@ -130,7 +134,7 @@ public abstract class AbstractNode<T> {
 
             long endTime = System.currentTimeMillis();
 
-            buildLogInfo(logInfo, Arrays.asList(AFTER_EXECUTE_PARAMS, JsonUtil.objectConvertToJson(topologyContext)), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
+            buildLogInfo(logInfo, Arrays.asList(AFTER_EXECUTE_PARAMS, JsonUtil.objectConvertToJson(chainContext)), logLevel, LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
             buildLogInfo(logInfo, Arrays.asList(LOG_TIME, endTime - startTime), logLevel, LogLevelEnum.BASE_AND_TIME, true);
         } catch (ProcessException e) {
 //                    log.info(logStr + " checkParams business fail msg=", e);
@@ -158,11 +162,11 @@ public abstract class AbstractNode<T> {
             logLevel = LogLevelEnum.BASE_AND_TIME;
         }
 
-        if (thisLogLevel.getCode() <= logLevel.getCode() && !LogLevelEnum.NO.getCode().equals(logLevel.getCode())) {
+        if (thisLogLevel.getCode() <= logLevel.getCode() && LogLevelEnum.NO.getCode() != logLevel.getCode()) {
             logInfos.forEach(logInfo::append);
         }
 
-        if (print && !LogLevelEnum.NO.getCode().equals(logLevel.getCode())) {
+        if (print && LogLevelEnum.NO.getCode() != logLevel.getCode()) {
             log.info(logInfo.toString());
             // 打印完手动释放内存
             logInfo.setLength(0);
@@ -175,7 +179,7 @@ public abstract class AbstractNode<T> {
      * @param code code
      * @param msg  msg
      */
-    protected void businessFail(Integer code, String msg) {
+    protected void businessFail(int code, String msg) {
         throw new BusinessException(code, msg);
     }
 
@@ -191,49 +195,49 @@ public abstract class AbstractNode<T> {
     /**
      * 获取上下文信息
      *
-     * @param topologyContext topologyContext
+     * @param chainContext chainContext
      * @return T
      */
-    protected <T> T getContextInfo(TopologyContext<T> topologyContext) {
-        if (Objects.isNull(topologyContext)) {
+    protected <T> T getContextInfo(ChainContext<T> chainContext) {
+        if (Objects.isNull(chainContext)) {
             return null;
         }
-        return topologyContext.getContextInfo();
+        return chainContext.getContextInfo();
     }
 
     /**
      * 成功时执行
      *
-     * @param topologyContext topologyContext
+     * @param chainContext chainContext
      */
-    public void onSuccess(@NonNull TopologyContext<T> topologyContext) {
+    public void onSuccess(@NonNull ChainContext<T> chainContext) {
     }
 
     /**
      * 超时失败时执行
      *
-     * @param topologyContext topologyContext
+     * @param chainContext chainContext
      */
-    public abstract void onTimeoutFail(@NonNull TopologyContext<T> topologyContext);
+    public abstract void onTimeoutFail(@NonNull ChainContext<T> chainContext);
 
     /**
      * 业务失败时执行
      *
-     * @param topologyContext topologyContext
+     * @param chainContext chainContext
      */
-    public abstract void onBusinessFail(@NonNull TopologyContext<T> topologyContext, @NonNull BusinessException e);
+    public abstract void onBusinessFail(@NonNull ChainContext<T> chainContext, @NonNull BusinessException e);
 
     /**
      * 未知失败时执行
      *
-     * @param topologyContext topologyContext
+     * @param chainContext chainContext
      */
-    public abstract void onUnknowFail(@NonNull TopologyContext<T> topologyContext, @NonNull Exception e);
+    public abstract void onUnknowFail(@NonNull ChainContext<T> chainContext, @NonNull Exception e);
 
     /**
      * 无论成功失败，最后都会执行
      */
-    public void afterProcess(@NonNull TopologyContext<T> topologyContext) {
+    public void afterProcess(@NonNull ChainContext<T> chainContext) {
     }
 
 
@@ -289,7 +293,7 @@ public abstract class AbstractNode<T> {
         BASE_AND_TIME_AND_PARAMS(4, "打印基本信息和耗时和参数"),
         ;
 
-        private final Integer code;
+        private final int code;
         private final String msg;
 
         private static final Map<Integer, LogLevelEnum> MAP;
@@ -298,11 +302,11 @@ public abstract class AbstractNode<T> {
             MAP = Arrays.stream(LogLevelEnum.values()).collect(Collectors.toMap(LogLevelEnum::getCode, obj -> obj));
         }
 
-        public static Boolean containsCode(Integer code) {
+        public static Boolean containsCode(int code) {
             return MAP.containsKey(code);
         }
 
-        public static String getMsg(Integer code) {
+        public static String getMsg(int code) {
             if (!MAP.containsKey(code)) {
                 return null;
             }
@@ -310,7 +314,7 @@ public abstract class AbstractNode<T> {
             return MAP.get(code).getMsg();
         }
 
-        public static LogLevelEnum getEnum(Integer code) {
+        public static LogLevelEnum getEnum(int code) {
             if (!MAP.containsKey(code)) {
                 return null;
             }
@@ -324,12 +328,12 @@ public abstract class AbstractNode<T> {
     @Getter
     public enum FailHandleEnum {
 
-        INTERRUPT(1, "中断拓扑图"),
+        INTERRUPT(1, "中断链路"),
         ABANDON(2, "抛弃节点"),
         RETRY(3, "重试节点"),
         ;
 
-        private final Integer code;
+        private final int code;
         private final String msg;
 
         private static final Map<Integer, FailHandleEnum> MAP;
@@ -338,11 +342,11 @@ public abstract class AbstractNode<T> {
             MAP = Arrays.stream(FailHandleEnum.values()).collect(Collectors.toMap(FailHandleEnum::getCode, obj -> obj));
         }
 
-        public static Boolean containsCode(Integer code) {
+        public static Boolean containsCode(int code) {
             return MAP.containsKey(code);
         }
 
-        public static String getMsg(Integer code) {
+        public static String getMsg(int code) {
             if (!MAP.containsKey(code)) {
                 return null;
             }
@@ -350,7 +354,7 @@ public abstract class AbstractNode<T> {
             return MAP.get(code).getMsg();
         }
 
-        public static FailHandleEnum getEnum(Integer code) {
+        public static FailHandleEnum getEnum(int code) {
             if (!MAP.containsKey(code)) {
                 return null;
             }
@@ -371,7 +375,7 @@ public abstract class AbstractNode<T> {
         FIVE(5),
         TEN(10);
 
-        private final Integer code;
+        private final int code;
 
         private static final Map<Integer, RetryTimesEnum> MAP;
 
@@ -379,11 +383,11 @@ public abstract class AbstractNode<T> {
             MAP = Arrays.stream(RetryTimesEnum.values()).collect(Collectors.toMap(RetryTimesEnum::getCode, obj -> obj));
         }
 
-        public static Boolean containsCode(Integer code) {
+        public static Boolean containsCode(int code) {
             return MAP.containsKey(code);
         }
 
-        public static RetryTimesEnum getEnum(Integer code) {
+        public static RetryTimesEnum getEnum(int code) {
             if (!MAP.containsKey(code)) {
                 return null;
             }

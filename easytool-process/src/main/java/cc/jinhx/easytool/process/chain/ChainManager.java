@@ -1,4 +1,4 @@
-package cc.jinhx.easytool.process.topology;
+package cc.jinhx.easytool.process.chain;
 
 import cc.jinhx.easytool.process.SpringUtil;
 import lombok.NonNull;
@@ -14,18 +14,18 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 拓扑图管理器
+ * 链路管理器
  *
  * @author jinhx
  * @since 2022-03-21
  */
 @Slf4j
-public class TopologyManager {
+public class ChainManager {
 
-    private static Map<String, AbstractTopology> MAP = new HashMap<>();
+    private static Map<String, AbstractChain> MAP = new HashMap<>();
 
-    public void addTopology(String key, AbstractTopology abstractTopology) {
-        MAP.put(key, abstractTopology);
+    public void addChain(String key, AbstractChain abstractChain) {
+        MAP.put(key, abstractChain);
     }
 
     /**
@@ -35,7 +35,7 @@ public class TopologyManager {
      * @param logLevel logLevel
      * @return AbstractNode
      */
-    public static AbstractTopology getTopology(@NonNull Class<? extends AbstractTopology> clazz, AbstractTopology.LogLevelEnum logLevel) {
+    public static AbstractChain getChain(@NonNull Class<? extends AbstractChain> clazz, AbstractChain.LogLevelEnum logLevel) {
         String key = clazz.getName() + ":";
         if (Objects.isNull(logLevel)) {
             key += null;
@@ -47,12 +47,12 @@ public class TopologyManager {
             return MAP.get(key);
         }
 
-        AbstractTopology abstractTopology = createTopology(clazz, logLevel);
-        if (Objects.nonNull(abstractTopology)) {
-            MAP.put(key, abstractTopology);
+        AbstractChain abstractChain = createChain(clazz, logLevel);
+        if (Objects.nonNull(abstractChain)) {
+            MAP.put(key, abstractChain);
         }
 
-        return abstractTopology;
+        return abstractChain;
     }
 
     /**
@@ -62,21 +62,28 @@ public class TopologyManager {
      * @param logLevel logLevel
      * @return AbstractNode
      */
-    private static AbstractTopology createTopology(Class<? extends AbstractTopology> clazz, AbstractTopology.LogLevelEnum logLevel) {
+    private static AbstractChain createChain(Class<? extends AbstractChain> clazz, AbstractChain.LogLevelEnum logLevel) {
         try {
-            Constructor<? extends AbstractTopology> constructor = clazz.getDeclaredConstructor();
+            Constructor<? extends AbstractChain> constructor = clazz.getDeclaredConstructor();
             // 跳过了访问检查，并提高效率
             constructor.setAccessible(true);
-            AbstractTopology abstractTopology = constructor.newInstance();
+            AbstractChain abstractChain = constructor.newInstance();
+
             Method setNodeInfoMethod = clazz.getDeclaredMethod("setNodeInfo");
             // 跳过了访问检查，并提高效率
             setNodeInfoMethod.setAccessible(true);
-            setNodeInfoMethod.invoke(abstractTopology);
-            if (Objects.nonNull(logLevel) && AbstractTopology.LogLevelEnum.containsCode(logLevel.getCode())) {
-                Method setLogLevelMethod = clazz.getMethod("setLogLevel", AbstractTopology.LogLevelEnum.class);
+            setNodeInfoMethod.invoke(abstractChain);
+
+            Method checkChainCompleteMethod = clazz.getDeclaredMethod("checkChainComplete");
+            // 跳过了访问检查，并提高效率
+            checkChainCompleteMethod.setAccessible(true);
+            checkChainCompleteMethod.invoke(abstractChain);
+
+            if (Objects.nonNull(logLevel) && AbstractChain.LogLevelEnum.containsCode(logLevel.getCode())) {
+                Method setLogLevelMethod = clazz.getMethod("setLogLevel", AbstractChain.LogLevelEnum.class);
                 // 跳过了访问检查，并提高效率
                 setLogLevelMethod.setAccessible(true);
-                setLogLevelMethod.invoke(abstractTopology, logLevel);
+                setLogLevelMethod.invoke(abstractChain, logLevel);
             }
 
             for (Field declaredField : clazz.getDeclaredFields()) {
@@ -84,50 +91,50 @@ public class TopologyManager {
                 declaredField.setAccessible(true);
                 String name = declaredField.getName();
                 Class<?> type = declaredField.getType();
-                if (Objects.isNull(declaredField.get(abstractTopology))) {
+                if (Objects.isNull(declaredField.get(abstractChain))) {
                     if (Objects.nonNull(declaredField.getAnnotation(Resource.class))) {
                         Object bean = null;
 
                         try {
-                            if (SpringUtil.containsBean(name) && SpringUtil.isTypeMatch(name, type)){
+                            if (SpringUtil.containsBean(name) && SpringUtil.isTypeMatch(name, type)) {
                                 bean = SpringUtil.getBean(name, type);
                             }
-                        } catch (Exception e){
-                            log.info("process createTopology getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
+                        } catch (Exception e) {
+                            log.info("process createChain getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
                         try {
                             bean = SpringUtil.getBean(type);
-                        } catch (Exception e){
-                            log.info("process createTopology getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
+                        } catch (Exception e) {
+                            log.info("process createChain getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
-                        declaredField.set(abstractTopology, bean);
+                        declaredField.set(abstractChain, bean);
                     } else if (Objects.nonNull(declaredField.getAnnotation(Autowired.class))) {
                         Object bean = null;
 
                         try {
-                            if (SpringUtil.containsBean(name) && SpringUtil.isTypeMatch(name, type)){
+                            if (SpringUtil.containsBean(name) && SpringUtil.isTypeMatch(name, type)) {
                                 bean = SpringUtil.getBean(name, type);
                             }
-                        } catch (Exception e){
-                            log.info("process createTopology getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
+                        } catch (Exception e) {
+                            log.info("process createChain getBeanByNameAndType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
                         try {
                             bean = SpringUtil.getBean(type);
-                        } catch (Exception e){
-                            log.info("process createTopology getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
+                        } catch (Exception e) {
+                            log.info("process createChain getBeanByType fail clazz={} name={} error=", clazz.getName(), name, e);
                         }
 
-                        declaredField.set(abstractTopology, bean);
+                        declaredField.set(abstractChain, bean);
                     }
                 }
             }
 
-            return abstractTopology;
+            return abstractChain;
         } catch (Exception e) {
-            log.info("process createTopology reflex create object fail clazz={} logLevel={} error=", clazz, logLevel, e);
+            log.info("process createChain reflex create object fail clazz={} logLevel={} error=", clazz, logLevel, e);
             return null;
         }
     }

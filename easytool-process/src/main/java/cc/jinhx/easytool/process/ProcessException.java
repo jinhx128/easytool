@@ -16,8 +16,8 @@ public class ProcessException extends RuntimeException {
 
     private static final long serialVersionUID = 8431670825597478958L;
 
+    private int code;
     private String msg;
-    private Integer code;
 
     public ProcessException(MsgEnum msgEnum, Throwable e) {
         super(msgEnum.getMsg(), e);
@@ -42,8 +42,11 @@ public class ProcessException extends RuntimeException {
         NODE_UNKNOWN("节点未知异常"),
         NODE_TIMEOUT("节点超时"),
         NODE_UNREGISTERED("节点未注册"),
+        NODE_REPEAT("节点重复"),
+        NODE_EMPTY("节点为空"),
 
-        TOPOLOGY_UNREGISTERED("拓扑图未注册");
+        CHAIN_UNREGISTERED("链路未注册"),
+        CHAIN_INCOMPLETE("链路不完整");
 
         private final String msg;
 

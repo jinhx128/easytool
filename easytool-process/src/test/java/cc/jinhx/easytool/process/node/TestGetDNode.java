@@ -3,8 +3,12 @@ package cc.jinhx.easytool.process.node;
 import cc.jinhx.easytool.process.context.TestContext;
 import cc.jinhx.easytool.process.service.TestService;
 import cc.jinhx.easytool.process.BusinessException;
-import cc.jinhx.easytool.process.topology.TopologyContext;
+import cc.jinhx.easytool.process.chain.ChainContext;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * TestGetDNode
@@ -18,28 +22,33 @@ public class TestGetDNode extends AbstractNode<TestContext> {
     private TestService testService;
 
     @Override
-    protected boolean isSkip(TopologyContext<TestContext> topologyContext) {
+    public Set<Class<? extends AbstractNode>> getChildNodes() {
+        return null;
+    }
+
+    @Override
+    protected boolean isSkip(ChainContext<TestContext> chainContext) {
         return false;
     }
 
     @Override
-    protected void process(TopologyContext<TestContext> topologyContext) {
-        TestContext contextInfo = topologyContext.getContextInfo();
+    protected void process(ChainContext<TestContext> chainContext) {
+        TestContext contextInfo = chainContext.getContextInfo();
         contextInfo.setD(testService.getD());
     }
 
     @Override
-    public void onUnknowFail(TopologyContext<TestContext> topologyContext, Exception e) {
+    public void onUnknowFail(ChainContext<TestContext> chainContext, Exception e) {
 
     }
 
     @Override
-    public void onBusinessFail(TopologyContext<TestContext> topologyContext, BusinessException e) {
+    public void onBusinessFail(ChainContext<TestContext> chainContext, BusinessException e) {
 
     }
 
     @Override
-    public void onTimeoutFail(TopologyContext<TestContext> topologyContext) {
+    public void onTimeoutFail(ChainContext<TestContext> chainContext) {
 
     }
 

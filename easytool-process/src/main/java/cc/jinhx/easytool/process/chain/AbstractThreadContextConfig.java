@@ -1,4 +1,4 @@
-package cc.jinhx.easytool.process.topology;
+package cc.jinhx.easytool.process.chain;
 
 /**
  * 抽象线程上下文配置

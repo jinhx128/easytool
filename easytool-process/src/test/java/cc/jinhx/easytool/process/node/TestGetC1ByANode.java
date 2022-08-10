@@ -1,10 +1,14 @@
 package cc.jinhx.easytool.process.node;
 
 import cc.jinhx.easytool.process.context.TestContext;
-import cc.jinhx.easytool.process.topology.TopologyContext;
+import cc.jinhx.easytool.process.chain.ChainContext;
 import cc.jinhx.easytool.process.service.TestService;
 import cc.jinhx.easytool.process.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * TestGetC1ByANode
@@ -18,12 +22,17 @@ public class TestGetC1ByANode extends AbstractNode<TestContext> {
     private TestService testService;
 
     @Override
-    protected boolean isSkip(TopologyContext<TestContext> topologyContext) {
+    public Set<Class<? extends AbstractNode>> getChildNodes() {
+        return new HashSet<>(Arrays.asList(TestGetAByReqNode.class));
+    }
+
+    @Override
+    protected boolean isSkip(ChainContext<TestContext> chainContext) {
         return false;
     }
 
     @Override
-    protected void process(TopologyContext<TestContext> topologyContext) {
+    protected void process(ChainContext<TestContext> chainContext) {
         System.out.println(Thread.currentThread().getName() + "start1");
         try {
             Thread.sleep(700L);
@@ -31,24 +40,24 @@ public class TestGetC1ByANode extends AbstractNode<TestContext> {
             throw new RuntimeException(e);
         }
         System.out.println(Thread.currentThread().getName() + "start2");
-        TestContext contextInfo = topologyContext.getContextInfo();
+        TestContext contextInfo = chainContext.getContextInfo();
         if ("A".equals(contextInfo.getA())){
             contextInfo.setC1(testService.getC() + "1");
         }
     }
 
     @Override
-    public void onUnknowFail(TopologyContext<TestContext> topologyContext, Exception e) {
+    public void onUnknowFail(ChainContext<TestContext> chainContext, Exception e) {
 
     }
 
     @Override
-    public void onBusinessFail(TopologyContext<TestContext> topologyContext, BusinessException e) {
+    public void onBusinessFail(ChainContext<TestContext> chainContext, BusinessException e) {
 
     }
 
     @Override
-    public void onTimeoutFail(TopologyContext<TestContext> topologyContext) {
+    public void onTimeoutFail(ChainContext<TestContext> chainContext) {
 
     }
 

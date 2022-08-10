@@ -1,10 +1,10 @@
 package cc.jinhx.easytool.process;
 
-import cc.jinhx.easytool.process.topology.TestTopology;
+import cc.jinhx.easytool.process.chain.AbstractChain;
+import cc.jinhx.easytool.process.chain.ChainContext;
+import cc.jinhx.easytool.process.chain.TestChain;
 import cc.jinhx.easytool.process.context.TestContext;
 import cc.jinhx.easytool.process.handler.AbstractHandler;
-import cc.jinhx.easytool.process.topology.AbstractTopology;
-import cc.jinhx.easytool.process.topology.TopologyContext;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
@@ -21,7 +21,7 @@ public class ProcessTest {
     public void test1() {
         ProcessResult<TestContext> processResult = new AbstractHandler<TestContext>() {
 
-            TopologyContext<TestContext> testTopologyContext = buildTopologyContext(TestContext.class);
+            ChainContext<TestContext> testChainContext = buildChainContext(TestContext.class);
 
             @Override
             protected void checkParams() {
@@ -30,9 +30,9 @@ public class ProcessTest {
 
             @Override
             protected ProcessResult<TestContext> process() {
-                testTopologyContext.getContextInfo().setReq("re");
-                executeTopology(TestTopology.class, testTopologyContext);
-                return buildSuccessResult(testTopologyContext.getContextInfo());
+                testChainContext.getContextInfo().setReq("re");
+                executeChain(TestChain.class, testChainContext);
+                return buildSuccessResult(testChainContext.getContextInfo());
             }
 
         }.execute();
@@ -43,7 +43,7 @@ public class ProcessTest {
     public void test2() {
         ProcessResult<TestContext> processResult = new AbstractHandler<TestContext>() {
 
-            TopologyContext<TestContext> testTopologyContext = buildTopologyContext(TestContext.class);
+            ChainContext<TestContext> testChainContext = buildChainContext(TestContext.class);
 
             @Override
             protected void checkParams() {
@@ -52,9 +52,9 @@ public class ProcessTest {
 
             @Override
             protected ProcessResult<TestContext> process() {
-                testTopologyContext.getContextInfo().setReq("req");
-                executeTopology(TestTopology.class, AbstractTopology.LogLevelEnum.BASE_AND_TIME, testTopologyContext);
-                return buildSuccessResult(testTopologyContext.getContextInfo());
+                testChainContext.getContextInfo().setReq("req");
+                executeChain(TestChain.class, AbstractChain.LogLevelEnum.BASE_AND_TIME, testChainContext);
+                return buildSuccessResult(testChainContext.getContextInfo());
             }
 
         }.execute();

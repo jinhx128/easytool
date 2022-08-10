@@ -105,7 +105,7 @@ public class SpringUtil implements ApplicationContextAware {
     /**
      * 根据名称判断是否存在bean
      *
-     * @param name  name
+     * @param name name
      * @return boolean
      */
     public static boolean containsBean(String name) {
@@ -115,7 +115,7 @@ public class SpringUtil implements ApplicationContextAware {
     /**
      * 根据名称判断是否是单例，如果没有给定名称的Bean，抛出NoSuchBeanDefinitionException
      *
-     * @param name  name
+     * @param name name
      * @return boolean
      */
     public static boolean isSingleton(String name) {
@@ -125,7 +125,7 @@ public class SpringUtil implements ApplicationContextAware {
     /**
      * 根据名称判断是否是指定类型，如果没有给定名称的Bean，抛出NoSuchBeanDefinitionException
      *
-     * @param name  name
+     * @param name name
      * @return boolean
      */
     public static boolean isTypeMatch(String name, Class<?> clazz) {
