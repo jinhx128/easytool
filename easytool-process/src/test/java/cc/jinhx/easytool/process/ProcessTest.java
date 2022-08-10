@@ -7,6 +7,9 @@ import cc.jinhx.easytool.process.context.TestContext;
 import cc.jinhx.easytool.process.handler.AbstractHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
  * json工具，依赖jackson
@@ -15,6 +18,8 @@ import org.junit.Test;
  * @since 2022-03-21
  */
 @Slf4j
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = SpringContextConfig.class)
 public class ProcessTest {
 
     @Test

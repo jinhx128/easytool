@@ -59,7 +59,7 @@ public abstract class AbstractChain {
         add(node, failHandle, null, null);
     }
 
-    public void addNode(@NonNull Class<? extends AbstractNode> node, Long timeout) {
+    public void addNode(@NonNull Class<? extends AbstractNode> node, long timeout) {
         add(node, null, timeout, null);
     }
 
@@ -67,7 +67,7 @@ public abstract class AbstractChain {
         add(node, null, null, retryTimes);
     }
 
-    public void addNode(@NonNull Class<? extends AbstractNode> node, ChainNode.FailHandleEnum failHandle, Long timeout) {
+    public void addNode(@NonNull Class<? extends AbstractNode> node, ChainNode.FailHandleEnum failHandle, long timeout) {
         add(node, failHandle, timeout, null);
     }
 
@@ -75,85 +75,55 @@ public abstract class AbstractChain {
         add(node, failHandle, null, retryTimes);
     }
 
-    public void addNode(@NonNull Class<? extends AbstractNode> node, Long timeout, ChainNode.RetryTimesEnum retryTimes) {
+    public void addNode(@NonNull Class<? extends AbstractNode> node, long timeout, ChainNode.RetryTimesEnum retryTimes) {
         add(node, null, timeout, retryTimes);
     }
 
-    public void addNode(@NonNull Class<? extends AbstractNode> node, ChainNode.FailHandleEnum failHandle, Long timeout, ChainNode.RetryTimesEnum retryTimes) {
+    public void addNode(@NonNull Class<? extends AbstractNode> node, ChainNode.FailHandleEnum failHandle, long timeout, ChainNode.RetryTimesEnum retryTimes) {
         add(node, failHandle, timeout, retryTimes);
     }
 
     public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet) {
-        if (CollectionUtils.isEmpty(nodeSet)) {
-            throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
-        }
-
-        for (Class<? extends AbstractNode> node : nodeSet) {
-            add(node, null, null, null);
-        }
+        adds(nodeSet, null, null, null);
     }
 
-    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, Long timeout) {
-        if (CollectionUtils.isEmpty(nodeSet)) {
-            throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
-        }
-
-        for (Class<? extends AbstractNode> node : nodeSet) {
-            add(node, null, timeout, null);
-        }
+    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, long timeout) {
+        adds(nodeSet, null, timeout, null);
     }
 
     public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, ChainNode.RetryTimesEnum retryTimes) {
-        if (CollectionUtils.isEmpty(nodeSet)) {
-            throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
-        }
-
-        for (Class<? extends AbstractNode> node : nodeSet) {
-            add(node, null, null, retryTimes);
-        }
+        adds(nodeSet, null, null, retryTimes);
     }
 
     public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, ChainNode.FailHandleEnum failHandle) {
-        if (CollectionUtils.isEmpty(nodeSet)) {
-            throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
-        }
-
-        for (Class<? extends AbstractNode> node : nodeSet) {
-            add(node, failHandle, null, null);
-        }
+        adds(nodeSet, failHandle, null, null);
     }
 
-    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, ChainNode.FailHandleEnum failHandle, Long timeout) {
-        if (CollectionUtils.isEmpty(nodeSet)) {
-            throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
-        }
-
-        for (Class<? extends AbstractNode> node : nodeSet) {
-            add(node, failHandle, timeout, null);
-        }
+    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, ChainNode.FailHandleEnum failHandle, long timeout) {
+        adds(nodeSet, failHandle, timeout, null);
     }
 
     public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, ChainNode.FailHandleEnum failHandle, ChainNode.RetryTimesEnum retryTimes) {
-        if (CollectionUtils.isEmpty(nodeSet)) {
-            throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
-        }
-
-        for (Class<? extends AbstractNode> node : nodeSet) {
-            add(node, failHandle, null, retryTimes);
-        }
+        adds(nodeSet, failHandle, null, retryTimes);
     }
 
-    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, Long timeout, ChainNode.RetryTimesEnum retryTimes) {
-        if (CollectionUtils.isEmpty(nodeSet)) {
-            throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
-        }
-
-        for (Class<? extends AbstractNode> node : nodeSet) {
-            add(node, null, timeout, retryTimes);
-        }
+    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, long timeout, ChainNode.RetryTimesEnum retryTimes) {
+        adds(nodeSet, null, timeout, retryTimes);
     }
 
-    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, ChainNode.FailHandleEnum failHandle, Long timeout, ChainNode.RetryTimesEnum retryTimes) {
+    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, ChainNode.FailHandleEnum failHandle, long timeout, ChainNode.RetryTimesEnum retryTimes) {
+        adds(nodeSet, failHandle, timeout, retryTimes);
+    }
+
+    /**
+     * 添加节点
+     *
+     * @param nodeSet    nodeSet
+     * @param failHandle failHandle
+     * @param timeout    timeout
+     * @param retryTimes retryTimes
+     */
+    private void adds(@NonNull Set<Class<? extends AbstractNode>> nodeSet, ChainNode.FailHandleEnum failHandle, Long timeout, ChainNode.RetryTimesEnum retryTimes) {
         if (CollectionUtils.isEmpty(nodeSet)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
         }
@@ -176,7 +146,6 @@ public abstract class AbstractChain {
             throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
         }
 
-
         AbstractNode abstractNode = SpringUtil.getBean(node);
         if (Objects.isNull(abstractNode)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_UNREGISTERED.getMsg() + "=" + node.getName());
@@ -186,7 +155,7 @@ public abstract class AbstractChain {
             throw new ProcessException(ProcessException.MsgEnum.NODE_REPEAT.getMsg() + "=" + node.getName());
         }
 
-        chainNodeMap.put(node, new ChainNode(abstractNode, failHandle, timeout, retryTimes));
+        chainNodeMap.put(node, ChainNode.create(abstractNode, failHandle, timeout, retryTimes));
 
         Set<Class<? extends AbstractNode>> dependsOnNodes = abstractNode.getDependsOnNodes();
         parentNodeMap.put(node, dependsOnNodes);
@@ -225,12 +194,12 @@ public abstract class AbstractChain {
     /**
      * 校验链路完整性
      */
-    private void checkChainComplete() {
-        if (!CollectionUtils.isEmpty(parentNodeMap)){
+    public void checkChainComplete() {
+        if (!CollectionUtils.isEmpty(parentNodeMap)) {
             parentNodeMap.forEach((k, v) -> {
-                if (!CollectionUtils.isEmpty(v)){
+                if (!CollectionUtils.isEmpty(v)) {
                     v.forEach(item -> {
-                        if (Objects.isNull(chainNodeMap.get(item)) || Objects.isNull(chainNodeMap.get(item).getNode())){
+                        if (Objects.isNull(chainNodeMap.get(item)) || Objects.isNull(chainNodeMap.get(item).getNode())) {
                             throw new ProcessException(ProcessException.MsgEnum.CHAIN_INCOMPLETE.getMsg() + "=" + item.getName());
                         }
                     });
@@ -250,33 +219,22 @@ public abstract class AbstractChain {
      */
     private void executeNode(ChainContext<?> chainContext, ExecutorService executorService, Collection<AbstractNode> abstractNodes,
                              Map<Class<? extends AbstractNode>, Boolean> nodesStatusMap, Map<String, Integer> retriedMap) {
-        // 处理线程上下文配置
-        Map<Object, AbstractThreadContextConfig> paramMap = getThreadContextInitConfigMap();
-        Set<AbstractThreadContextConfig> threadContextInitConfigs = getThreadContextInitConfigs();
-
-        // 组装future
-        Map<Future<Void>, AbstractNode> futureMap = new HashMap<>();
-        for (AbstractNode abstractNode : abstractNodes) {
-            futureMap.put(CompletableFuture.supplyAsync(() -> {
-                initThreadContext(paramMap);
-                abstractNode.execute(chainContext, getAbstractNodeLogLevel(abstractNode.getClass()), this.getClass().getName());
-                removeThreadContext(threadContextInitConfigs);
-                return null;
-            }, executorService), abstractNode);
-        }
+        List<Future<Void>> futureList = new LinkedList<>();
+        Map<Future<Void>, AbstractNode> abstractNodeMap = new HashMap<>();
+        dealNodeFuture(chainContext, getThreadPool(), abstractNodes, futureList, abstractNodeMap);
 
         String logStr = LOG_PREFIX + chainContext.getLogStr();
-        for (Map.Entry<Future<Void>, AbstractNode> futureEntry : futureMap.entrySet()) {
+        for (int i = 0; i < futureList.size(); i++) {
+            Future<Void> future = futureList.get(i);
             ProcessException processException = null;
             BusinessException businessException = null;
             Exception exception = null;
-            Future<Void> future = futureEntry.getKey();
-            AbstractNode abstractNode = futureEntry.getValue();
+            AbstractNode abstractNode = abstractNodeMap.get(future);
 
             Class<? extends AbstractNode> astractNodeClass = abstractNode.getClass();
             String nodeName = astractNodeClass.getName();
 
-            Long timeout = chainNodeMap.get(astractNodeClass).getTimeout();
+            long timeout = chainNodeMap.get(astractNodeClass).getTimeout();
             int failHandle = chainNodeMap.get(astractNodeClass).getFailHandle().getCode();
             int retryTimes = chainNodeMap.get(astractNodeClass).getRetryTimes().getCode();
 
@@ -336,15 +294,42 @@ public abstract class AbstractChain {
             // 失败处理
             if (Objects.nonNull(processException) || Objects.nonNull(businessException)) {
                 failHandle(chainContext, executorService, failHandle, logStr, nodeName, timeout, processException, exception, abstractNode, nodesStatusMap, retriedMap, retryTimes);
+            } else {
+                // 节点执行成功
+                nodesStatusMap.put(astractNodeClass, true);
+                // 执行子节点
+                if (chainContext.getExecuteChildNode()) {
+                    executeChildNode(chainContext, astractNodeClass, nodesStatusMap, futureList, abstractNodeMap);
+                }
             }
+        }
+    }
 
-            // 节点执行完
-            nodesStatusMap.put(astractNodeClass, true);
+    /**
+     * 处理节点future
+     *
+     * @param chainContext    chainContext
+     * @param executorService executorService
+     * @param abstractNodes   abstractNodes
+     * @param futureList      futureList
+     * @param abstractNodeMap abstractNodeMap
+     */
+    private void dealNodeFuture(ChainContext<?> chainContext, ExecutorService executorService, Collection<AbstractNode> abstractNodes,
+                                List<Future<Void>> futureList, Map<Future<Void>, AbstractNode> abstractNodeMap) {
+        // 处理线程上下文配置
+        Map<Object, AbstractThreadContextConfig> paramMap = getThreadContextInitConfigMap();
+        Set<AbstractThreadContextConfig> threadContextInitConfigs = getThreadContextInitConfigs();
 
-            // 执行子节点
-            if (chainContext.getExecuteChildNode()) {
-                executeChildNode(chainContext, executorService, astractNodeClass, nodesStatusMap, retriedMap);
-            }
+        // 组装future
+        for (AbstractNode abstractNode : abstractNodes) {
+            CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
+                initThreadContext(paramMap);
+                abstractNode.execute(chainContext, getAbstractNodeLogLevel(abstractNode.getClass()), this.getClass().getName());
+                removeThreadContext(threadContextInitConfigs);
+                return null;
+            }, executorService);
+            abstractNodeMap.put(future, abstractNode);
+            futureList.add(future);
         }
     }
 
@@ -364,7 +349,7 @@ public abstract class AbstractChain {
      * @param retryTimes      retryTimes
      */
     private void failHandle(ChainContext<?> chainContext, ExecutorService executorService, int failHandle, String logStr,
-                            String nodeName, Long timeout, ProcessException processException, Exception exception, AbstractNode abstractNode,
+                            String nodeName, long timeout, ProcessException processException, Exception exception, AbstractNode abstractNode,
                             Map<Class<? extends AbstractNode>, Boolean> nodesStatusMap, Map<String, Integer> retriedMap, int retryTimes) {
         if (ChainNode.FailHandleEnum.INTERRUPT.getCode() == failHandle) {
             log.info("{} execute fail interrupt node [{}] timeout={}", logStr, nodeName, timeout);
@@ -433,24 +418,25 @@ public abstract class AbstractChain {
      * 执行子节点
      *
      * @param chainContext     chainContext
-     * @param executorService  executorService
      * @param astractNodeClass astractNodeClass
      * @param nodesStatusMap   nodesStatusMap
-     * @param retriedMap       retriedMap
+     * @param futureList       futureList
+     * @param abstractNodeMap  abstractNodeMap
      */
-    private void executeChildNode(ChainContext<?> chainContext, ExecutorService executorService, Class<? extends AbstractNode> astractNodeClass,
-                                  Map<Class<? extends AbstractNode>, Boolean> nodesStatusMap, Map<String, Integer> retriedMap) {
-        nodesStatusMap.put(astractNodeClass, true);
-        Set<Class<? extends AbstractNode>> dependentNodeSet = parentNodeMap.get(astractNodeClass);
-        if (!CollectionUtils.isEmpty(dependentNodeSet)) {
+    private void executeChildNode(ChainContext<?> chainContext, Class<? extends AbstractNode> astractNodeClass, Map<Class<? extends AbstractNode>, Boolean> nodesStatusMap,
+                                  List<Future<Void>> futureList, Map<Future<Void>, AbstractNode> abstractNodeMap) {
+        Set<Class<? extends AbstractNode>> childNodeSet = childNodeMap.get(astractNodeClass);
+        if (!CollectionUtils.isEmpty(childNodeSet)) {
             Set<AbstractNode> toExecuteDependentNodeSet = new HashSet<>();
-            for (Class<? extends AbstractNode> dependentNode : dependentNodeSet) {
-                if ((Objects.isNull(nodesStatusMap.get(dependentNode)) || !nodesStatusMap.get(dependentNode)) && childNodeMap.get(astractNodeClass).stream().allMatch(nodesStatusMap::get)) {
-                    toExecuteDependentNodeSet.add(chainNodeMap.get(dependentNode).getNode());
-                    nodesStatusMap.put(astractNodeClass, false);
+            for (Class<? extends AbstractNode> childNode : childNodeSet) {
+                if ((Objects.isNull(nodesStatusMap.get(childNode)) || !nodesStatusMap.get(childNode)) && !CollectionUtils.isEmpty(parentNodeMap.get(childNode))
+                        && parentNodeMap.get(childNode).stream().allMatch(item -> Objects.nonNull(nodesStatusMap.get(item)) && nodesStatusMap.get(item))) {
+                    toExecuteDependentNodeSet.add(chainNodeMap.get(childNode).getNode());
+                    nodesStatusMap.put(childNode, false);
                 }
             }
-            executeNode(chainContext, executorService, toExecuteDependentNodeSet, nodesStatusMap, retriedMap);
+
+            dealNodeFuture(chainContext, getThreadPool(), toExecuteDependentNodeSet, futureList, abstractNodeMap);
         }
     }
 

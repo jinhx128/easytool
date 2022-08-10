@@ -74,7 +74,7 @@ public class ChainManager {
             setNodeInfoMethod.setAccessible(true);
             setNodeInfoMethod.invoke(abstractChain);
 
-            Method checkChainCompleteMethod = clazz.getDeclaredMethod("checkChainComplete");
+            Method checkChainCompleteMethod = clazz.getMethod("checkChainComplete");
             // 跳过了访问检查，并提高效率
             checkChainCompleteMethod.setAccessible(true);
             checkChainCompleteMethod.invoke(abstractChain);

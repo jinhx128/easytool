@@ -1,12 +1,10 @@
 package cc.jinhx.easytool.process.node;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -28,17 +26,46 @@ public class ChainNode {
     /**
      * 节点失败处理
      */
-    private FailHandleEnum failHandle = FailHandleEnum.INTERRUPT;
+    private FailHandleEnum failHandle;
 
     /**
      * 节点执行超时时间
      */
-    private Long timeout = TimeoutEnum.COMMONLY.getCode();
+    private long timeout;
 
     /**
      * 重试次数
      */
-    private RetryTimesEnum retryTimes = RetryTimesEnum.ONE;
+    private RetryTimesEnum retryTimes;
+
+    /**
+     * 创建链路节点
+     *
+     * @param node       node
+     * @param failHandle failHandle
+     * @param timeout    timeout
+     * @param retryTimes retryTimes
+     * @return ChainNode
+     */
+    public static ChainNode create(@NonNull AbstractNode node, FailHandleEnum failHandle, Long timeout, RetryTimesEnum retryTimes) {
+        ChainNode chainNode = new ChainNode();
+        chainNode.setNode(node);
+        chainNode.setFailHandle(FailHandleEnum.INTERRUPT);
+        chainNode.setTimeout(TimeoutEnum.COMMONLY.getCode());
+        chainNode.setRetryTimes(RetryTimesEnum.ONE);
+
+        if (Objects.nonNull(failHandle)) {
+            chainNode.setFailHandle(failHandle);
+        }
+        if (Objects.nonNull(timeout)) {
+            chainNode.setTimeout(timeout);
+        }
+        if (Objects.nonNull(retryTimes)) {
+            chainNode.setRetryTimes(retryTimes);
+        }
+
+        return chainNode;
+    }
 
 
     @AllArgsConstructor
@@ -52,7 +79,7 @@ public class ChainNode {
         LONG(1000L, "长"),
         ;
 
-        private final Long code;
+        private final long code;
         private final String msg;
 
         private static final Map<Long, TimeoutEnum> MAP;
@@ -61,11 +88,11 @@ public class ChainNode {
             MAP = Arrays.stream(TimeoutEnum.values()).collect(Collectors.toMap(TimeoutEnum::getCode, obj -> obj));
         }
 
-        public static Boolean containsCode(Long code) {
+        public static Boolean containsCode(long code) {
             return MAP.containsKey(code);
         }
 
-        public static String getMsg(Long code) {
+        public static String getMsg(long code) {
             if (!MAP.containsKey(code)) {
                 return null;
             }
@@ -73,7 +100,7 @@ public class ChainNode {
             return MAP.get(code).getMsg();
         }
 
-        public static TimeoutEnum getEnum(Long code) {
+        public static TimeoutEnum getEnum(long code) {
             if (!MAP.containsKey(code)) {
                 return null;
             }

@@ -25,7 +25,7 @@ public class TestGetC2ByBNode extends AbstractNode<TestContext> {
 
     @Override
     public Set<Class<? extends AbstractNode>> getDependsOnNodes() {
-        return new HashSet<>(Arrays.asList(TestGetBByReqNode.class));
+        return new HashSet<>(Arrays.asList(TestGetBByReqNode.class, TestGetC1ByANode.class));
     }
 
     @Override
