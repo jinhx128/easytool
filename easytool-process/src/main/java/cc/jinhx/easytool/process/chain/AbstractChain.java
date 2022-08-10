@@ -32,7 +32,7 @@ public abstract class AbstractChain {
     /**
      * 首节点集合
      */
-    private Map<Class<? extends AbstractNode>, AbstractNode> firstNodeMap = new HashMap<>();
+    private Set<Class<? extends AbstractNode>> firstNodeSet = new HashSet<>();
 
     /**
      * 父节点map
@@ -161,7 +161,7 @@ public abstract class AbstractChain {
         parentNodeMap.put(node, dependsOnNodes);
 
         if (CollectionUtils.isEmpty(dependsOnNodes)) {
-            firstNodeMap.put(node, abstractNode);
+            firstNodeSet.add(node);
         } else {
             dependsOnNodes.forEach(item -> childNodeMap.computeIfAbsent(item, value -> new HashSet<>()).add(node));
         }
@@ -178,7 +178,7 @@ public abstract class AbstractChain {
      * @param chainContext chainContext
      */
     public void execute(@NonNull ChainContext<?> chainContext) {
-        executeNode(chainContext, getThreadPool(), firstNodeMap.values(), new HashMap<>(), new HashMap<>());
+        executeNode(chainContext, getThreadPool(), firstNodeSet, new HashMap<>(), new HashMap<>());
     }
 
     /**
@@ -188,7 +188,7 @@ public abstract class AbstractChain {
      * @param executorService executorService
      */
     public void execute(@NonNull ChainContext<?> chainContext, @NonNull ExecutorService executorService) {
-        executeNode(chainContext, executorService, firstNodeMap.values(), new HashMap<>(), new HashMap<>());
+        executeNode(chainContext, executorService, firstNodeSet, new HashMap<>(), new HashMap<>());
     }
 
     /**
@@ -217,7 +217,7 @@ public abstract class AbstractChain {
      * @param nodesStatusMap  nodesStatusMap
      * @param retriedMap      retriedMap
      */
-    private void executeNode(ChainContext<?> chainContext, ExecutorService executorService, Collection<AbstractNode> abstractNodes,
+    private void executeNode(ChainContext<?> chainContext, ExecutorService executorService, Collection<Class<? extends AbstractNode>> abstractNodes,
                              Map<Class<? extends AbstractNode>, Boolean> nodesStatusMap, Map<String, Integer> retriedMap) {
         List<Future<Void>> futureList = new LinkedList<>();
         Map<Future<Void>, AbstractNode> abstractNodeMap = new HashMap<>();
@@ -314,21 +314,21 @@ public abstract class AbstractChain {
      * @param futureList      futureList
      * @param abstractNodeMap abstractNodeMap
      */
-    private void dealNodeFuture(ChainContext<?> chainContext, ExecutorService executorService, Collection<AbstractNode> abstractNodes,
+    private void dealNodeFuture(ChainContext<?> chainContext, ExecutorService executorService, Collection<Class<? extends AbstractNode>> abstractNodes,
                                 List<Future<Void>> futureList, Map<Future<Void>, AbstractNode> abstractNodeMap) {
         // 处理线程上下文配置
         Map<Object, AbstractThreadContextConfig> paramMap = getThreadContextInitConfigMap();
         Set<AbstractThreadContextConfig> threadContextInitConfigs = getThreadContextInitConfigs();
 
         // 组装future
-        for (AbstractNode abstractNode : abstractNodes) {
+        for (Class<? extends AbstractNode> abstractNode : abstractNodes) {
             CompletableFuture<Void> future = CompletableFuture.supplyAsync(() -> {
                 initThreadContext(paramMap);
-                abstractNode.execute(chainContext, getAbstractNodeLogLevel(abstractNode.getClass()), this.getClass().getName());
+                chainNodeMap.get(abstractNode).getNode().execute(chainContext, getAbstractNodeLogLevel(abstractNode), this.getClass().getName());
                 removeThreadContext(threadContextInitConfigs);
                 return null;
             }, executorService);
-            abstractNodeMap.put(future, abstractNode);
+            abstractNodeMap.put(future, chainNodeMap.get(abstractNode).getNode());
             futureList.add(future);
         }
     }
@@ -357,8 +357,8 @@ public abstract class AbstractChain {
         } else if (ChainNode.FailHandleEnum.ABANDON.getCode() == failHandle) {
             log.info("{} execute fail abandon node [{}] timeout={}", logStr, nodeName, timeout);
         } else if (ChainNode.FailHandleEnum.RETRY.getCode() == failHandle) {
-            Set<AbstractNode> retryAbstractNodeSet = new HashSet<>();
-            retryAbstractNodeSet.add(abstractNode);
+            Set<Class<? extends AbstractNode>> retryAbstractNodeSet = new HashSet<>();
+            retryAbstractNodeSet.add(abstractNode.getClass());
 
             // 当前重试次数
             int nowRetryCount;
@@ -427,11 +427,11 @@ public abstract class AbstractChain {
                                   List<Future<Void>> futureList, Map<Future<Void>, AbstractNode> abstractNodeMap) {
         Set<Class<? extends AbstractNode>> childNodeSet = childNodeMap.get(astractNodeClass);
         if (!CollectionUtils.isEmpty(childNodeSet)) {
-            Set<AbstractNode> toExecuteDependentNodeSet = new HashSet<>();
+            Set<Class<? extends AbstractNode>> toExecuteDependentNodeSet = new HashSet<>();
             for (Class<? extends AbstractNode> childNode : childNodeSet) {
                 if ((Objects.isNull(nodesStatusMap.get(childNode)) || !nodesStatusMap.get(childNode)) && !CollectionUtils.isEmpty(parentNodeMap.get(childNode))
                         && parentNodeMap.get(childNode).stream().allMatch(item -> Objects.nonNull(nodesStatusMap.get(item)) && nodesStatusMap.get(item))) {
-                    toExecuteDependentNodeSet.add(chainNodeMap.get(childNode).getNode());
+                    toExecuteDependentNodeSet.add(childNode);
                     nodesStatusMap.put(childNode, false);
                 }
             }
