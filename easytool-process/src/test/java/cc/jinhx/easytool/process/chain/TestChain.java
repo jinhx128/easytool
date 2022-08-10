@@ -21,7 +21,7 @@ public class TestChain extends AbstractChain {
         // 添加一组异步执行的节点
         this.addNodes(new HashSet<>(Arrays.asList(TestGetAByReqNode.class, TestGetBByReqNode.class)));
         // 添加一个异步执行的节点，与下面添加的异步节点属于同组
-        this.addNode(TestGetC2ByBNode.class, AbstractNode.FailHandleEnum.RETRY, AbstractNode.RetryTimesEnum.FIVE);
+        this.addNode(TestGetC2ByBNode.class, ChainNode.FailHandleEnum.RETRY, ChainNode.RetryTimesEnum.FIVE);
         this.addNode(TestGetC1ByANode.class, 1000L);
         // 添加一个异步执行的节点，与上面添加的异步节点属于同组
         this.addNode(TestGetDNode.class);

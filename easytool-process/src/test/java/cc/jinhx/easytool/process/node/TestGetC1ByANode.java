@@ -5,6 +5,7 @@ import cc.jinhx.easytool.process.chain.ChainContext;
 import cc.jinhx.easytool.process.service.TestService;
 import cc.jinhx.easytool.process.BusinessException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -16,13 +17,14 @@ import java.util.Set;
  * @author jinhx
  * @since 2022-03-29
  */
+@Component
 public class TestGetC1ByANode extends AbstractNode<TestContext> {
 
     @Autowired
     private TestService testService;
 
     @Override
-    public Set<Class<? extends AbstractNode>> getChildNodes() {
+    public Set<Class<? extends AbstractNode>> getDependsOnNodes() {
         return new HashSet<>(Arrays.asList(TestGetAByReqNode.class));
     }
 

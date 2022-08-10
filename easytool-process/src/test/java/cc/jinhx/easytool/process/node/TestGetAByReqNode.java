@@ -5,6 +5,7 @@ import cc.jinhx.easytool.process.chain.ChainContext;
 import cc.jinhx.easytool.process.context.TestContext;
 import cc.jinhx.easytool.process.service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
@@ -14,13 +15,14 @@ import java.util.Set;
  * @author jinhx
  * @since 2022-03-29
  */
+@Component
 public class TestGetAByReqNode extends AbstractNode<TestContext> {
 
     @Autowired
     private TestService testService;
 
     @Override
-    public Set<Class<? extends AbstractNode>> getChildNodes() {
+    public Set<Class<? extends AbstractNode>> getDependsOnNodes() {
         return null;
     }
 

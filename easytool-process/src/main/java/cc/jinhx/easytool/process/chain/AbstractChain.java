@@ -2,9 +2,10 @@ package cc.jinhx.easytool.process.chain;
 
 import cc.jinhx.easytool.process.BusinessException;
 import cc.jinhx.easytool.process.ProcessException;
+import cc.jinhx.easytool.process.SpringUtil;
 import cc.jinhx.easytool.process.ThreadPoolManager;
 import cc.jinhx.easytool.process.node.AbstractNode;
-import cc.jinhx.easytool.process.node.NodeManager;
+import cc.jinhx.easytool.process.node.ChainNode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -31,22 +32,22 @@ public abstract class AbstractChain {
     /**
      * 首节点集合
      */
-    private Map<Class<? extends AbstractNode>, AbstractNode> firstNodeMap;
+    private Map<Class<? extends AbstractNode>, AbstractNode> firstNodeMap = new HashMap<>();
 
     /**
      * 父节点map
      */
-    private Map<Class<? extends AbstractNode>, Set<Class<? extends AbstractNode>>> parentNodeMap;
+    private Map<Class<? extends AbstractNode>, Set<Class<? extends AbstractNode>>> parentNodeMap = new HashMap<>();
 
     /**
      * 子节点map
      */
-    private Map<Class<? extends AbstractNode>, Set<Class<? extends AbstractNode>>> childNodeMap;
+    private Map<Class<? extends AbstractNode>, Set<Class<? extends AbstractNode>>> childNodeMap = new HashMap<>();
 
     /**
-     * 节点集合
+     * 链路节点集合
      */
-    private Map<Class<? extends AbstractNode>, AbstractNode> nodeMap;
+    private Map<Class<? extends AbstractNode>, ChainNode> chainNodeMap = new HashMap<>();
 
     private LogLevelEnum logLevel = LogLevelEnum.BASE_AND_TIME_AND_FIRST_AND_LAST_NODES_PARAMS;
 
@@ -54,7 +55,7 @@ public abstract class AbstractChain {
         add(node, null, null, null);
     }
 
-    public void addNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle) {
+    public void addNode(@NonNull Class<? extends AbstractNode> node, ChainNode.FailHandleEnum failHandle) {
         add(node, failHandle, null, null);
     }
 
@@ -62,23 +63,23 @@ public abstract class AbstractChain {
         add(node, null, timeout, null);
     }
 
-    public void addNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addNode(@NonNull Class<? extends AbstractNode> node, ChainNode.RetryTimesEnum retryTimes) {
         add(node, null, null, retryTimes);
     }
 
-    public void addNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout) {
+    public void addNode(@NonNull Class<? extends AbstractNode> node, ChainNode.FailHandleEnum failHandle, Long timeout) {
         add(node, failHandle, timeout, null);
     }
 
-    public void addNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addNode(@NonNull Class<? extends AbstractNode> node, ChainNode.FailHandleEnum failHandle, ChainNode.RetryTimesEnum retryTimes) {
         add(node, failHandle, null, retryTimes);
     }
 
-    public void addNode(@NonNull Class<? extends AbstractNode> node, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addNode(@NonNull Class<? extends AbstractNode> node, Long timeout, ChainNode.RetryTimesEnum retryTimes) {
         add(node, null, timeout, retryTimes);
     }
 
-    public void addNode(@NonNull Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addNode(@NonNull Class<? extends AbstractNode> node, ChainNode.FailHandleEnum failHandle, Long timeout, ChainNode.RetryTimesEnum retryTimes) {
         add(node, failHandle, timeout, retryTimes);
     }
 
@@ -102,7 +103,7 @@ public abstract class AbstractChain {
         }
     }
 
-    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, ChainNode.RetryTimesEnum retryTimes) {
         if (CollectionUtils.isEmpty(nodeSet)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
         }
@@ -112,7 +113,7 @@ public abstract class AbstractChain {
         }
     }
 
-    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, AbstractNode.FailHandleEnum failHandle) {
+    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, ChainNode.FailHandleEnum failHandle) {
         if (CollectionUtils.isEmpty(nodeSet)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
         }
@@ -122,7 +123,7 @@ public abstract class AbstractChain {
         }
     }
 
-    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, AbstractNode.FailHandleEnum failHandle, Long timeout) {
+    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, ChainNode.FailHandleEnum failHandle, Long timeout) {
         if (CollectionUtils.isEmpty(nodeSet)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
         }
@@ -132,7 +133,7 @@ public abstract class AbstractChain {
         }
     }
 
-    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, AbstractNode.FailHandleEnum failHandle, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, ChainNode.FailHandleEnum failHandle, ChainNode.RetryTimesEnum retryTimes) {
         if (CollectionUtils.isEmpty(nodeSet)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
         }
@@ -142,7 +143,7 @@ public abstract class AbstractChain {
         }
     }
 
-    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, Long timeout, ChainNode.RetryTimesEnum retryTimes) {
         if (CollectionUtils.isEmpty(nodeSet)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
         }
@@ -152,7 +153,7 @@ public abstract class AbstractChain {
         }
     }
 
-    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, AbstractNode.FailHandleEnum failHandle, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
+    public void addNodes(@NonNull Set<Class<? extends AbstractNode>> nodeSet, ChainNode.FailHandleEnum failHandle, Long timeout, ChainNode.RetryTimesEnum retryTimes) {
         if (CollectionUtils.isEmpty(nodeSet)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
         }
@@ -170,21 +171,22 @@ public abstract class AbstractChain {
      * @param timeout    timeout
      * @param retryTimes retryTimes
      */
-    private void add(Class<? extends AbstractNode> node, AbstractNode.FailHandleEnum failHandle, Long timeout, AbstractNode.RetryTimesEnum retryTimes) {
+    private void add(Class<? extends AbstractNode> node, ChainNode.FailHandleEnum failHandle, Long timeout, ChainNode.RetryTimesEnum retryTimes) {
         if (Objects.isNull(node)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
         }
 
-        AbstractNode abstractNode = NodeManager.getNode(node, failHandle, timeout, retryTimes);
+
+        AbstractNode abstractNode = SpringUtil.getBean(node);
         if (Objects.isNull(abstractNode)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_UNREGISTERED.getMsg() + "=" + node.getName());
         }
 
-        if (nodeMap.containsKey(node)) {
+        if (chainNodeMap.containsKey(node)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_REPEAT.getMsg() + "=" + node.getName());
         }
 
-        nodeMap.put(node, abstractNode);
+        chainNodeMap.put(node, new ChainNode(abstractNode, failHandle, timeout, retryTimes));
 
         Set<Class<? extends AbstractNode>> dependsOnNodes = abstractNode.getDependsOnNodes();
         parentNodeMap.put(node, dependsOnNodes);
@@ -228,7 +230,7 @@ public abstract class AbstractChain {
             parentNodeMap.forEach((k, v) -> {
                 if (!CollectionUtils.isEmpty(v)){
                     v.forEach(item -> {
-                        if (Objects.isNull(nodeMap.get(item))){
+                        if (Objects.isNull(chainNodeMap.get(item)) || Objects.isNull(chainNodeMap.get(item).getNode())){
                             throw new ProcessException(ProcessException.MsgEnum.CHAIN_INCOMPLETE.getMsg() + "=" + item.getName());
                         }
                     });
@@ -270,18 +272,20 @@ public abstract class AbstractChain {
             Exception exception = null;
             Future<Void> future = futureEntry.getKey();
             AbstractNode abstractNode = futureEntry.getValue();
-            Long timeout = abstractNode.getTimeout();
-            int failHandle = abstractNode.getFailHandle().getCode();
-            int retryTimes = abstractNode.getRetryTimes().getCode();
+
             Class<? extends AbstractNode> astractNodeClass = abstractNode.getClass();
             String nodeName = astractNodeClass.getName();
+
+            Long timeout = chainNodeMap.get(astractNodeClass).getTimeout();
+            int failHandle = chainNodeMap.get(astractNodeClass).getFailHandle().getCode();
+            int retryTimes = chainNodeMap.get(astractNodeClass).getRetryTimes().getCode();
 
             // 执行节点
             try {
                 future.get(timeout, TimeUnit.MILLISECONDS);
                 abstractNode.onSuccess(chainContext);
             } catch (TimeoutException e) {
-                if (AbstractNode.FailHandleEnum.RETRY.getCode() != failHandle) {
+                if (ChainNode.FailHandleEnum.RETRY.getCode() != failHandle) {
                     abstractNode.onTimeoutFail(chainContext);
                 }
                 exception = e;
@@ -291,7 +295,7 @@ public abstract class AbstractChain {
                 processException = new ProcessException(ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);
             } catch (ExecutionException e) {
                 if (e.getCause() instanceof ProcessException) {
-                    if (AbstractNode.FailHandleEnum.RETRY.getCode() != failHandle) {
+                    if (ChainNode.FailHandleEnum.RETRY.getCode() != failHandle) {
                         abstractNode.onUnknowFail(chainContext, (Exception) e.getCause());
                     }
                     exception = e;
@@ -300,14 +304,14 @@ public abstract class AbstractChain {
                 } else if (e.getCause() instanceof BusinessException) {
                     exception = e;
                     log.info("{} execute business fail node [{}] msg={}", logStr, nodeName, getExceptionLog(e));
-                    if (AbstractNode.FailHandleEnum.RETRY.getCode() != failHandle) {
+                    if (ChainNode.FailHandleEnum.RETRY.getCode() != failHandle) {
                         abstractNode.onBusinessFail(chainContext, (BusinessException) e.getCause());
                         throw (BusinessException) e.getCause();
                     } else {
                         businessException = (BusinessException) e.getCause();
                     }
                 } else {
-                    if (AbstractNode.FailHandleEnum.RETRY.getCode() != failHandle) {
+                    if (ChainNode.FailHandleEnum.RETRY.getCode() != failHandle) {
                         abstractNode.onUnknowFail(chainContext, (Exception) e.getCause());
                     }
                     exception = e;
@@ -316,7 +320,7 @@ public abstract class AbstractChain {
                     processException = new ProcessException(ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
                 }
             } catch (Exception e) {
-                if (AbstractNode.FailHandleEnum.RETRY.getCode() != failHandle) {
+                if (ChainNode.FailHandleEnum.RETRY.getCode() != failHandle) {
                     abstractNode.onUnknowFail(chainContext, e);
                 }
                 exception = e;
@@ -324,7 +328,7 @@ public abstract class AbstractChain {
                 log.info("{} execute fail node [{}] msg={}", logStr, nodeName, exceptionLog);
                 processException = new ProcessException(ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
             } finally {
-                if (AbstractNode.FailHandleEnum.RETRY.getCode() != failHandle) {
+                if (ChainNode.FailHandleEnum.RETRY.getCode() != failHandle) {
                     abstractNode.afterProcess(chainContext);
                 }
             }
@@ -362,12 +366,12 @@ public abstract class AbstractChain {
     private void failHandle(ChainContext<?> chainContext, ExecutorService executorService, int failHandle, String logStr,
                             String nodeName, Long timeout, ProcessException processException, Exception exception, AbstractNode abstractNode,
                             Map<Class<? extends AbstractNode>, Boolean> nodesStatusMap, Map<String, Integer> retriedMap, int retryTimes) {
-        if (AbstractNode.FailHandleEnum.INTERRUPT.getCode() == failHandle) {
+        if (ChainNode.FailHandleEnum.INTERRUPT.getCode() == failHandle) {
             log.info("{} execute fail interrupt node [{}] timeout={}", logStr, nodeName, timeout);
             throw processException;
-        } else if (AbstractNode.FailHandleEnum.ABANDON.getCode() == failHandle) {
+        } else if (ChainNode.FailHandleEnum.ABANDON.getCode() == failHandle) {
             log.info("{} execute fail abandon node [{}] timeout={}", logStr, nodeName, timeout);
-        } else if (AbstractNode.FailHandleEnum.RETRY.getCode() == failHandle) {
+        } else if (ChainNode.FailHandleEnum.RETRY.getCode() == failHandle) {
             Set<AbstractNode> retryAbstractNodeSet = new HashSet<>();
             retryAbstractNodeSet.add(abstractNode);
 
@@ -442,7 +446,7 @@ public abstract class AbstractChain {
             Set<AbstractNode> toExecuteDependentNodeSet = new HashSet<>();
             for (Class<? extends AbstractNode> dependentNode : dependentNodeSet) {
                 if ((Objects.isNull(nodesStatusMap.get(dependentNode)) || !nodesStatusMap.get(dependentNode)) && childNodeMap.get(astractNodeClass).stream().allMatch(nodesStatusMap::get)) {
-                    toExecuteDependentNodeSet.add(nodeMap.get(dependentNode));
+                    toExecuteDependentNodeSet.add(chainNodeMap.get(dependentNode).getNode());
                     nodesStatusMap.put(astractNodeClass, false);
                 }
             }
@@ -456,30 +460,30 @@ public abstract class AbstractChain {
      * @param astractNodeClass astractNodeClass
      * @return 节点日志级别
      */
-    private AbstractNode.LogLevelEnum getAbstractNodeLogLevel(Class<? extends AbstractNode> astractNodeClass) {
+    private ChainNode.LogLevelEnum getAbstractNodeLogLevel(Class<? extends AbstractNode> astractNodeClass) {
         // 处理节点日志级别
-        AbstractNode.LogLevelEnum nodeLogLevel = null;
+        ChainNode.LogLevelEnum nodeLogLevel = null;
         LogLevelEnum chainLogLevel = this.logLevel;
         boolean baseAndTimeAndFirstAndLastNodesParamsLogLevel = false;
         if (LogLevelEnum.NO.getCode() == chainLogLevel.getCode()) {
-            nodeLogLevel = AbstractNode.LogLevelEnum.NO;
+            nodeLogLevel = ChainNode.LogLevelEnum.NO;
         } else if (LogLevelEnum.BASE.getCode() == chainLogLevel.getCode()) {
-            nodeLogLevel = AbstractNode.LogLevelEnum.BASE;
+            nodeLogLevel = ChainNode.LogLevelEnum.BASE;
         } else if (LogLevelEnum.BASE_AND_TIME.getCode() == chainLogLevel.getCode()) {
-            nodeLogLevel = AbstractNode.LogLevelEnum.BASE_AND_TIME;
+            nodeLogLevel = ChainNode.LogLevelEnum.BASE_AND_TIME;
         } else if (LogLevelEnum.BASE_AND_TIME_AND_FIRST_AND_LAST_NODES_PARAMS.getCode() == chainLogLevel.getCode()) {
             baseAndTimeAndFirstAndLastNodesParamsLogLevel = true;
         } else if (LogLevelEnum.BASE_AND_TIME_AND_ALL_NODES_PARAMS.getCode() == chainLogLevel.getCode()) {
-            nodeLogLevel = AbstractNode.LogLevelEnum.BASE_AND_TIME_AND_PARAMS;
+            nodeLogLevel = ChainNode.LogLevelEnum.BASE_AND_TIME_AND_PARAMS;
         } else {
-            nodeLogLevel = AbstractNode.LogLevelEnum.BASE_AND_TIME;
+            nodeLogLevel = ChainNode.LogLevelEnum.BASE_AND_TIME;
         }
 
         if (baseAndTimeAndFirstAndLastNodesParamsLogLevel) {
             if (CollectionUtils.isEmpty(parentNodeMap.get(astractNodeClass)) || CollectionUtils.isEmpty(childNodeMap.get(astractNodeClass))) {
-                nodeLogLevel = AbstractNode.LogLevelEnum.BASE_AND_TIME_AND_PARAMS;
+                nodeLogLevel = ChainNode.LogLevelEnum.BASE_AND_TIME_AND_PARAMS;
             } else {
-                nodeLogLevel = AbstractNode.LogLevelEnum.BASE_AND_TIME;
+                nodeLogLevel = ChainNode.LogLevelEnum.BASE_AND_TIME;
             }
         }
 
