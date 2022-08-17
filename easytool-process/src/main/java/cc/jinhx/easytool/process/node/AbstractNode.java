@@ -70,8 +70,7 @@ public abstract class AbstractNode<T> {
             execute(chainContext);
         }
 
-        logInfo.append(LOG_TIME).append(System.currentTimeMillis() - startTime).append("[").append(chainName).append("]").append(NODE).append("[")
-                .append(this.getClass().getName()).append("]");
+        logInfo.append(LOG_TIME).append(System.currentTimeMillis() - startTime);
         log.info(logInfo.toString());
         // 手动释放内存
         logInfo.setLength(0);

@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+cc.jinhx.easytool.process.BeanPostProcessor,\
 cc.jinhx.easytool.process.SpringUtil
