@@ -1,6 +1,10 @@
-package cc.jinhx.easytool.process.node;
+package cc.jinhx.easytool.process.chain;
 
-import lombok.*;
+import cc.jinhx.easytool.process.node.AbstractNode;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -47,12 +51,8 @@ public class ChainNode {
      * @param retryTimes retryTimes
      * @return ChainNode
      */
-    public static ChainNode create(@NonNull AbstractNode node, FailHandleEnum failHandle, Long timeout, RetryTimesEnum retryTimes) {
-        ChainNode chainNode = new ChainNode();
-        chainNode.setNode(node);
-        chainNode.setFailHandle(FailHandleEnum.INTERRUPT);
-        chainNode.setTimeout(TimeoutEnum.COMMONLY.getCode());
-        chainNode.setRetryTimes(RetryTimesEnum.ONE);
+    public static ChainNode create(AbstractNode node, FailHandleEnum failHandle, Long timeout, RetryTimesEnum retryTimes) {
+        ChainNode chainNode = new ChainNode(node, FailHandleEnum.INTERRUPT, TimeoutEnum.COMMONLY.getCode(), RetryTimesEnum.ONE);
 
         if (Objects.nonNull(failHandle)) {
             chainNode.setFailHandle(failHandle);
@@ -112,56 +112,16 @@ public class ChainNode {
 
     @AllArgsConstructor
     @Getter
-    public enum LogLevelEnum {
-
-        NO(1, "不打印"),
-        BASE(2, "打印基本信息"),
-        BASE_AND_TIME(3, "打印基本信息和耗时"),
-        BASE_AND_TIME_AND_PARAMS(4, "打印基本信息和耗时和参数"),
-        ;
-
-        private final int code;
-        private final String msg;
-
-        private static final Map<Integer, LogLevelEnum> MAP;
-
-        static {
-            MAP = Arrays.stream(LogLevelEnum.values()).collect(Collectors.toMap(LogLevelEnum::getCode, obj -> obj));
-        }
-
-        public static Boolean containsCode(int code) {
-            return MAP.containsKey(code);
-        }
-
-        public static String getMsg(int code) {
-            if (!MAP.containsKey(code)) {
-                return null;
-            }
-
-            return MAP.get(code).getMsg();
-        }
-
-        public static LogLevelEnum getEnum(int code) {
-            if (!MAP.containsKey(code)) {
-                return null;
-            }
-
-            return MAP.get(code);
-        }
-
-    }
-
-    @AllArgsConstructor
-    @Getter
     public enum FailHandleEnum {
 
-        INTERRUPT(1, "中断链路"),
-        ABANDON(2, "抛弃节点"),
-        RETRY(3, "重试节点"),
+        INTERRUPT(1, "中断链路", new InterruptFailHandle()),
+        ABANDON(2, "抛弃节点", new AbandonFailHandle()),
+        RETRY(3, "重试节点", new RetryFailHandle()),
         ;
 
         private final int code;
         private final String msg;
+        private final AbstractFailHandle failHandle;
 
         private static final Map<Integer, FailHandleEnum> MAP;
 

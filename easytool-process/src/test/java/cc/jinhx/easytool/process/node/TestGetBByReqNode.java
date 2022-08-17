@@ -32,8 +32,13 @@ public class TestGetBByReqNode extends AbstractNode<TestContext> {
     }
 
     @Override
-    protected void process(ChainContext<TestContext> chainContext) {
+    protected void execute(ChainContext<TestContext> chainContext) {
         TestContext contextInfo = chainContext.getContextInfo();
+//        try {
+//            Thread.sleep(6000L);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
         if ("req".equals(contextInfo.getReq())){
             contextInfo.setB(testService.getB());
         }

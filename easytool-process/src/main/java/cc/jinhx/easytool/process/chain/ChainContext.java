@@ -30,23 +30,12 @@ public class ChainContext<T> implements Serializable {
      */
     protected String logStr;
 
-    /*w
-     * 是否执行子节点，默认需要
-     */
-    protected boolean executeChildNode;
-
     private ChainContext(T contextInfo, String logStr) {
         this.contextInfo = contextInfo;
-        this.executeChildNode = true;
         setLogStr(logStr);
     }
 
     private ChainContext() {
-        this.executeChildNode = true;
-    }
-
-    public boolean getExecuteChildNode() {
-        return this.executeChildNode;
     }
 
     /**
@@ -57,19 +46,19 @@ public class ChainContext<T> implements Serializable {
      * @return ChainContext
      */
     public static <T> ChainContext<T> create(@NonNull T contextInfo, @NonNull String logStr) {
-        return new ChainContext<>(contextInfo, logStr + " method [" + Thread.currentThread().getStackTrace()[4].getMethodName() + "]");
+        return new ChainContext<>(contextInfo, logStr + " method [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
     }
 
     public static <T> ChainContext<T> create(@NonNull Class<T> clazz) {
-        return new ChainContext<>(createChainContext(clazz), "method [" + Thread.currentThread().getStackTrace()[4].getMethodName() + "]");
+        return new ChainContext<>(createChainContext(clazz), "method [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
     }
 
     public static <T> ChainContext<T> create(@NonNull T contextInfo) {
-        return new ChainContext<>(contextInfo, "method [" + Thread.currentThread().getStackTrace()[4].getMethodName() + "]");
+        return new ChainContext<>(contextInfo, "method [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
     }
 
     public static <T> ChainContext<T> create(@NonNull Class<T> clazz, @NonNull String logStr) {
-        return new ChainContext<>(createChainContext(clazz), logStr + " method [" + Thread.currentThread().getStackTrace()[4].getMethodName() + "]");
+        return new ChainContext<>(createChainContext(clazz), logStr + " method [" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]");
     }
 
     /**

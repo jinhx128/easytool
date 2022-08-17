@@ -34,7 +34,7 @@ public class TestGetC1ByANode extends AbstractNode<TestContext> {
     }
 
     @Override
-    protected void process(ChainContext<TestContext> chainContext) {
+    protected void execute(ChainContext<TestContext> chainContext) {
         System.out.println(Thread.currentThread().getName() + "start1");
         try {
             Thread.sleep(700L);

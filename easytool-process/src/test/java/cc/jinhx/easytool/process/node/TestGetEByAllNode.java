@@ -34,7 +34,7 @@ public class TestGetEByAllNode extends AbstractNode<TestContext> {
     }
 
     @Override
-    protected void process(ChainContext<TestContext> chainContext) {
+    protected void execute(ChainContext<TestContext> chainContext) {
         TestContext contextInfo = chainContext.getContextInfo();
         if ("A".equals(contextInfo.getA()) && "B".equals(contextInfo.getB()) && "C1".equals(contextInfo.getC1())
                 && "C2".equals(contextInfo.getC2()) && "D".equals(contextInfo.getD())){

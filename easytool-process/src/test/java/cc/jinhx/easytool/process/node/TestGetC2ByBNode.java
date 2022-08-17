@@ -34,7 +34,7 @@ public class TestGetC2ByBNode extends AbstractNode<TestContext> {
     }
 
     @Override
-    protected void process(ChainContext<TestContext> chainContext) {
+    protected void execute(ChainContext<TestContext> chainContext) {
         TestContext contextInfo = chainContext.getContextInfo();
         System.out.println(Thread.currentThread().getName() + "start3");
         try {
@@ -43,11 +43,14 @@ public class TestGetC2ByBNode extends AbstractNode<TestContext> {
             throw new RuntimeException(e);
         }
 
+        businessFail(-1, "出错了");
+//        int i = 1/0;
+
         System.out.println(Thread.currentThread().getName() + "start4");
         if ("B".equals(contextInfo.getB()) && "C1".equals(contextInfo.getC1())){
             contextInfo.setC2(testService.getC() + "2");
         } else {
-            int i = 1/0;
+//            int i = 1/0;
 //            businessFail(-1, "出错了");
         }
     }
@@ -73,8 +76,8 @@ public class TestGetC2ByBNode extends AbstractNode<TestContext> {
     }
 
     @Override
-    public void afterProcess(ChainContext<TestContext> testChainContext) {
-        System.out.println("afterProcess：" + testChainContext.toString());
+    public void afterExecute(ChainContext<TestContext> testChainContext) {
+        System.out.println("afterExecute：" + testChainContext.toString());
     }
 
 }

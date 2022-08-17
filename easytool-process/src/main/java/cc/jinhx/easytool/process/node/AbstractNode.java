@@ -1,17 +1,12 @@
 package cc.jinhx.easytool.process.node;
 
-import cc.jinhx.easytool.core.JsonUtil;
 import cc.jinhx.easytool.process.BusinessException;
-import cc.jinhx.easytool.process.ProcessException;
 import cc.jinhx.easytool.process.ProcessResult;
 import cc.jinhx.easytool.process.chain.ChainContext;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -30,8 +25,6 @@ public abstract class AbstractNode<T> {
     private final String NODE = " node ";
     private final String LOG_SKIP = " skip=";
     private final String LOG_TIME = " time=";
-    private final String BEFORE_EXECUTE_PARAMS = " beforeExecuteParams=";
-    private final String AFTER_EXECUTE_PARAMS = " afterExecuteParams=";
     private final String TRUE = "true";
     private final String FALSE = "false";
 
@@ -51,112 +44,39 @@ public abstract class AbstractNode<T> {
     protected abstract boolean isSkip(ChainContext<T> chainContext);
 
     /**
-     * 参数校验
-     *
-     * @param chainContext chainContext
-     */
-    protected void checkParams(ChainContext<T> chainContext) {
-    }
-
-    /**
      * 节点执行方法
      *
      * @param chainContext chainContext
      */
-    protected abstract void process(ChainContext<T> chainContext);
+    protected abstract void execute(ChainContext<T> chainContext);
 
     /**
      * 通用执行方法
      *
      * @param chainContext chainContext
-     * @param logLevel     logLevel
      * @param chainName    chainName
      */
-    public void execute(@NonNull ChainContext<T> chainContext, ChainNode.LogLevelEnum logLevel, String chainName) {
-        String logStr = LOG_PREFIX + chainContext.getLogStr();
-        try {
-            // 日志
-            StringBuilder logInfo = new StringBuilder(logStr);
+    public void doExecute(@NonNull ChainContext<T> chainContext, String chainName) {
+        StringBuilder logInfo = new StringBuilder();
+        logInfo.append(LOG_PREFIX).append(chainContext.getLogStr()).append(LOG_END).append(CHAIN).append("[").append(chainName)
+                .append("]").append(NODE).append("[").append(this.getClass().getName()).append("]");
 
-            buildLogInfo(logInfo, Arrays.asList(LOG_END, CHAIN, "[" + chainName + "]", NODE, "[" + this.getClass().getName() + "]"), logLevel, ChainNode.LogLevelEnum.BASE, false);
-            buildLogInfo(logInfo, Arrays.asList(BEFORE_EXECUTE_PARAMS, JsonUtil.objectConvertToJson(chainContext)), logLevel, ChainNode.LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
+        long startTime = System.currentTimeMillis();
 
-            // 耗时计算
-            long startTime = System.currentTimeMillis();
-
-            if (isSkip(chainContext)) {
-                buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, TRUE), logLevel, ChainNode.LogLevelEnum.BASE, false);
-            } else {
-                try {
-                    checkParams(chainContext);
-//            log.info(logStr + " checkParams success");
-                } catch (ProcessException e) {
-//                    log.info(logStr + " checkParams process fail msg=", e);
-                    throw e;
-                } catch (BusinessException e) {
-//                    log.info(logStr + " checkParams business fail msg=", e);
-                    throw e;
-                } catch (Exception e) {
-//                    log.info(logStr + " checkParams fail msg=", e);
-                    throw e;
-                }
-
-                buildLogInfo(logInfo, Arrays.asList(LOG_SKIP, FALSE), logLevel, ChainNode.LogLevelEnum.BASE, false);
-
-                try {
-                    process(chainContext);
-                } catch (ProcessException e) {
-//                    log.info(logStr + " execute process fail msg=", e);
-                    throw e;
-                } catch (BusinessException e) {
-//                    log.info(logStr + " execute business fail node [{}] msg=", nodeName, e);
-                    throw e;
-                } catch (Exception e) {
-//                    log.info(logStr + " execute fail node [{}] msg=", nodeName, e);
-                    throw e;
-                }
-            }
-
-            long endTime = System.currentTimeMillis();
-
-            buildLogInfo(logInfo, Arrays.asList(AFTER_EXECUTE_PARAMS, JsonUtil.objectConvertToJson(chainContext)), logLevel, ChainNode.LogLevelEnum.BASE_AND_TIME_AND_PARAMS, false);
-            buildLogInfo(logInfo, Arrays.asList(LOG_TIME, endTime - startTime), logLevel, ChainNode.LogLevelEnum.BASE_AND_TIME, true);
-        } catch (ProcessException e) {
-//                    log.info(logStr + " checkParams business fail msg=", e);
-            throw e;
-        } catch (BusinessException e) {
-//            log.info(logStr + " execute business fail node [{}] msg=", nodeName, e);
-            throw e;
-        } catch (Exception e) {
-//            log.info(logStr + " execute fail node [{}] msg=", nodeName, e);
-            throw e;
+        if (isSkip(chainContext)) {
+            logInfo.append(LOG_SKIP).append(TRUE);
+        } else {
+            logInfo.append(LOG_SKIP).append(FALSE);
+            execute(chainContext);
         }
+
+        logInfo.append(LOG_TIME).append(System.currentTimeMillis() - startTime).append("[").append(chainName).append("]").append(NODE).append("[")
+                .append(this.getClass().getName()).append("]");
+        log.info(logInfo.toString());
+        // 手动释放内存
+        logInfo.setLength(0);
     }
 
-    /**
-     * 通过传进来的节点日志类型判断打印什么日志，太长可能出现YGC频繁
-     *
-     * @param logInfo      logInfo
-     * @param logInfos     logInfos
-     * @param logLevel     logLevel
-     * @param thisLogLevel thisLogLevel
-     * @param print        print
-     */
-    private void buildLogInfo(StringBuilder logInfo, List<Object> logInfos, ChainNode.LogLevelEnum logLevel, ChainNode.LogLevelEnum thisLogLevel, Boolean print) {
-        if (Objects.isNull(logLevel) || !ChainNode.LogLevelEnum.containsCode(logLevel.getCode())) {
-            logLevel = ChainNode.LogLevelEnum.BASE_AND_TIME;
-        }
-
-        if (thisLogLevel.getCode() <= logLevel.getCode() && ChainNode.LogLevelEnum.NO.getCode() != logLevel.getCode()) {
-            logInfos.forEach(logInfo::append);
-        }
-
-        if (print && ChainNode.LogLevelEnum.NO.getCode() != logLevel.getCode()) {
-            log.info(logInfo.toString());
-            // 打印完手动释放内存
-            logInfo.setLength(0);
-        }
-    }
 
     /**
      * 业务失败
@@ -177,18 +97,6 @@ public abstract class AbstractNode<T> {
         throw new BusinessException(ProcessResult.BaseEnum.BUSINESS_FAIL.getCode(), msg);
     }
 
-    /**
-     * 获取上下文信息
-     *
-     * @param chainContext chainContext
-     * @return T
-     */
-    protected <T> T getContextInfo(ChainContext<T> chainContext) {
-        if (Objects.isNull(chainContext)) {
-            return null;
-        }
-        return chainContext.getContextInfo();
-    }
 
     /**
      * 成功时执行
@@ -222,7 +130,7 @@ public abstract class AbstractNode<T> {
     /**
      * 无论成功失败，最后都会执行
      */
-    public void afterProcess(@NonNull ChainContext<T> chainContext) {
+    public void afterExecute(@NonNull ChainContext<T> chainContext) {
     }
 
 }

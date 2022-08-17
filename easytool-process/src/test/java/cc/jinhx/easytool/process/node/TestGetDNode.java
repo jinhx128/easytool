@@ -32,7 +32,8 @@ public class TestGetDNode extends AbstractNode<TestContext> {
     }
 
     @Override
-    protected void process(ChainContext<TestContext> chainContext) {
+    protected void execute(ChainContext<TestContext> chainContext) {
+//        int i = 1/0;
         TestContext contextInfo = chainContext.getContextInfo();
         contextInfo.setD(testService.getD());
     }

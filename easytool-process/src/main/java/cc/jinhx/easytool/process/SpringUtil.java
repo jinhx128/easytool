@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 /**
- * 加载和获取spring上下文环境，支持xml文件配置方式和静态代码加载方式两种形式
+ * 获取spring上下文
  *
  * @author jinhx
  * @since 2022-03-21
