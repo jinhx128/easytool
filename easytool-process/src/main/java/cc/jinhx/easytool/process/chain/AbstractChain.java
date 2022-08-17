@@ -218,7 +218,7 @@ public abstract class AbstractChain<T> {
     }
 
     /**
-     * 执行当前链路，指定线程池，如果为空则使用默认配置的线程池
+     * 执行当前链路，使用默认配置的线程池
      *
      * @param chainContext chainContext
      */

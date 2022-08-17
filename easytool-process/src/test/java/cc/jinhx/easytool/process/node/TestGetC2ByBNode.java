@@ -43,7 +43,7 @@ public class TestGetC2ByBNode extends AbstractNode<TestContext> {
             throw new RuntimeException(e);
         }
 
-        businessFail(-1, "出错了");
+//        businessFail(-1, "出错了");
 //        int i = 1/0;
 
         System.out.println(Thread.currentThread().getName() + "start4");

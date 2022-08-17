@@ -1,6 +1,7 @@
 package cc.jinhx.easytool.process;
 
 import cc.jinhx.easytool.process.chain.ChainContext;
+import cc.jinhx.easytool.process.chain.Handler;
 import cc.jinhx.easytool.process.chain.TestChain;
 import cc.jinhx.easytool.process.context.TestContext;
 import lombok.extern.slf4j.Slf4j;
@@ -79,7 +80,15 @@ public class ProcessTest {
     }
 
     @Test
-    public void test4() throws InterruptedException {
+    public void test4() {
+        ChainContext<TestContext> chainContext = ChainContext.create(TestContext.class);
+        chainContext.getContextInfo().setReq("req");
+        ProcessResult<TestContext> processResult = Handler.execute(TestChain.class, chainContext);
+        System.out.println(processResult.getData());
+    }
+
+    @Test
+    public void test5() throws InterruptedException {
         int count = 1;
         long start = System.currentTimeMillis();
         CountDownLatch countDownLatch = new CountDownLatch(count);

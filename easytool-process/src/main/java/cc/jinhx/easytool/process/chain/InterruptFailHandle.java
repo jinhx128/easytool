@@ -22,10 +22,10 @@ import java.util.concurrent.TimeoutException;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Slf4j
-public class InterruptFailHandle<T> extends AbstractFailHandle<T> {
+public class InterruptFailHandle extends AbstractFailHandle {
 
     @Override
-    protected void dealFailNode(ChainContext<T> chainContext, ExecutorService executorService, Class<? extends AbstractNode> nodeClass,
+    protected <T> void dealFailNode(ChainContext<T> chainContext, ExecutorService executorService, Class<? extends AbstractNode> nodeClass,
                                 ChainParam<T> chainParam, Map<Class<? extends AbstractNode>, ChainNode> chainNodeMap,
                                 Map<Class<? extends AbstractNode>, Set<Class<? extends AbstractNode>>> childNodeClassMap,
                                 AbstractChain chain, Throwable throwable) {

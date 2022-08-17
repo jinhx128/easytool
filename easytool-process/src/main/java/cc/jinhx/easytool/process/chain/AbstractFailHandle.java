@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  */
 @Data
 @Slf4j
-public abstract class AbstractFailHandle<T> {
+public abstract class AbstractFailHandle {
 
     protected static final String LOG_PREFIX = "process chainLog ";
 
@@ -52,7 +52,7 @@ public abstract class AbstractFailHandle<T> {
     /**
      * 构建失败结果
      */
-    protected ProcessResult<T> buildFailResult(int code, String msg) {
+    protected <T> ProcessResult<T> buildFailResult(int code, String msg) {
         return new ProcessResult<>(code, msg);
     }
 
@@ -62,7 +62,7 @@ public abstract class AbstractFailHandle<T> {
      * @param chainParam   chainParam
      * @param chainNodeMap chainNodeMap
      */
-    protected void interruptChain(ChainParam<T> chainParam, Map<Class<? extends AbstractNode>, ChainNode> chainNodeMap) {
+    protected <T> void interruptChain(ChainParam<T> chainParam, Map<Class<? extends AbstractNode>, ChainNode> chainNodeMap) {
         chainParam.getNodeClassStatusMap().putAll(chainNodeMap.entrySet().stream().collect(Collectors.toConcurrentMap(Map.Entry::getKey, v -> true, (v1, v2) -> v2)));
         while (chainParam.getSuccessNodeCountDownLatch().getCount() > 0) {
             chainParam.getSuccessNodeCountDownLatch().countDown();
@@ -77,14 +77,14 @@ public abstract class AbstractFailHandle<T> {
      * @param chainNode  chainNode
      * @return 是否最后一次执行该节点
      */
-    protected boolean getIsLastTimes(Class<? extends AbstractNode> nodeClass, ChainParam<T> chainParam, ChainNode chainNode) {
+    protected <T> boolean getIsLastTimes(Class<? extends AbstractNode> nodeClass, ChainParam<T> chainParam, ChainNode chainNode) {
         return ChainNode.FailHandleEnum.RETRY.getCode() != chainNode.getFailHandle().getCode() || chainNode.getRetryTimes().getCode() == chainParam.getNodeClassRetryCountMap().get(nodeClass);
     }
 
     /**
      * 处理失败节点
      */
-    protected abstract void dealFailNode(ChainContext<T> chainContext, ExecutorService executorService, Class<? extends AbstractNode> nodeClass,
+    protected abstract <T> void dealFailNode(ChainContext<T> chainContext, ExecutorService executorService, Class<? extends AbstractNode> nodeClass,
                                          ChainParam<T> chainParam, Map<Class<? extends AbstractNode>, ChainNode> chainNodeMap,
                                          Map<Class<? extends AbstractNode>, Set<Class<? extends AbstractNode>>> childNodeClassMap,
                                          AbstractChain chain, Throwable throwable);
