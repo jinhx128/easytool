@@ -211,24 +211,141 @@ public abstract class AbstractChain<T> {
      * 校验参数
      *
      * @param chainContext chainContext
+     * @return ProcessResult
      */
     private ProcessResult<T> doCheckParams(ChainContext<T> chainContext) {
         StringBuffer logStr = new StringBuffer(LOG_PREFIX + chainContext.getLogStr());
         try {
             checkParams(chainContext);
             logStr.append(" checkParams success");
-            log.info(logStr.toString());
             return null;
         } catch (BusinessException e) {
             onBusinessFail(chainContext, e);
             logStr.append(" checkParams business fail msg=").append(getExceptionLog(e));
-            log.info(logStr.toString());
             return buildFailResult(e.getCode(), e.getMsg());
         } catch (Exception e) {
             onUnknowFail(chainContext, e);
             logStr.append(" checkParams unknown fail msg=").append(getExceptionLog(e));
-            log.info(logStr.toString());
             return buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.CHECK_PARAMS.getMsg() + " error=" + getExceptionLog(e));
+        } finally {
+            log.info(logStr.toString());
+        }
+    }
+
+    /**
+     * 成功时执行
+     *
+     * @param chainContext chainContext
+     * @return ProcessResult
+     */
+    private ProcessResult<T> doOnSuccess(ChainContext<T> chainContext) {
+        StringBuffer logStr = new StringBuffer(LOG_PREFIX + chainContext.getLogStr());
+        try {
+            onSuccess(chainContext);
+            logStr.append(" onSuccess success");
+            return null;
+        } catch (BusinessException e) {
+            logStr.append(" onSuccess business fail msg=").append(getExceptionLog(e));
+            return buildFailResult(e.getCode(), e.getMsg());
+        } catch (Exception e) {
+            logStr.append(" onSuccess unknown fail msg=").append(getExceptionLog(e));
+            return buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.ON_SUCCESS.getMsg() + " error=" + getExceptionLog(e));
+        } finally {
+            log.info(logStr.toString());
+        }
+    }
+
+    /**
+     * 执行后执行
+     *
+     * @param chainContext chainContext
+     * @return ProcessResult
+     */
+    private ProcessResult<T> doAfterExecute(ChainContext<T> chainContext) {
+        StringBuffer logStr = new StringBuffer(LOG_PREFIX + chainContext.getLogStr());
+        try {
+            afterExecute(chainContext);
+            logStr.append(" afterExecute success");
+            return null;
+        } catch (BusinessException e) {
+            logStr.append(" afterExecute business fail msg=").append(getExceptionLog(e));
+            return buildFailResult(e.getCode(), e.getMsg());
+        } catch (Exception e) {
+            logStr.append(" afterExecute unknown fail msg=").append(getExceptionLog(e));
+            return buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.AFTER_EXECUTE.getMsg() + " error=" + getExceptionLog(e));
+        } finally {
+            log.info(logStr.toString());
+        }
+    }
+
+    /**
+     * 超时失败时执行
+     *
+     * @param chainContext chainContext
+     * @return ProcessResult
+     */
+    private ProcessResult<T> doOnTimeoutFail(ChainContext<T> chainContext) {
+        StringBuffer logStr = new StringBuffer(LOG_PREFIX + chainContext.getLogStr());
+        try {
+            onTimeoutFail(chainContext);
+            logStr.append(" onTimeoutFail success");
+            return null;
+        } catch (BusinessException e) {
+            logStr.append(" onTimeoutFail business fail msg=").append(getExceptionLog(e));
+            return buildFailResult(e.getCode(), e.getMsg());
+        } catch (Exception e) {
+            logStr.append(" onTimeoutFail unknown fail msg=").append(getExceptionLog(e));
+            return buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.ON_TIMEOUT_FAIL.getMsg() + " error=" + getExceptionLog(e));
+        } finally {
+            log.info(logStr.toString());
+        }
+    }
+
+    /**
+     * 业务失败时执行
+     *
+     * @param chainContext      chainContext
+     * @param businessException businessException
+     * @return ProcessResult
+     */
+    private ProcessResult<T> doOnBusinessFail(ChainContext<T> chainContext, BusinessException businessException) {
+        StringBuffer logStr = new StringBuffer(LOG_PREFIX + chainContext.getLogStr());
+        try {
+            onBusinessFail(chainContext, businessException);
+            logStr.append(" onBusinessFail success");
+            return null;
+        } catch (BusinessException e) {
+            logStr.append(" onBusinessFail business fail msg=").append(getExceptionLog(e));
+            return buildFailResult(e.getCode(), e.getMsg());
+        } catch (Exception e) {
+            logStr.append(" onBusinessFail unknown fail msg=").append(getExceptionLog(e));
+            return buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.ON_BUSINESS_FAIL.getMsg() + " error=" + getExceptionLog(e));
+        } finally {
+            log.info(logStr.toString());
+        }
+    }
+
+    /**
+     * 未知失败时执行
+     *
+     * @param chainContext chainContext
+     * @param exception    exception
+     * @return ProcessResult
+     */
+    private ProcessResult<T> doOnUnknowFail(ChainContext<T> chainContext, Exception exception) {
+        StringBuffer logStr = new StringBuffer(LOG_PREFIX + chainContext.getLogStr());
+        try {
+            onUnknowFail(chainContext, exception);
+            logStr.append(" onUnknowFail success");
+            return null;
+        } catch (BusinessException e) {
+            logStr.append(" onUnknowFail business fail msg=").append(getExceptionLog(e));
+            return buildFailResult(e.getCode(), e.getMsg());
+        } catch (Exception e) {
+            logStr.append(" onUnknowFail unknown fail msg=").append(getExceptionLog(e));
+            return buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.ON_UNKNOW_FAIL.getMsg() + " error=" + getExceptionLog(e));
+        } finally {
+            log.info(logStr.toString());
         }
     }
 
@@ -248,7 +365,7 @@ public abstract class AbstractChain<T> {
      */
     public <R> ProcessResult<R> execute(@NonNull ChainContext<T> chainContext, Function<T, R> getResultData) {
         ProcessResult processResult = execute(chainContext);
-        if (processResult.isSuccess()){
+        if (processResult.isSuccess()) {
             processResult.setData(getResultData.apply((T) processResult.getData()));
             return processResult;
         }
@@ -273,7 +390,7 @@ public abstract class AbstractChain<T> {
      */
     public <R> ProcessResult<R> execute(@NonNull ChainContext<T> chainContext, Function<T, R> getResultData, @NonNull ExecutorService executorService) {
         ProcessResult processResult = execute(chainContext, executorService);
-        if (processResult.isSuccess()){
+        if (processResult.isSuccess()) {
             processResult.setData(getResultData.apply((T) processResult.getData()));
             return processResult;
         }
@@ -292,9 +409,9 @@ public abstract class AbstractChain<T> {
         initChainAndCheckChainComplete();
 
         // 校验参数
-        ProcessResult<T> processResult = doCheckParams(chainContext);
-        if (Objects.nonNull(processResult)) {
-            return processResult;
+        ProcessResult<T> checkParamsResult = doCheckParams(chainContext);
+        if (Objects.nonNull(checkParamsResult)) {
+            return checkParamsResult;
         }
 
         // 获取初始化链路参数
@@ -306,26 +423,48 @@ public abstract class AbstractChain<T> {
         try {
             chainParam.getSuccessNodeCountDownLatch().await();
         } catch (InterruptedException e) {
+            log.info(LOG_PREFIX + chainContext.getLogStr() + " await unknown fail msg=" + getExceptionLog(e));
             chainParam.setProcessResult(buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + " error=" + getExceptionLog(e)));
         }
 
         // 失败
         if (Objects.nonNull(chainParam.getProcessResult())) {
             if (chainParam.isTimeoutFail()) {
-                onTimeoutFail(chainContext);
+                ProcessResult<T> onTimeoutFailResult = doOnTimeoutFail(chainContext);
+                if (Objects.nonNull(onTimeoutFailResult)) {
+                    return onTimeoutFailResult;
+                }
             } else if (chainParam.isBusinessFail()) {
-                onBusinessFail(chainContext, (BusinessException) chainParam.getFailException());
+                ProcessResult<T> onBusinessFailResult = doOnBusinessFail(chainContext, (BusinessException) chainParam.getFailException());
+                if (Objects.nonNull(onBusinessFailResult)) {
+                    return onBusinessFailResult;
+                }
             } else {
-                onUnknowFail(chainContext, chainParam.getFailException());
+                ProcessResult<T> onUnknowFailResult = doOnUnknowFail(chainContext, chainParam.getFailException());
+                if (Objects.nonNull(onUnknowFailResult)) {
+                    return onUnknowFailResult;
+                }
             }
 
-            afterExecute(chainContext);
+            ProcessResult<T> afterExecuteResult = doAfterExecute(chainContext);
+            if (Objects.nonNull(afterExecuteResult)) {
+                return afterExecuteResult;
+            }
+
             return chainParam.getProcessResult();
         }
 
         // 成功
-        onSuccess(chainContext);
-        afterExecute(chainContext);
+        ProcessResult<T> onSuccessResult = doOnSuccess(chainContext);
+        if (Objects.nonNull(onSuccessResult)) {
+            return onSuccessResult;
+        }
+
+        ProcessResult<T> afterExecuteResult = doAfterExecute(chainContext);
+        if (Objects.nonNull(afterExecuteResult)) {
+            return afterExecuteResult;
+        }
+
         return buildSuccessResult(chainContext.getContextInfo());
     }
 
@@ -595,7 +734,7 @@ public abstract class AbstractChain<T> {
     }
 
     /**
-     * 无论成功失败，最后都会执行
+     * 执行后执行，无论成功失败
      *
      * @param chainContext chainContext
      */
