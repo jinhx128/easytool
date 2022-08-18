@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -241,6 +242,21 @@ public abstract class AbstractChain<T> {
     }
 
     /**
+     * 执行当前链路，使用默认配置的线程池
+     *
+     * @param chainContext chainContext
+     */
+    public <R> ProcessResult<R> execute(@NonNull ChainContext<T> chainContext, Function<T, R> getResultData) {
+        ProcessResult processResult = execute(chainContext);
+        if (processResult.isSuccess()){
+            processResult.setData(getResultData.apply((T) processResult.getData()));
+            return processResult;
+        }
+
+        return processResult;
+    }
+
+    /**
      * 执行当前链路，指定线程池，如果为空则使用默认配置的线程池
      *
      * @param chainContext    chainContext
@@ -248,6 +264,21 @@ public abstract class AbstractChain<T> {
      */
     public ProcessResult<T> execute(@NonNull ChainContext<T> chainContext, @NonNull ExecutorService executorService) {
         return doExecute(chainContext, executorService);
+    }
+
+    /**
+     * 执行当前链路，使用默认配置的线程池
+     *
+     * @param chainContext chainContext
+     */
+    public <R> ProcessResult<R> execute(@NonNull ChainContext<T> chainContext, Function<T, R> getResultData, @NonNull ExecutorService executorService) {
+        ProcessResult processResult = execute(chainContext, executorService);
+        if (processResult.isSuccess()){
+            processResult.setData(getResultData.apply((T) processResult.getData()));
+            return processResult;
+        }
+
+        return processResult;
     }
 
     /**
@@ -565,6 +596,8 @@ public abstract class AbstractChain<T> {
 
     /**
      * 无论成功失败，最后都会执行
+     *
+     * @param chainContext chainContext
      */
     protected void afterExecute(@NonNull ChainContext<T> chainContext) {
     }

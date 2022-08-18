@@ -76,19 +76,35 @@ public class ProcessTest {
         ChainContext<TestContext> chainContext = ChainContext.create(TestContext.class);
         chainContext.getContextInfo().setReq("req");
         ProcessResult<TestContext> processResult = testChain.execute(chainContext);
-        System.out.println(processResult.getData());
+        System.out.println(processResult);
     }
 
     @Test
     public void test4() {
         ChainContext<TestContext> chainContext = ChainContext.create(TestContext.class);
         chainContext.getContextInfo().setReq("req");
-        ProcessResult<TestContext> processResult = Handler.execute(TestChain.class, chainContext);
-        System.out.println(processResult.getData());
+        ProcessResult<String> processResult = testChain.execute(chainContext, TestContext::getE);
+        System.out.println(processResult);
     }
 
     @Test
-    public void test5() throws InterruptedException {
+    public void test5() {
+        ChainContext<TestContext> chainContext = ChainContext.create(TestContext.class);
+        chainContext.getContextInfo().setReq("req");
+        ProcessResult<TestContext> processResult = Handler.execute(TestChain.class, chainContext);
+        System.out.println(processResult);
+    }
+
+    @Test
+    public void test6() {
+        ChainContext<TestContext> chainContext = ChainContext.create(TestContext.class);
+        chainContext.getContextInfo().setReq("req");
+        ProcessResult<String> processResult = Handler.execute(TestChain.class, chainContext, TestContext::getE);
+        System.out.println(processResult);
+    }
+
+    @Test
+    public void test7() throws InterruptedException {
         int count = 1;
         long start = System.currentTimeMillis();
         CountDownLatch countDownLatch = new CountDownLatch(count);
@@ -113,4 +129,3 @@ public class ProcessTest {
     }
 
 }
-
