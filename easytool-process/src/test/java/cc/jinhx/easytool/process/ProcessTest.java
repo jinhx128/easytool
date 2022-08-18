@@ -1,7 +1,7 @@
 package cc.jinhx.easytool.process;
 
 import cc.jinhx.easytool.process.chain.ChainContext;
-import cc.jinhx.easytool.process.chain.Handler;
+import cc.jinhx.easytool.process.chain.ChainHandler;
 import cc.jinhx.easytool.process.chain.TestChain;
 import cc.jinhx.easytool.process.context.TestContext;
 import lombok.extern.slf4j.Slf4j;
@@ -91,7 +91,7 @@ public class ProcessTest {
     public void test5() {
         ChainContext<TestContext> chainContext = ChainContext.create(TestContext.class);
         chainContext.getContextInfo().setReq("req");
-        ProcessResult<TestContext> processResult = Handler.execute(TestChain.class, chainContext);
+        ProcessResult<TestContext> processResult = ChainHandler.execute(TestChain.class, chainContext);
         System.out.println(processResult);
     }
 
@@ -99,7 +99,7 @@ public class ProcessTest {
     public void test6() {
         ChainContext<TestContext> chainContext = ChainContext.create(TestContext.class);
         chainContext.getContextInfo().setReq("req");
-        ProcessResult<String> processResult = Handler.execute(TestChain.class, chainContext, TestContext::getE);
+        ProcessResult<String> processResult = ChainHandler.execute(TestChain.class, chainContext, TestContext::getE);
         System.out.println(processResult);
     }
 
