@@ -145,6 +145,13 @@ public abstract class AbstractChain<T> {
 
 
     /**
+     * 是否开启监控
+     */
+    protected boolean openMonitor(){
+        return false;
+    }
+
+    /**
      * 校验参数
      *
      * @param chainContext chainContext
@@ -506,7 +513,7 @@ public abstract class AbstractChain<T> {
             nodeClasses.forEach(nodeClass -> {
                 ChainNode chainNode = chainNodeMap.get(nodeClass);
                 if (Objects.nonNull(chainNode)) {
-                    ThreadUtil.within(buildNodeFuture(chainContext, executorService, nodeClass, chainParam), Duration.ofMillis(chainNode.getTimeout()))
+                    ThreadUtil.withinTime(buildNodeFuture(chainContext, executorService, nodeClass, chainParam), Duration.ofMillis(chainNode.getTimeout()))
                             .thenRun(() -> startRunNode(chainContext, executorService, childNodeClassMap.get(nodeClass), chainParam))
                             .exceptionally(throwable -> {
                                 chainNode.getFailHandle().getFailHandle().dealFailNode(chainContext, executorService, nodeClass, chainParam, chainNodeMap, childNodeClassMap, this, throwable);
@@ -551,13 +558,16 @@ public abstract class AbstractChain<T> {
 
             // 设置子线程上下文
             initThreadContext(chainParam.getThreadContextInitConfigMap());
-            chainNode.getNode().doExecute(chainContext, this.getClass().getName());
+            long time = chainNode.getNode().doExecute(chainContext, this.getClass());
             // 移除子线程上下文
             removeThreadContext(chainParam.getThreadContextInitConfigSet());
 
             // 节点执行成功
             chainParam.getSuccessNodeCountDownLatch().countDown();
             chainParam.getNodeClassStatusMap().put(nodeClass, true);
+            if (openMonitor()){
+                ChainMonitor.addCount(this.getClass(), chainNode.getNode().getClass(), time);
+            }
         }, executorService);
     }
 
@@ -594,7 +604,7 @@ public abstract class AbstractChain<T> {
      */
     @NonNull
     protected ExecutorService getThreadPool() {
-        return ThreadPoolManager.COMMON_CHAIN_THREAD_POOL;
+        return ThreadUtil.COMMON_CHAIN_THREAD_POOL;
     }
 
 

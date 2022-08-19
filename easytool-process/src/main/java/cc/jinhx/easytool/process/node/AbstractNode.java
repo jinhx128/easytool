@@ -2,6 +2,7 @@ package cc.jinhx.easytool.process.node;
 
 import cc.jinhx.easytool.process.BusinessException;
 import cc.jinhx.easytool.process.ProcessResult;
+import cc.jinhx.easytool.process.chain.AbstractChain;
 import cc.jinhx.easytool.process.chain.ChainContext;
 import lombok.Data;
 import lombok.NonNull;
@@ -54,11 +55,12 @@ public abstract class AbstractNode<T> {
      * 通用执行方法
      *
      * @param chainContext chainContext
-     * @param chainName    chainName
+     * @param chainClass   chainClass
+     * @return long
      */
-    public void doExecute(@NonNull ChainContext<T> chainContext, String chainName) {
+    public long doExecute(@NonNull ChainContext<T> chainContext, Class<? extends AbstractChain> chainClass) {
         StringBuilder logInfo = new StringBuilder();
-        logInfo.append(LOG_PREFIX).append(chainContext.getLogStr()).append(LOG_END).append(CHAIN).append("[").append(chainName)
+        logInfo.append(LOG_PREFIX).append(chainContext.getLogStr()).append(LOG_END).append(CHAIN).append("[").append(chainClass.getName())
                 .append("]").append(NODE).append("[").append(this.getClass().getName()).append("]");
 
         long startTime = System.currentTimeMillis();
@@ -70,10 +72,12 @@ public abstract class AbstractNode<T> {
             execute(chainContext);
         }
 
-        logInfo.append(LOG_TIME).append(System.currentTimeMillis() - startTime);
+        long time = System.currentTimeMillis() - startTime;
+
+        logInfo.append(LOG_TIME).append(time);
         log.info(logInfo.toString());
-        // 手动释放内存
         logInfo.setLength(0);
+        return time;
     }
 
 

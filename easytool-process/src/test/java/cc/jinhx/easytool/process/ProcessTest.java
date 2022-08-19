@@ -111,7 +111,7 @@ public class ProcessTest {
 
         for (int i = 10; i > count; i--) {
             int finalI = i;
-            ThreadUtil.within(CompletableFuture.runAsync(() -> {
+            ThreadUtil.withinTime(CompletableFuture.runAsync(() -> {
                 try {
                     Thread.sleep(finalI * 100);
                 } catch (InterruptedException e) {
