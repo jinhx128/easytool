@@ -26,12 +26,12 @@ public class TestChain extends AbstractChain<TestContext> {
      */
     @Override
     protected void setNodeInfo() {
-        this.addNodes(new HashSet<>(Arrays.asList(TestGetAByReqNode.class)));
-        this.addNodes(new HashSet<>(Arrays.asList(TestGetBByReqNode.class)), 7000);
-        this.addNode(TestGetC2ByBNode.class, ChainNode.FailHandleEnum.RETRY, ChainNode.RetryTimesEnum.FIVE);
-        this.addNode(TestGetC1ByANode.class, 1000L);
-        this.addNode(TestGetDNode.class, ChainNode.FailHandleEnum.ABANDON);
-        this.addNode(TestGetEByAllNode.class);
+        this.addInterruptNodes(Arrays.asList(TestGetAByReqNode.class));
+        this.addInterruptNodes(Arrays.asList(TestGetBByReqNode.class), 7000);
+        this.addRetryNode(TestGetC2ByBNode.class, ChainNode.RetryTimesEnum.FIVE);
+        this.addInterruptNode(TestGetC1ByANode.class, 1000L);
+        this.addAbandonNode(TestGetDNode.class);
+        this.addInterruptNode(TestGetEByAllNode.class);
     }
 
 }
