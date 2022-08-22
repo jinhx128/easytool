@@ -88,7 +88,7 @@ public class ChainNode {
             MAP = Arrays.stream(TimeoutEnum.values()).collect(Collectors.toMap(TimeoutEnum::getCode, obj -> obj));
         }
 
-        public static Boolean containsCode(long code) {
+        public static boolean containsCode(long code) {
             return MAP.containsKey(code);
         }
 
@@ -110,6 +110,7 @@ public class ChainNode {
 
     }
 
+
     @AllArgsConstructor
     @Getter
     public enum FailHandleEnum {
@@ -129,7 +130,7 @@ public class ChainNode {
             MAP = Arrays.stream(FailHandleEnum.values()).collect(Collectors.toMap(FailHandleEnum::getCode, obj -> obj));
         }
 
-        public static Boolean containsCode(int code) {
+        public static boolean containsCode(int code) {
             return MAP.containsKey(code);
         }
 
@@ -151,6 +152,7 @@ public class ChainNode {
 
     }
 
+
     @AllArgsConstructor
     @Getter
     public enum RetryTimesEnum {
@@ -170,7 +172,7 @@ public class ChainNode {
             MAP = Arrays.stream(RetryTimesEnum.values()).collect(Collectors.toMap(RetryTimesEnum::getCode, obj -> obj));
         }
 
-        public static Boolean containsCode(int code) {
+        public static boolean containsCode(int code) {
             return MAP.containsKey(code);
         }
 

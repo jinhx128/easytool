@@ -35,7 +35,6 @@ public class InterruptFailHandle extends AbstractFailHandle {
         long timeout = chainNode.getTimeout();
         AbstractNode node = chainNode.getNode();
         ProcessResult<T> processResult;
-        boolean isLastTimes = getIsLastTimes(nodeClass, chainParam, chainNode);
         String exceptionLog = getExceptionLog((Exception) throwable);
         Throwable cause = throwable.getCause();
 
@@ -53,25 +52,23 @@ public class InterruptFailHandle extends AbstractFailHandle {
             processResult = buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
         }
 
-        if (isLastTimes) {
-            chainParam.setFailException((Exception) cause);
+        chainParam.setFailException((Exception) cause);
 
-            if (cause instanceof TimeoutException) {
-                node.onTimeoutFail(chainContext);
-                chainParam.setTimeoutFail(true);
-            } else if (cause instanceof ProcessException) {
-                node.onUnknowFail(chainContext, (Exception) cause);
-            } else if (cause instanceof BusinessException) {
-                node.onBusinessFail(chainContext, (BusinessException) cause);
-                chainParam.setBusinessFail(true);
-            } else {
-                node.onUnknowFail(chainContext, (Exception) cause);
-            }
-
-            chainParam.setProcessResult(processResult);
-
-            node.afterExecute(chainContext);
+        if (cause instanceof TimeoutException) {
+            node.onTimeoutFail(chainContext);
+            chainParam.setTimeoutFail(true);
+        } else if (cause instanceof ProcessException) {
+            node.onUnknowFail(chainContext, (Exception) cause);
+        } else if (cause instanceof BusinessException) {
+            node.onBusinessFail(chainContext, (BusinessException) cause);
+            chainParam.setBusinessFail(true);
+        } else {
+            node.onUnknowFail(chainContext, (Exception) cause);
         }
+
+        chainParam.setProcessResult(processResult);
+
+        node.afterExecute(chainContext);
 
         logStr.append(" interrupt node msg=").append(exceptionLog);
         log.info(logStr.toString());

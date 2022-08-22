@@ -491,7 +491,7 @@ public abstract class AbstractChain<T> {
         chainParam.setThreadContextInitConfigSet(getThreadContextInitConfigs());
 
         // 初始化所有节点状态
-        chainParam.setNodeClassStatusMap(chainNodeMap.entrySet().stream().collect(Collectors.toConcurrentMap(Map.Entry::getKey, v -> false, (v1, v2) -> v2)));
+        chainParam.setNodeClassStatusMap(chainNodeMap.entrySet().stream().collect(Collectors.toConcurrentMap(Map.Entry::getKey, v -> ChainParam.NodeStatusEnum.NOT_STARTED.getCode(), (v1, v2) -> v2)));
         // 初始化所有节点重试次数
         chainParam.setNodeClassRetryCountMap(chainNodeMap.entrySet().stream().collect(Collectors.toConcurrentMap(Map.Entry::getKey, v -> 0, (v1, v2) -> v2)));
         // 初始化计数器
@@ -546,16 +546,18 @@ public abstract class AbstractChain<T> {
                 return;
             }
 
-            // 已经执行过的
-            if (chainParam.getNodeClassStatusMap().get(nodeClass)) {
+            // 父节点还有未执行完的
+            Set<Class<? extends AbstractNode>> parentNodeClassSet = parentNodeClassMap.get(nodeClass);
+            if (!CollectionUtils.isEmpty(parentNodeClassSet) && parentNodeClassSet.stream().anyMatch(item -> ChainParam.NodeStatusEnum.COMPLETED.getCode() != chainParam.getNodeClassStatusMap().get(item))) {
                 return;
             }
 
-            // 父节点还有未执行过的
-            Set<Class<? extends AbstractNode>> parentNodeClassSet = parentNodeClassMap.get(nodeClass);
-            if (!CollectionUtils.isEmpty(parentNodeClassSet) && parentNodeClassSet.stream().anyMatch(item -> !chainParam.getNodeClassStatusMap().get(item))) {
+            // 已经开始执行或已经执行完
+            if (chainParam.getNodeClassStatusMap().get(nodeClass) != ChainParam.NodeStatusEnum.NOT_STARTED.getCode()) {
                 return;
             }
+
+            chainParam.getNodeClassStatusMap().put(nodeClass, ChainParam.NodeStatusEnum.ONGOING.getCode());
 
             // 设置子线程上下文
             initThreadContext(chainParam.getThreadContextInitConfigMap());
@@ -565,7 +567,7 @@ public abstract class AbstractChain<T> {
 
             // 节点执行成功
             chainParam.getSuccessNodeCountDownLatch().countDown();
-            chainParam.getNodeClassStatusMap().put(nodeClass, true);
+            chainParam.getNodeClassStatusMap().put(nodeClass, ChainParam.NodeStatusEnum.COMPLETED.getCode());
             if (openMonitor()){
                 Monitor.addCount(this.getClass(), chainNode.getNode().getClass(), time);
             }

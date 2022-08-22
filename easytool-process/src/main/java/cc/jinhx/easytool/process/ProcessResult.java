@@ -70,7 +70,7 @@ public class ProcessResult<T> implements Serializable {
             MAP = Arrays.stream(BaseEnum.values()).collect(Collectors.toMap(BaseEnum::getCode, obj -> obj));
         }
 
-        public static Boolean containsCode(int code) {
+        public static boolean containsCode(int code) {
             return MAP.containsKey(code);
         }
 

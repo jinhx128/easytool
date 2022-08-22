@@ -33,7 +33,6 @@ public class AbandonFailHandle extends AbstractFailHandle {
         String nodeName = nodeClass.getName();
         long timeout = chainNode.getTimeout();
         AbstractNode node = chainNode.getNode();
-        boolean isLastTimes = getIsLastTimes(nodeClass, chainParam, chainNode);
         String exceptionLog = getExceptionLog((Exception) throwable);
         Throwable cause = throwable.getCause();
 
@@ -47,24 +46,22 @@ public class AbandonFailHandle extends AbstractFailHandle {
             logStr.append(" execute unknown fail node [").append(nodeName).append("]");
         }
 
-        if (isLastTimes) {
-            if (cause instanceof TimeoutException) {
-                node.onTimeoutFail(chainContext);
-            } else if (cause instanceof ProcessException) {
-                node.onUnknowFail(chainContext, (Exception) cause);
-            } else if (cause instanceof BusinessException) {
-                node.onBusinessFail(chainContext, (BusinessException) cause);
-            } else {
-                node.onUnknowFail(chainContext, (Exception) cause);
-            }
-
-            node.afterExecute(chainContext);
+        if (cause instanceof TimeoutException) {
+            node.onTimeoutFail(chainContext);
+        } else if (cause instanceof ProcessException) {
+            node.onUnknowFail(chainContext, (Exception) cause);
+        } else if (cause instanceof BusinessException) {
+            node.onBusinessFail(chainContext, (BusinessException) cause);
+        } else {
+            node.onUnknowFail(chainContext, (Exception) cause);
         }
+
+        node.afterExecute(chainContext);
 
         logStr.append(" abandon node msg=").append(exceptionLog);
         log.info(logStr.toString());
 
-        chainParam.getNodeClassStatusMap().put(nodeClass, true);
+        chainParam.getNodeClassStatusMap().put(nodeClass, ChainParam.NodeStatusEnum.COMPLETED.getCode());
         chainParam.getSuccessNodeCountDownLatch().countDown();
 
         chain.startRunNode(chainContext, executorService, childNodeClassMap.get(nodeClass), chainParam);

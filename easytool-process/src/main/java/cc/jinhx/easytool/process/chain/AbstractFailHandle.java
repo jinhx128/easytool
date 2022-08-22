@@ -63,7 +63,7 @@ public abstract class AbstractFailHandle {
      * @param chainNodeMap chainNodeMap
      */
     protected <T> void interruptChain(ChainParam<T> chainParam, Map<Class<? extends AbstractNode>, ChainNode> chainNodeMap) {
-        chainParam.getNodeClassStatusMap().putAll(chainNodeMap.entrySet().stream().collect(Collectors.toConcurrentMap(Map.Entry::getKey, v -> true, (v1, v2) -> v2)));
+        chainParam.getNodeClassStatusMap().putAll(chainNodeMap.entrySet().stream().collect(Collectors.toConcurrentMap(Map.Entry::getKey, v -> ChainParam.NodeStatusEnum.COMPLETED.getCode(), (v1, v2) -> v2)));
         while (chainParam.getSuccessNodeCountDownLatch().getCount() > 0) {
             chainParam.getSuccessNodeCountDownLatch().countDown();
         }
