@@ -13,7 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
 
 /**
- * 获取失败处理
+ * 抛弃失败处理
  *
  * @author jinhx
  * @since 2022-03-21
@@ -27,23 +27,23 @@ public class AbandonFailHandle extends AbstractFailHandle {
     protected <T> void dealFailNode(ChainContext<T> chainContext, ExecutorService executorService, Class<? extends AbstractNode> nodeClass,
                                 ChainParam<T> chainParam, Map<Class<? extends AbstractNode>, ChainNode> chainNodeMap,
                                 Map<Class<? extends AbstractNode>, Set<Class<? extends AbstractNode>>> childNodeClassMap,
-                                AbstractChain chain, Throwable throwable) {
-        StringBuffer logStr = new StringBuffer(LOG_PREFIX + chainContext.getLogStr());
+                                AbstractChain chain, Throwable throwable, String logPrefix) {
+        StringBuffer logStr = new StringBuffer(logPrefix);
         ChainNode chainNode = chainNodeMap.get(nodeClass);
-        String nodeName = nodeClass.getName();
+        String nodeName = nodeClass.getSimpleName();
         long timeout = chainNode.getTimeout();
         AbstractNode node = chainNode.getNode();
         String exceptionLog = getExceptionLog((Exception) throwable);
         Throwable cause = throwable.getCause();
 
         if (cause instanceof TimeoutException) {
-            logStr.append(" execute timeout fail node [").append(nodeName).append("]").append(" timeout=").append(timeout);
+            logStr.append(" node [").append(nodeName).append("] execute timeout fail timeout=").append(timeout);
         } else if (cause instanceof ProcessException) {
-            logStr.append(" execute process fail node [").append(nodeName).append("]");
+            logStr.append(" node [").append(nodeName).append("] execute process fail");
         } else if (cause instanceof BusinessException) {
-            logStr.append(" execute business fail node [").append(nodeName).append("]");
+            logStr.append(" node [").append(nodeName).append("] execute business fail");
         } else {
-            logStr.append(" execute unknown fail node [").append(nodeName).append("]");
+            logStr.append(" node [").append(nodeName).append("] execute unknown fail");
         }
 
         if (cause instanceof TimeoutException) {

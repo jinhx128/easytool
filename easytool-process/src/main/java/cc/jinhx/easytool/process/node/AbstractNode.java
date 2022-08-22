@@ -20,15 +20,6 @@ import java.util.Set;
 @Slf4j
 public abstract class AbstractNode<T> {
 
-    private final String LOG_PREFIX = "process nodeLog ";
-    private final String LOG_END = " execute success";
-    private final String CHAIN = " chain ";
-    private final String NODE = " node ";
-    private final String LOG_SKIP = " skip=";
-    private final String LOG_TIME = " time=";
-    private final String TRUE = "true";
-    private final String FALSE = "false";
-
     /**
      * 获取依赖节点集合
      *
@@ -60,21 +51,21 @@ public abstract class AbstractNode<T> {
      */
     public long doExecute(@NonNull ChainContext<T> chainContext, Class<? extends AbstractChain> chainClass) {
         StringBuilder logInfo = new StringBuilder();
-        logInfo.append(LOG_PREFIX).append(chainContext.getLogStr()).append(LOG_END).append(CHAIN).append("[").append(chainClass.getName())
-                .append("]").append(NODE).append("[").append(this.getClass().getName()).append("]");
+        logInfo.append("process nodeLog ").append(chainContext.getLogStr()).append(" chain ").append("[").append(chainClass.getSimpleName())
+                .append("]").append(" node ").append("[").append(this.getClass().getSimpleName()).append("]").append(" execute success");
 
         long startTime = System.currentTimeMillis();
 
         if (isSkip(chainContext)) {
-            logInfo.append(LOG_SKIP).append(TRUE);
+            logInfo.append(" skip=").append("true");
         } else {
-            logInfo.append(LOG_SKIP).append(FALSE);
+            logInfo.append(" skip=").append("false");
             execute(chainContext);
         }
 
         long time = System.currentTimeMillis() - startTime;
 
-        logInfo.append(LOG_TIME).append(time);
+        logInfo.append(" time=").append(time);
         log.info(logInfo.toString());
         logInfo.setLength(0);
         return time;

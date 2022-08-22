@@ -21,8 +21,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class AbstractFailHandle {
 
-    protected static final String LOG_PREFIX = "process chainLog ";
-
     /**
      * 获取拼接错误日志
      *
@@ -70,23 +68,21 @@ public abstract class AbstractFailHandle {
     }
 
     /**
-     * 获取是否最后一次执行该节点
-     *
-     * @param nodeClass  nodeClass
-     * @param chainParam chainParam
-     * @param chainNode  chainNode
-     * @return 是否最后一次执行该节点
-     */
-    protected <T> boolean getIsLastTimes(Class<? extends AbstractNode> nodeClass, ChainParam<T> chainParam, ChainNode chainNode) {
-        return ChainNode.FailHandleEnum.RETRY.getCode() != chainNode.getFailHandle().getCode() || chainNode.getRetryTimes().getCode() == chainParam.getNodeClassRetryCountMap().get(nodeClass);
-    }
-
-    /**
      * 处理失败节点
+     *
+     * @param chainContext chainContext
+     * @param executorService executorService
+     * @param nodeClass nodeClass
+     * @param chainParam chainParam
+     * @param chainNodeMap chainNodeMap
+     * @param childNodeClassMap childNodeClassMap
+     * @param chain chain
+     * @param throwable throwable
+     * @param logPrefix logPrefix
      */
     protected abstract <T> void dealFailNode(ChainContext<T> chainContext, ExecutorService executorService, Class<? extends AbstractNode> nodeClass,
                                          ChainParam<T> chainParam, Map<Class<? extends AbstractNode>, ChainNode> chainNodeMap,
                                          Map<Class<? extends AbstractNode>, Set<Class<? extends AbstractNode>>> childNodeClassMap,
-                                         AbstractChain chain, Throwable throwable);
+                                         AbstractChain chain, Throwable throwable, String logPrefix);
 
 }

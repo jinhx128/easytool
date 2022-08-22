@@ -68,10 +68,10 @@ public class Monitor {
      */
     private static void openMonitor() {
         ThreadUtil.CHAIN_MONITOR_SCHEDULER.scheduleAtFixedRate(() -> chainNodeExecuteInfoMap.forEach((chainClass, nodeExecuteInfoMap) -> {
-            StringBuffer logStr = new StringBuffer("process monitorLog chain [" + chainClass.getName() + "]");
+            StringBuffer logStr = new StringBuffer("process monitorLog chain [" + chainClass.getSimpleName() + "]");
             nodeExecuteInfoMap.forEach((nodeClass, nodeExecuteInfo) -> {
                 if (Objects.nonNull(nodeExecuteInfo)) {
-                    logStr.append(" node [").append(nodeClass.getName()).append("] averageTime=").append(nodeExecuteInfo.getTotalTime() / nodeExecuteInfo.getTotalCount())
+                    logStr.append(" node [").append(nodeClass.getSimpleName()).append("] averageTime=").append(nodeExecuteInfo.getTotalTime() / nodeExecuteInfo.getTotalCount())
                             .append(" minTime=").append(nodeExecuteInfo.getMinTime()).append(" maxTime=").append(nodeExecuteInfo.getMaxTime())
                             .append(" totalTime=").append(nodeExecuteInfo.getTotalTime()).append(" totalCount=").append(nodeExecuteInfo.getTotalCount());
                 }

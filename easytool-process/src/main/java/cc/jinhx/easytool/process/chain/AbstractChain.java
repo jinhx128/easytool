@@ -26,8 +26,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class AbstractChain<T> {
 
-    private static final String LOG_PREFIX = "process chainLog ";
-
     /**
      * 是否校验过，只需要校验一次
      */
@@ -117,7 +115,7 @@ public abstract class AbstractChain<T> {
      */
     private void addNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, ChainNode.FailHandleEnum failHandle, ChainNode.RetryTimesEnum retryTimes, Long timeout) {
         if (CollectionUtils.isEmpty(nodeClasses)) {
-            throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
+            throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getSimpleName());
         }
 
         for (Class<? extends AbstractNode> nodeClass : nodeClasses) {
@@ -135,11 +133,11 @@ public abstract class AbstractChain<T> {
      */
     private void addNode(Class<? extends AbstractNode> nodeClass, ChainNode.FailHandleEnum failHandle, ChainNode.RetryTimesEnum retryTimes, Long timeout) {
         if (Objects.isNull(nodeClass)) {
-            throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getName());
+            throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getSimpleName());
         }
 
         if (chainNodeMap.containsKey(nodeClass)) {
-            throw new ProcessException(ProcessException.MsgEnum.NODE_REPEAT.getMsg() + "=" + nodeClass.getName());
+            throw new ProcessException(ProcessException.MsgEnum.NODE_REPEAT.getMsg() + "=" + nodeClass.getSimpleName());
         }
         chainNodeMap.put(nodeClass, ChainNode.create(null, failHandle, timeout, retryTimes));
     }
@@ -183,7 +181,7 @@ public abstract class AbstractChain<T> {
             if (Objects.isNull(chainNode.getNode())) {
                 AbstractNode node = SpringUtil.getBean(nodeClass);
                 if (Objects.isNull(node)) {
-                    throw new ProcessException(ProcessException.MsgEnum.NODE_UNREGISTERED.getMsg() + "=" + nodeClass.getName());
+                    throw new ProcessException(ProcessException.MsgEnum.NODE_UNREGISTERED.getMsg() + "=" + nodeClass.getSimpleName());
                 }
 
                 chainNode.setNode(node);
@@ -209,7 +207,7 @@ public abstract class AbstractChain<T> {
                 if (!CollectionUtils.isEmpty(v)) {
                     v.forEach(item -> {
                         if (Objects.isNull(chainNodeMap.get(item)) || Objects.isNull(chainNodeMap.get(item).getNode())) {
-                            throw new ProcessException(ProcessException.MsgEnum.CHAIN_INCOMPLETE.getMsg() + "=" + item.getName());
+                            throw new ProcessException(ProcessException.MsgEnum.CHAIN_INCOMPLETE.getMsg() + "=" + item.getSimpleName());
                         }
                     });
                 }
@@ -224,7 +222,7 @@ public abstract class AbstractChain<T> {
      * @return ProcessResult
      */
     private ProcessResult<T> doCheckParams(ChainContext<T> chainContext) {
-        StringBuffer logStr = new StringBuffer(LOG_PREFIX + chainContext.getLogStr());
+        StringBuffer logStr = new StringBuffer(getLogPrefix(chainContext));
         try {
             checkParams(chainContext);
             logStr.append(" checkParams success");
@@ -249,7 +247,7 @@ public abstract class AbstractChain<T> {
      * @return ProcessResult
      */
     private ProcessResult<T> doOnSuccess(ChainContext<T> chainContext) {
-        StringBuffer logStr = new StringBuffer(LOG_PREFIX + chainContext.getLogStr());
+        StringBuffer logStr = new StringBuffer(getLogPrefix(chainContext));
         try {
             onSuccess(chainContext);
             logStr.append(" onSuccess success");
@@ -272,7 +270,7 @@ public abstract class AbstractChain<T> {
      * @return ProcessResult
      */
     private ProcessResult<T> doAfterExecute(ChainContext<T> chainContext) {
-        StringBuffer logStr = new StringBuffer(LOG_PREFIX + chainContext.getLogStr());
+        StringBuffer logStr = new StringBuffer(getLogPrefix(chainContext));
         try {
             afterExecute(chainContext);
             logStr.append(" afterExecute success");
@@ -295,7 +293,7 @@ public abstract class AbstractChain<T> {
      * @return ProcessResult
      */
     private ProcessResult<T> doOnTimeoutFail(ChainContext<T> chainContext) {
-        StringBuffer logStr = new StringBuffer(LOG_PREFIX + chainContext.getLogStr());
+        StringBuffer logStr = new StringBuffer(getLogPrefix(chainContext));
         try {
             onTimeoutFail(chainContext);
             logStr.append(" onTimeoutFail success");
@@ -319,7 +317,7 @@ public abstract class AbstractChain<T> {
      * @return ProcessResult
      */
     private ProcessResult<T> doOnBusinessFail(ChainContext<T> chainContext, BusinessException businessException) {
-        StringBuffer logStr = new StringBuffer(LOG_PREFIX + chainContext.getLogStr());
+        StringBuffer logStr = new StringBuffer(getLogPrefix(chainContext));
         try {
             onBusinessFail(chainContext, businessException);
             logStr.append(" onBusinessFail success");
@@ -343,7 +341,7 @@ public abstract class AbstractChain<T> {
      * @return ProcessResult
      */
     private ProcessResult<T> doOnUnknowFail(ChainContext<T> chainContext, Exception exception) {
-        StringBuffer logStr = new StringBuffer(LOG_PREFIX + chainContext.getLogStr());
+        StringBuffer logStr = new StringBuffer(getLogPrefix(chainContext));
         try {
             onUnknowFail(chainContext, exception);
             logStr.append(" onUnknowFail success");
@@ -430,10 +428,12 @@ public abstract class AbstractChain<T> {
         startRunNode(chainContext, executorService, firstNodeClassSet, chainParam);
 
         // 等待执行完成
+        String logPrefix = getLogPrefix(chainContext);
         try {
             chainParam.getSuccessNodeCountDownLatch().await();
+            log.info(logPrefix + " execute success");
         } catch (InterruptedException e) {
-            log.info(LOG_PREFIX + chainContext.getLogStr() + " await unknown fail msg=" + getExceptionLog(e));
+            log.info(logPrefix + " execute await unknown fail msg=" + getExceptionLog(e));
             chainParam.setProcessResult(buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + " error=" + getExceptionLog(e)));
         }
 
@@ -517,7 +517,7 @@ public abstract class AbstractChain<T> {
                     ThreadUtil.withinTime(buildNodeFuture(chainContext, executorService, nodeClass, chainParam), Duration.ofMillis(chainNode.getTimeout()))
                             .thenRun(() -> startRunNode(chainContext, executorService, childNodeClassMap.get(nodeClass), chainParam))
                             .exceptionally(throwable -> {
-                                chainNode.getFailHandle().getFailHandle().dealFailNode(chainContext, executorService, nodeClass, chainParam, chainNodeMap, childNodeClassMap, this, throwable);
+                                chainNode.getFailHandle().getFailHandle().dealFailNode(chainContext, executorService, nodeClass, chainParam, chainNodeMap, childNodeClassMap, this, throwable, getLogPrefix(chainContext));
                                 return null;
                             });
                 }
@@ -572,6 +572,16 @@ public abstract class AbstractChain<T> {
                 Monitor.addCount(this.getClass(), chainNode.getNode().getClass(), time);
             }
         }, executorService);
+    }
+
+    /**
+     * 获取日志前缀
+     *
+     * @param chainContext chainContext
+     * @return 日志前缀
+     */
+    private String getLogPrefix(ChainContext<T> chainContext) {
+        return "process chainLog " + chainContext.getLogStr() + " chain [" + this.getClass().getSimpleName() + "]";
     }
 
     /**

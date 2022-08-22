@@ -29,10 +29,10 @@ public class RetryFailHandle extends AbstractFailHandle {
     protected <T> void dealFailNode(ChainContext<T> chainContext, ExecutorService executorService, Class<? extends AbstractNode> nodeClass,
                                 ChainParam<T> chainParam, Map<Class<? extends AbstractNode>, ChainNode> chainNodeMap,
                                 Map<Class<? extends AbstractNode>, Set<Class<? extends AbstractNode>>> childNodeClassMap,
-                                AbstractChain chain, Throwable throwable) {
-        StringBuffer logStr = new StringBuffer(LOG_PREFIX + chainContext.getLogStr());
+                                AbstractChain chain, Throwable throwable, String logPrefix) {
+        StringBuffer logStr = new StringBuffer(logPrefix);
         ChainNode chainNode = chainNodeMap.get(nodeClass);
-        String nodeName = nodeClass.getName();
+        String nodeName = nodeClass.getSimpleName();
         long timeout = chainNode.getTimeout();
         ChainNode.RetryTimesEnum retryTimes = chainNode.getRetryTimes();
         AbstractNode node = chainNode.getNode();
@@ -42,16 +42,16 @@ public class RetryFailHandle extends AbstractFailHandle {
         Throwable cause = throwable.getCause();
 
         if (cause instanceof TimeoutException) {
-            logStr.append(" execute timeout fail node [").append(nodeName).append("]").append(" timeout=").append(timeout);
+            logStr.append(" node [").append(nodeName).append("] execute timeout fail timeout=").append(timeout);
             processResult = buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);
         } else if (cause instanceof ProcessException) {
-            logStr.append(" execute process fail node [").append(nodeName).append("]");
+            logStr.append(" node [").append(nodeName).append("] execute process fail");
             processResult = buildFailResult(((ProcessException) cause).getCode(), ((ProcessException) cause).getMsg());
         } else if (cause instanceof BusinessException) {
-            logStr.append(" execute business fail node [").append(nodeName).append("]");
+            logStr.append(" node [").append(nodeName).append("] execute business fail");
             processResult = buildFailResult(((BusinessException) cause).getCode(), ((BusinessException) cause).getMsg());
         } else {
-            logStr.append(" execute unknown fail node [").append(nodeName).append("]");
+            logStr.append(" node [").append(nodeName).append("] execute unknown fail");
             processResult = buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
         }
 
@@ -90,6 +90,18 @@ public class RetryFailHandle extends AbstractFailHandle {
         } else {
             interruptChain(chainParam, chainNodeMap);
         }
+    }
+
+    /**
+     * 获取是否最后一次执行该节点
+     *
+     * @param nodeClass  nodeClass
+     * @param chainParam chainParam
+     * @param chainNode  chainNode
+     * @return 是否最后一次执行该节点
+     */
+    private <T> boolean getIsLastTimes(Class<? extends AbstractNode> nodeClass, ChainParam<T> chainParam, ChainNode chainNode) {
+        return ChainNode.FailHandleEnum.RETRY.getCode() != chainNode.getFailHandle().getCode() || chainNode.getRetryTimes().getCode() == chainParam.getNodeClassRetryCountMap().get(nodeClass);
     }
 
 }
