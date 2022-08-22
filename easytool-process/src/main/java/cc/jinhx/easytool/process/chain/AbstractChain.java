@@ -1,6 +1,7 @@
 package cc.jinhx.easytool.process.chain;
 
 import cc.jinhx.easytool.process.*;
+import cc.jinhx.easytool.process.monitor.Monitor;
 import cc.jinhx.easytool.process.node.AbstractNode;
 import lombok.Data;
 import lombok.NonNull;
@@ -566,7 +567,7 @@ public abstract class AbstractChain<T> {
             chainParam.getSuccessNodeCountDownLatch().countDown();
             chainParam.getNodeClassStatusMap().put(nodeClass, true);
             if (openMonitor()){
-                ChainMonitor.addCount(this.getClass(), chainNode.getNode().getClass(), time);
+                Monitor.addCount(this.getClass(), chainNode.getNode().getClass(), time);
             }
         }, executorService);
     }
