@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -44,9 +45,9 @@ public class ChainParam<T> {
     private Map<Class<? extends AbstractNode>, Integer> nodeClassRetryCountMap;
 
     /**
-     * 成功节点计数器
+     * 执行完节点计数器
      */
-    private CountDownLatch successNodeCountDownLatch;
+    private CountDownLatch completedNodeCountDownLatch;
 
     /**
      * 结果
@@ -73,18 +74,24 @@ public class ChainParam<T> {
     @Getter
     public enum NodeStatusEnum {
 
-        NOT_STARTED(-1, "未开始"),
-        ONGOING(0, "进行中"),
-        COMPLETED(1, "已完成")
-        ;
+        NOT_STARTED(1, "未开始"),
+        ONGOING(2, "进行中"),
+        RETRYING(3, "重试中"),
+        COMPLETED(4, "已完成");
 
         private final int code;
         private final String msg;
+
+        private static final Set<Integer> CAN_RUN_NODE_STATUS_SET;
 
         private static final Map<Integer, NodeStatusEnum> MAP;
 
         static {
             MAP = Arrays.stream(NodeStatusEnum.values()).collect(Collectors.toMap(NodeStatusEnum::getCode, obj -> obj));
+
+            CAN_RUN_NODE_STATUS_SET = new HashSet<>();
+            CAN_RUN_NODE_STATUS_SET.add(NOT_STARTED.getCode());
+            CAN_RUN_NODE_STATUS_SET.add(RETRYING.getCode());
         }
 
         public static boolean containsCode(int code) {
@@ -105,6 +112,15 @@ public class ChainParam<T> {
             }
 
             return MAP.get(code);
+        }
+
+        /**
+         * 获取可执行状态集合
+         *
+         * @return Set<Integer>
+         */
+        public static Set<Integer> getCanRunNodeStatusSet() {
+            return CAN_RUN_NODE_STATUS_SET;
         }
 
     }

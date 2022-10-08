@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -27,9 +28,9 @@ import java.util.stream.Collectors;
 public abstract class AbstractChain<T> {
 
     /**
-     * 是否校验过，只需要校验一次
+     * 默认超时时间，单位毫秒
      */
-    private boolean isChecked = false;
+    private final static long DEFAULT_TIMEOUT = 200L;
 
     /**
      * 首节点class集合
@@ -51,9 +52,13 @@ public abstract class AbstractChain<T> {
      */
     private Map<Class<? extends AbstractNode>, ChainNode> chainNodeMap = new HashMap<>();
 
-
+    /**
+     * 初始化并校验链路完整性
+     */
     public AbstractChain() {
         setNodeInfo();
+        initChain();
+        checkChainComplete();
     }
 
 
@@ -139,14 +144,22 @@ public abstract class AbstractChain<T> {
         if (chainNodeMap.containsKey(nodeClass)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_REPEAT.getMsg() + "=" + nodeClass.getSimpleName());
         }
+
         chainNodeMap.put(nodeClass, ChainNode.create(null, failHandle, timeout, retryTimes));
     }
 
 
     /**
+     * 获取超时时间，单位毫秒
+     */
+    protected long getTimeout() {
+        return DEFAULT_TIMEOUT;
+    }
+
+    /**
      * 是否开启监控
      */
-    protected boolean openMonitor(){
+    protected boolean openMonitor() {
         return false;
     }
 
@@ -161,17 +174,6 @@ public abstract class AbstractChain<T> {
      * 设置节点信息，添加节点操作
      */
     protected abstract void setNodeInfo();
-
-    /**
-     * 初始化并校验链路完整性
-     */
-    protected void initChainAndCheckChainComplete() {
-        if (!isChecked) {
-            initChain();
-            checkChainComplete();
-            isChecked = true;
-        }
-    }
 
     /**
      * 初始化链路
@@ -413,9 +415,6 @@ public abstract class AbstractChain<T> {
      * @param executorService executorService
      */
     private ProcessResult<T> doExecute(ChainContext<T> chainContext, ExecutorService executorService) {
-        // 校验链路
-        initChainAndCheckChainComplete();
-
         // 校验参数
         ProcessResult<T> checkParamsResult = doCheckParams(chainContext);
         if (Objects.nonNull(checkParamsResult)) {
@@ -430,11 +429,26 @@ public abstract class AbstractChain<T> {
         // 等待执行完成
         String logPrefix = getLogPrefix(chainContext);
         try {
-            chainParam.getSuccessNodeCountDownLatch().await();
-            log.info(logPrefix + " execute success");
+            long timeout = getTimeout();
+            boolean awaitResult = chainParam.getCompletedNodeCountDownLatch().await(timeout, TimeUnit.MILLISECONDS);
+            if (!awaitResult) {
+                log.info(logPrefix + " execute timeout fail timeout=" + timeout);
+
+                // 中断链路
+                chainParam.getNodeClassStatusMap().putAll(chainNodeMap.entrySet().stream().collect(Collectors.toConcurrentMap(Map.Entry::getKey, v -> ChainParam.NodeStatusEnum.COMPLETED.getCode(), (v1, v2) -> v2)));
+                while (chainParam.getCompletedNodeCountDownLatch().getCount() > 0) {
+                    chainParam.getCompletedNodeCountDownLatch().countDown();
+                }
+
+                chainParam.setTimeoutFail(true);
+                chainParam.setProcessResult(buildFailResult(ProcessResult.BaseEnum.TIMEOUT_FAIL.getCode(), ProcessException.MsgEnum.CHAIN_TIMEOUT.getMsg() + " timeout=" + timeout));
+            } else {
+                log.info(logPrefix + " execute success");
+            }
         } catch (InterruptedException e) {
             log.info(logPrefix + " execute await unknown fail msg=" + getExceptionLog(e));
-            chainParam.setProcessResult(buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + " error=" + getExceptionLog(e)));
+
+            chainParam.setProcessResult(buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.CHAIN_UNKNOWN.getMsg() + " error=" + getExceptionLog(e)));
         }
 
         // 失败
@@ -495,7 +509,7 @@ public abstract class AbstractChain<T> {
         // 初始化所有节点重试次数
         chainParam.setNodeClassRetryCountMap(chainNodeMap.entrySet().stream().collect(Collectors.toConcurrentMap(Map.Entry::getKey, v -> 0, (v1, v2) -> v2)));
         // 初始化计数器
-        chainParam.setSuccessNodeCountDownLatch(new CountDownLatch(chainNodeMap.size()));
+        chainParam.setCompletedNodeCountDownLatch(new CountDownLatch(chainNodeMap.size()));
         chainParam.setTimeoutFail(false);
         chainParam.setBusinessFail(false);
         return chainParam;
@@ -552,8 +566,8 @@ public abstract class AbstractChain<T> {
                 return;
             }
 
-            // 已经开始执行或已经执行完
-            if (chainParam.getNodeClassStatusMap().get(nodeClass) != ChainParam.NodeStatusEnum.NOT_STARTED.getCode()) {
+            // 判断当前状态是否可执行
+            if (!ChainParam.NodeStatusEnum.getCanRunNodeStatusSet().contains(chainParam.getNodeClassStatusMap().get(nodeClass))) {
                 return;
             }
 
@@ -566,9 +580,9 @@ public abstract class AbstractChain<T> {
             removeThreadContext(chainParam.getThreadContextInitConfigSet());
 
             // 节点执行成功
-            chainParam.getSuccessNodeCountDownLatch().countDown();
+            chainParam.getCompletedNodeCountDownLatch().countDown();
             chainParam.getNodeClassStatusMap().put(nodeClass, ChainParam.NodeStatusEnum.COMPLETED.getCode());
-            if (openMonitor()){
+            if (openMonitor()) {
                 Monitor.addCount(this.getClass(), chainNode.getNode().getClass(), time);
             }
         }, executorService);

@@ -52,14 +52,19 @@ public class ProcessResult<T> implements Serializable {
         return BaseEnum.UNKNOW_FAIL.getCode() == this.code;
     }
 
+    public boolean isTimeoutFail() {
+        return BaseEnum.TIMEOUT_FAIL.getCode() == this.code;
+    }
+
 
     @AllArgsConstructor
     @Getter
     public enum BaseEnum {
 
         SUCCESS(1, "success"),
-        BUSINESS_FAIL(0, "business fail"),
-        UNKNOW_FAIL(-1, "unknown fail");
+        TIMEOUT_FAIL(2, "timeout fail"),
+        BUSINESS_FAIL(3, "business fail"),
+        UNKNOW_FAIL(4, "unknown fail");
 
         private final int code;
         private final String msg;

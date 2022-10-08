@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
@@ -26,9 +27,9 @@ public class InterruptFailHandle extends AbstractFailHandle {
 
     @Override
     protected <T> void dealFailNode(ChainContext<T> chainContext, ExecutorService executorService, Class<? extends AbstractNode> nodeClass,
-                                ChainParam<T> chainParam, Map<Class<? extends AbstractNode>, ChainNode> chainNodeMap,
-                                Map<Class<? extends AbstractNode>, Set<Class<? extends AbstractNode>>> childNodeClassMap,
-                                AbstractChain chain, Throwable throwable, String logPrefix) {
+                                    ChainParam<T> chainParam, Map<Class<? extends AbstractNode>, ChainNode> chainNodeMap,
+                                    Map<Class<? extends AbstractNode>, Set<Class<? extends AbstractNode>>> childNodeClassMap,
+                                    AbstractChain chain, Throwable throwable, String logPrefix) {
         StringBuffer logStr = new StringBuffer(logPrefix);
         ChainNode chainNode = chainNodeMap.get(nodeClass);
         String nodeName = nodeClass.getSimpleName();
@@ -36,44 +37,53 @@ public class InterruptFailHandle extends AbstractFailHandle {
         AbstractNode node = chainNode.getNode();
         ProcessResult<T> processResult;
         String exceptionLog = getExceptionLog((Exception) throwable);
-        Throwable cause = throwable.getCause();
-
-        if (cause instanceof TimeoutException) {
-            logStr.append(" node [").append(nodeName).append("] execute timeout fail timeout=").append(timeout);
-            processResult = buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);
-        } else if (cause instanceof ProcessException) {
-            logStr.append(" node [").append(nodeName).append(" execute process fail");
-            processResult = buildFailResult(((ProcessException) cause).getCode(), ((ProcessException) cause).getMsg());
-        } else if (cause instanceof BusinessException) {
-            logStr.append(" node [").append(nodeName).append("] execute business fail");
-            processResult = buildFailResult(((BusinessException) cause).getCode(), ((BusinessException) cause).getMsg());
-        } else {
-            logStr.append(" node [").append(nodeName).append("]").append(" execute unknown fail");
-            processResult = buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
+        Throwable cause = throwable;
+        if (Objects.nonNull(throwable.getCause())) {
+            cause = throwable.getCause();
         }
 
-        chainParam.setFailException((Exception) cause);
+        try {
+            if (cause instanceof TimeoutException) {
+                logStr.append(" node [").append(nodeName).append("] execute timeout fail timeout=").append(timeout);
+                processResult = buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);
+            } else if (cause instanceof ProcessException) {
+                logStr.append(" node [").append(nodeName).append(" execute process fail");
+                processResult = buildFailResult(((ProcessException) cause).getCode(), ((ProcessException) cause).getMsg());
+            } else if (cause instanceof BusinessException) {
+                logStr.append(" node [").append(nodeName).append("] execute business fail");
+                processResult = buildFailResult(((BusinessException) cause).getCode(), ((BusinessException) cause).getMsg());
+            } else {
+                logStr.append(" node [").append(nodeName).append("]").append(" execute unknown fail");
+                processResult = buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
+            }
 
-        if (cause instanceof TimeoutException) {
-            node.onTimeoutFail(chainContext);
-            chainParam.setTimeoutFail(true);
-        } else if (cause instanceof ProcessException) {
-            node.onUnknowFail(chainContext, (Exception) cause);
-        } else if (cause instanceof BusinessException) {
-            node.onBusinessFail(chainContext, (BusinessException) cause);
-            chainParam.setBusinessFail(true);
-        } else {
-            node.onUnknowFail(chainContext, (Exception) cause);
+            chainParam.setFailException((Exception) cause);
+
+            if (cause instanceof TimeoutException) {
+                node.onTimeoutFail(chainContext);
+                chainParam.setTimeoutFail(true);
+            } else if (cause instanceof ProcessException) {
+                node.onUnknowFail(chainContext, (Exception) cause);
+            } else if (cause instanceof BusinessException) {
+                node.onBusinessFail(chainContext, (BusinessException) cause);
+                chainParam.setBusinessFail(true);
+            } else {
+                node.onUnknowFail(chainContext, (Exception) cause);
+            }
+
+            chainParam.setProcessResult(processResult);
+
+            node.afterExecute(chainContext);
+
+            logStr.append(" interrupt node msg=").append(exceptionLog);
+
+        } catch (Exception e) {
+            logStr.append(" interrupt node dealFailNode fail msg=").append(getExceptionLog(e));
+        } finally {
+            log.info(logStr.toString());
+
+            interruptChain(chainParam, chainNodeMap);
         }
-
-        chainParam.setProcessResult(processResult);
-
-        node.afterExecute(chainContext);
-
-        logStr.append(" interrupt node msg=").append(exceptionLog);
-        log.info(logStr.toString());
-
-        interruptChain(chainParam, chainNodeMap);
     }
 
 }

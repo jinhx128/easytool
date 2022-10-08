@@ -52,6 +52,8 @@ public class ProcessException extends RuntimeException {
         NODE_REPEAT("节点重复"),
         NODE_EMPTY("节点为空"),
 
+        CHAIN_UNKNOWN("链路未知异常"),
+        CHAIN_TIMEOUT("链路超时"),
         CHAIN_UNREGISTERED("链路未注册"),
         CHAIN_INCOMPLETE("链路不完整");
 

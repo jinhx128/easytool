@@ -62,27 +62,27 @@ public abstract class AbstractFailHandle {
      */
     protected <T> void interruptChain(ChainParam<T> chainParam, Map<Class<? extends AbstractNode>, ChainNode> chainNodeMap) {
         chainParam.getNodeClassStatusMap().putAll(chainNodeMap.entrySet().stream().collect(Collectors.toConcurrentMap(Map.Entry::getKey, v -> ChainParam.NodeStatusEnum.COMPLETED.getCode(), (v1, v2) -> v2)));
-        while (chainParam.getSuccessNodeCountDownLatch().getCount() > 0) {
-            chainParam.getSuccessNodeCountDownLatch().countDown();
+        while (chainParam.getCompletedNodeCountDownLatch().getCount() > 0) {
+            chainParam.getCompletedNodeCountDownLatch().countDown();
         }
     }
 
     /**
      * 处理失败节点
      *
-     * @param chainContext chainContext
-     * @param executorService executorService
-     * @param nodeClass nodeClass
-     * @param chainParam chainParam
-     * @param chainNodeMap chainNodeMap
+     * @param chainContext      chainContext
+     * @param executorService   executorService
+     * @param nodeClass         nodeClass
+     * @param chainParam        chainParam
+     * @param chainNodeMap      chainNodeMap
      * @param childNodeClassMap childNodeClassMap
-     * @param chain chain
-     * @param throwable throwable
-     * @param logPrefix logPrefix
+     * @param chain             chain
+     * @param throwable         throwable
+     * @param logPrefix         logPrefix
      */
     protected abstract <T> void dealFailNode(ChainContext<T> chainContext, ExecutorService executorService, Class<? extends AbstractNode> nodeClass,
-                                         ChainParam<T> chainParam, Map<Class<? extends AbstractNode>, ChainNode> chainNodeMap,
-                                         Map<Class<? extends AbstractNode>, Set<Class<? extends AbstractNode>>> childNodeClassMap,
-                                         AbstractChain chain, Throwable throwable, String logPrefix);
+                                             ChainParam<T> chainParam, Map<Class<? extends AbstractNode>, ChainNode> chainNodeMap,
+                                             Map<Class<? extends AbstractNode>, Set<Class<? extends AbstractNode>>> childNodeClassMap,
+                                             AbstractChain chain, Throwable throwable, String logPrefix);
 
 }

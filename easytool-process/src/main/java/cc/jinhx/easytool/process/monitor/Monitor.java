@@ -42,8 +42,8 @@ public class Monitor {
      * @param time       time
      */
     public static void addCount(Class<? extends AbstractChain> chainClass, Class<? extends AbstractNode> nodeClass, long time) {
-        if (Objects.nonNull(chainClass) && Objects.nonNull(nodeClass) && time > 0) {
-            ThreadUtil.COMMON_CHAIN_THREAD_POOL.execute(() -> {
+        ThreadUtil.COMMON_CHAIN_THREAD_POOL.execute(() -> {
+            if (Objects.nonNull(chainClass) && Objects.nonNull(nodeClass) && time > 0) {
                 Map<Class<? extends AbstractNode>, NodeExecuteInfo> nodeExecuteInfoMap = chainNodeExecuteInfoMap.computeIfAbsent(chainClass, v -> new ConcurrentHashMap<>());
                 NodeExecuteInfo nodeExecuteInfo = nodeExecuteInfoMap.get(nodeClass);
                 if (Objects.isNull(nodeExecuteInfo)) {
@@ -59,8 +59,8 @@ public class Monitor {
                     }
                 }
                 nodeExecuteInfoMap.put(nodeClass, nodeExecuteInfo);
-            });
-        }
+            }
+        });
     }
 
     /**
