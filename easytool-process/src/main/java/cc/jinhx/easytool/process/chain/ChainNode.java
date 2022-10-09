@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.LongSupplier;
 import java.util.stream.Collectors;
 
 /**
@@ -33,9 +34,9 @@ public class ChainNode {
     private FailHandleEnum failHandle;
 
     /**
-     * 节点执行超时时间
+     * 获取节点执行超时时间
      */
-    private long timeout;
+    private LongSupplier getTimeout;
 
     /**
      * 重试次数
@@ -47,18 +48,18 @@ public class ChainNode {
      *
      * @param node       node
      * @param failHandle failHandle
-     * @param timeout    timeout
+     * @param getTimeout getTimeout
      * @param retryTimes retryTimes
      * @return ChainNode
      */
-    public static ChainNode create(AbstractNode node, FailHandleEnum failHandle, Long timeout, RetryTimesEnum retryTimes) {
-        ChainNode chainNode = new ChainNode(node, FailHandleEnum.INTERRUPT, TimeoutEnum.COMMONLY.getCode(), RetryTimesEnum.ONE);
+    public static ChainNode create(AbstractNode node, FailHandleEnum failHandle, LongSupplier getTimeout, RetryTimesEnum retryTimes) {
+        ChainNode chainNode = new ChainNode(node, FailHandleEnum.INTERRUPT, TimeoutEnum::getDefaultTimeout, RetryTimesEnum.ONE);
 
         if (Objects.nonNull(failHandle)) {
             chainNode.setFailHandle(failHandle);
         }
-        if (Objects.nonNull(timeout)) {
-            chainNode.setTimeout(timeout);
+        if (Objects.nonNull(getTimeout)) {
+            chainNode.setGetTimeout(getTimeout);
         }
         if (Objects.nonNull(retryTimes)) {
             chainNode.setRetryTimes(retryTimes);
@@ -106,6 +107,10 @@ public class ChainNode {
             }
 
             return MAP.get(code);
+        }
+
+        public static long getDefaultTimeout() {
+            return TimeoutEnum.COMMONLY.getCode();
         }
 
     }

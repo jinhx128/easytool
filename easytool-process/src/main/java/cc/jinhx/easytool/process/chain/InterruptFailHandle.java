@@ -31,18 +31,19 @@ public class InterruptFailHandle extends AbstractFailHandle {
                                     Map<Class<? extends AbstractNode>, Set<Class<? extends AbstractNode>>> childNodeClassMap,
                                     AbstractChain chain, Throwable throwable, String logPrefix) {
         StringBuffer logStr = new StringBuffer(logPrefix);
-        ChainNode chainNode = chainNodeMap.get(nodeClass);
-        String nodeName = nodeClass.getSimpleName();
-        long timeout = chainNode.getTimeout();
-        AbstractNode node = chainNode.getNode();
-        ProcessResult<T> processResult;
-        String exceptionLog = getExceptionLog((Exception) throwable);
-        Throwable cause = throwable;
-        if (Objects.nonNull(throwable.getCause())) {
-            cause = throwable.getCause();
-        }
-
         try {
+            ChainNode chainNode = chainNodeMap.get(nodeClass);
+            String nodeName = nodeClass.getSimpleName();
+            long timeout = chainNode.getGetTimeout().getAsLong();
+            AbstractNode node = chainNode.getNode();
+            ProcessResult<T> processResult;
+            String exceptionLog = getExceptionLog((Exception) throwable);
+            Throwable cause = throwable;
+            if (Objects.nonNull(throwable.getCause())) {
+                cause = throwable.getCause();
+            }
+
+
             if (cause instanceof TimeoutException) {
                 logStr.append(" node [").append(nodeName).append("] execute timeout fail timeout=").append(timeout);
                 processResult = buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);

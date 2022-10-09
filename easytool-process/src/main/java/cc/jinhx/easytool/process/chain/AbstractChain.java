@@ -15,6 +15,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.LongSupplier;
 import java.util.stream.Collectors;
 
 /**
@@ -66,48 +67,48 @@ public abstract class AbstractChain<T> {
         addNode(nodeClass, ChainNode.FailHandleEnum.INTERRUPT, null, null);
     }
 
-    protected void addInterruptNode(@NonNull Class<? extends AbstractNode> nodeClass, long timeout) {
-        addNode(nodeClass, ChainNode.FailHandleEnum.INTERRUPT, null, timeout);
+    protected void addInterruptNode(@NonNull Class<? extends AbstractNode> nodeClass, LongSupplier getTimeout) {
+        addNode(nodeClass, ChainNode.FailHandleEnum.INTERRUPT, null, getTimeout);
     }
 
     protected void addAbandonNode(@NonNull Class<? extends AbstractNode> nodeClass) {
         addNode(nodeClass, ChainNode.FailHandleEnum.ABANDON, null, null);
     }
 
-    protected void addAbandonNode(@NonNull Class<? extends AbstractNode> nodeClass, long timeout) {
-        addNode(nodeClass, ChainNode.FailHandleEnum.ABANDON, null, timeout);
+    protected void addAbandonNode(@NonNull Class<? extends AbstractNode> nodeClass, LongSupplier getTimeout) {
+        addNode(nodeClass, ChainNode.FailHandleEnum.ABANDON, null, getTimeout);
     }
 
     protected void addRetryNode(@NonNull Class<? extends AbstractNode> nodeClass, ChainNode.RetryTimesEnum retryTimes) {
         addNode(nodeClass, ChainNode.FailHandleEnum.RETRY, retryTimes, null);
     }
 
-    protected void addRetryNode(@NonNull Class<? extends AbstractNode> nodeClass, ChainNode.RetryTimesEnum retryTimes, long timeout) {
-        addNode(nodeClass, ChainNode.FailHandleEnum.RETRY, retryTimes, timeout);
+    protected void addRetryNode(@NonNull Class<? extends AbstractNode> nodeClass, ChainNode.RetryTimesEnum retryTimes, LongSupplier getTimeout) {
+        addNode(nodeClass, ChainNode.FailHandleEnum.RETRY, retryTimes, getTimeout);
     }
 
     protected void addInterruptNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses) {
         addNodes(nodeClasses, ChainNode.FailHandleEnum.INTERRUPT, null, null);
     }
 
-    protected void addInterruptNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, long timeout) {
-        addNodes(nodeClasses, ChainNode.FailHandleEnum.INTERRUPT, null, timeout);
+    protected void addInterruptNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, LongSupplier getTimeout) {
+        addNodes(nodeClasses, ChainNode.FailHandleEnum.INTERRUPT, null, getTimeout);
     }
 
     protected void addAbandonNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses) {
         addNodes(nodeClasses, ChainNode.FailHandleEnum.ABANDON, null, null);
     }
 
-    protected void addAbandonNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, long timeout) {
-        addNodes(nodeClasses, ChainNode.FailHandleEnum.ABANDON, null, timeout);
+    protected void addAbandonNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, LongSupplier getTimeout) {
+        addNodes(nodeClasses, ChainNode.FailHandleEnum.ABANDON, null, getTimeout);
     }
 
     protected void addRetryNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, ChainNode.RetryTimesEnum retryTimes) {
         addNodes(nodeClasses, ChainNode.FailHandleEnum.RETRY, retryTimes, null);
     }
 
-    protected void addRetryNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, ChainNode.RetryTimesEnum retryTimes, long timeout) {
-        addNodes(nodeClasses, ChainNode.FailHandleEnum.RETRY, retryTimes, timeout);
+    protected void addRetryNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, ChainNode.RetryTimesEnum retryTimes, LongSupplier getTimeout) {
+        addNodes(nodeClasses, ChainNode.FailHandleEnum.RETRY, retryTimes, getTimeout);
     }
 
     /**
@@ -115,16 +116,16 @@ public abstract class AbstractChain<T> {
      *
      * @param nodeClasses nodeClasses
      * @param failHandle  failHandle
-     * @param timeout     timeout
+     * @param getTimeout  getTimeout
      * @param retryTimes  retryTimes
      */
-    private void addNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, ChainNode.FailHandleEnum failHandle, ChainNode.RetryTimesEnum retryTimes, Long timeout) {
+    private void addNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, ChainNode.FailHandleEnum failHandle, ChainNode.RetryTimesEnum retryTimes, LongSupplier getTimeout) {
         if (CollectionUtils.isEmpty(nodeClasses)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getSimpleName());
         }
 
         for (Class<? extends AbstractNode> nodeClass : nodeClasses) {
-            addNode(nodeClass, failHandle, retryTimes, timeout);
+            addNode(nodeClass, failHandle, retryTimes, getTimeout);
         }
     }
 
@@ -133,10 +134,10 @@ public abstract class AbstractChain<T> {
      *
      * @param nodeClass  nodeClass
      * @param failHandle failHandle
-     * @param timeout    timeout
+     * @param getTimeout getTimeout
      * @param retryTimes retryTimes
      */
-    private void addNode(Class<? extends AbstractNode> nodeClass, ChainNode.FailHandleEnum failHandle, ChainNode.RetryTimesEnum retryTimes, Long timeout) {
+    private void addNode(Class<? extends AbstractNode> nodeClass, ChainNode.FailHandleEnum failHandle, ChainNode.RetryTimesEnum retryTimes, LongSupplier getTimeout) {
         if (Objects.isNull(nodeClass)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getSimpleName());
         }
@@ -145,7 +146,7 @@ public abstract class AbstractChain<T> {
             throw new ProcessException(ProcessException.MsgEnum.NODE_REPEAT.getMsg() + "=" + nodeClass.getSimpleName());
         }
 
-        chainNodeMap.put(nodeClass, ChainNode.create(null, failHandle, timeout, retryTimes));
+        chainNodeMap.put(nodeClass, ChainNode.create(null, failHandle, getTimeout, retryTimes));
     }
 
 
@@ -528,7 +529,7 @@ public abstract class AbstractChain<T> {
             nodeClasses.forEach(nodeClass -> {
                 ChainNode chainNode = chainNodeMap.get(nodeClass);
                 if (Objects.nonNull(chainNode)) {
-                    ThreadUtil.withinTime(buildNodeFuture(chainContext, executorService, nodeClass, chainParam), Duration.ofMillis(chainNode.getTimeout()))
+                    ThreadUtil.withinTime(buildNodeFuture(chainContext, executorService, nodeClass, chainParam), Duration.ofMillis(chainNode.getGetTimeout().getAsLong()))
                             .thenRun(() -> startRunNode(chainContext, executorService, childNodeClassMap.get(nodeClass), chainParam))
                             .exceptionally(throwable -> {
                                 chainNode.getFailHandle().getFailHandle().dealFailNode(chainContext, executorService, nodeClass, chainParam, chainNodeMap, childNodeClassMap, this, throwable, getLogPrefix(chainContext));

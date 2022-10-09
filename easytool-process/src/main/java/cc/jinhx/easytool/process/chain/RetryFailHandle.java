@@ -33,20 +33,21 @@ public class RetryFailHandle extends AbstractFailHandle {
                                     AbstractChain chain, Throwable throwable, String logPrefix) {
         StringBuffer logStr = new StringBuffer(logPrefix);
         ChainNode chainNode = chainNodeMap.get(nodeClass);
-        String nodeName = nodeClass.getSimpleName();
-        long timeout = chainNode.getTimeout();
-        ChainNode.RetryTimesEnum retryTimes = chainNode.getRetryTimes();
-        AbstractNode node = chainNode.getNode();
-        ProcessResult<T> processResult;
         boolean isLastTimes = getIsLastTimes(nodeClass, chainParam, chainNode);
-        String exceptionLog = getExceptionLog((Exception) throwable);
-        Throwable cause = throwable;
-        if (Objects.nonNull(throwable.getCause())) {
-            cause = throwable.getCause();
-        }
         int retryCount = chainParam.getNodeClassRetryCountMap().get(nodeClass) + 1;
-
         try {
+            String nodeName = nodeClass.getSimpleName();
+            long timeout = chainNode.getGetTimeout().getAsLong();
+            ChainNode.RetryTimesEnum retryTimes = chainNode.getRetryTimes();
+            AbstractNode node = chainNode.getNode();
+            ProcessResult<T> processResult;
+            String exceptionLog = getExceptionLog((Exception) throwable);
+            Throwable cause = throwable;
+            if (Objects.nonNull(throwable.getCause())) {
+                cause = throwable.getCause();
+            }
+
+
             if (cause instanceof TimeoutException) {
                 logStr.append(" node [").append(nodeName).append("] execute timeout fail timeout=").append(timeout);
                 processResult = buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);
