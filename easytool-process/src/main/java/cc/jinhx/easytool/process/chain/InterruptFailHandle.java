@@ -46,7 +46,7 @@ public class InterruptFailHandle extends AbstractFailHandle {
 
             if (cause instanceof TimeoutException) {
                 logStr.append(" node [").append(nodeName).append("] execute timeout fail nodeTimeout=").append(nodeTimeout);
-                processResult = buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);
+                processResult = buildFailResult(ProcessResult.BaseEnum.TIMEOUT_FAIL.getCode(), ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);
             } else if (cause instanceof ProcessException) {
                 logStr.append(" node [").append(nodeName).append(" execute process fail");
                 processResult = buildFailResult(((ProcessException) cause).getCode(), ((ProcessException) cause).getMsg());
