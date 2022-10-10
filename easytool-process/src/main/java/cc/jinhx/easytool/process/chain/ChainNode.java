@@ -24,6 +24,11 @@ import java.util.stream.Collectors;
 public class ChainNode {
 
     /**
+     * 默认节点超时时间，单位毫秒
+     */
+    private static final long DEFAULT_NODE_TIMEOUT = 200L;
+
+    /**
      * 节点对象
      */
     private AbstractNode node;
@@ -36,83 +41,46 @@ public class ChainNode {
     /**
      * 获取节点执行超时时间
      */
-    private LongSupplier getTimeout;
+    private LongSupplier getNodeTimeout;
 
     /**
      * 重试次数
      */
     private RetryTimesEnum retryTimes;
 
+
+    /**
+     * 获取默认节点超时时间，单位毫秒
+     *
+     * @return 默认节点超时时间，单位毫秒
+     */
+    public static long getDefaultNodeTimeout() {
+        return DEFAULT_NODE_TIMEOUT;
+    }
+
     /**
      * 创建链路节点
      *
-     * @param node       node
-     * @param failHandle failHandle
-     * @param getTimeout getTimeout
-     * @param retryTimes retryTimes
+     * @param node           node
+     * @param failHandle     failHandle
+     * @param getNodeTimeout getNodeTimeout
+     * @param retryTimes     retryTimes
      * @return ChainNode
      */
-    public static ChainNode create(AbstractNode node, FailHandleEnum failHandle, LongSupplier getTimeout, RetryTimesEnum retryTimes) {
-        ChainNode chainNode = new ChainNode(node, FailHandleEnum.INTERRUPT, TimeoutEnum::getDefaultTimeout, RetryTimesEnum.ONE);
+    public static ChainNode create(AbstractNode node, FailHandleEnum failHandle, LongSupplier getNodeTimeout, RetryTimesEnum retryTimes) {
+        ChainNode chainNode = new ChainNode(node, FailHandleEnum.INTERRUPT, ChainNode::getDefaultNodeTimeout, RetryTimesEnum.ONE);
 
         if (Objects.nonNull(failHandle)) {
             chainNode.setFailHandle(failHandle);
         }
-        if (Objects.nonNull(getTimeout)) {
-            chainNode.setGetTimeout(getTimeout);
+        if (Objects.nonNull(getNodeTimeout)) {
+            chainNode.setGetNodeTimeout(getNodeTimeout);
         }
         if (Objects.nonNull(retryTimes)) {
             chainNode.setRetryTimes(retryTimes);
         }
 
         return chainNode;
-    }
-
-
-    @AllArgsConstructor
-    @Getter
-    public enum TimeoutEnum {
-
-        SHORT(50L, "短"),
-        SHORTER(100L, "较短"),
-        COMMONLY(200L, "一般"),
-        LONGER(500L, "较长"),
-        LONG(1000L, "长"),
-        ;
-
-        private final long code;
-        private final String msg;
-
-        private static final Map<Long, TimeoutEnum> MAP;
-
-        static {
-            MAP = Arrays.stream(TimeoutEnum.values()).collect(Collectors.toMap(TimeoutEnum::getCode, obj -> obj));
-        }
-
-        public static boolean containsCode(long code) {
-            return MAP.containsKey(code);
-        }
-
-        public static String getMsg(long code) {
-            if (!MAP.containsKey(code)) {
-                return null;
-            }
-
-            return MAP.get(code).getMsg();
-        }
-
-        public static TimeoutEnum getEnum(long code) {
-            if (!MAP.containsKey(code)) {
-                return null;
-            }
-
-            return MAP.get(code);
-        }
-
-        public static long getDefaultTimeout() {
-            return TimeoutEnum.COMMONLY.getCode();
-        }
-
     }
 
 

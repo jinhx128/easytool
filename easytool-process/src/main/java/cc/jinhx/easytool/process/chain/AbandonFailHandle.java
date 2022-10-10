@@ -33,7 +33,7 @@ public class AbandonFailHandle extends AbstractFailHandle {
         try {
             ChainNode chainNode = chainNodeMap.get(nodeClass);
             String nodeName = nodeClass.getSimpleName();
-            long timeout = chainNode.getGetTimeout().getAsLong();
+            long nodeTimeout = chainNode.getGetNodeTimeout().getAsLong();
             AbstractNode node = chainNode.getNode();
             String exceptionLog = getExceptionLog((Exception) throwable);
             Throwable cause = throwable;
@@ -43,7 +43,7 @@ public class AbandonFailHandle extends AbstractFailHandle {
 
 
             if (cause instanceof TimeoutException) {
-                logStr.append(" node [").append(nodeName).append("] execute timeout fail timeout=").append(timeout);
+                logStr.append(" node [").append(nodeName).append("] execute timeout fail nodeTimeout=").append(nodeTimeout);
             } else if (cause instanceof ProcessException) {
                 logStr.append(" node [").append(nodeName).append("] execute process fail");
             } else if (cause instanceof BusinessException) {

@@ -37,7 +37,7 @@ public class RetryFailHandle extends AbstractFailHandle {
         int retryCount = chainParam.getNodeClassRetryCountMap().get(nodeClass) + 1;
         try {
             String nodeName = nodeClass.getSimpleName();
-            long timeout = chainNode.getGetTimeout().getAsLong();
+            long nodeTimeout = chainNode.getGetNodeTimeout().getAsLong();
             ChainNode.RetryTimesEnum retryTimes = chainNode.getRetryTimes();
             AbstractNode node = chainNode.getNode();
             ProcessResult<T> processResult;
@@ -49,7 +49,7 @@ public class RetryFailHandle extends AbstractFailHandle {
 
 
             if (cause instanceof TimeoutException) {
-                logStr.append(" node [").append(nodeName).append("] execute timeout fail timeout=").append(timeout);
+                logStr.append(" node [").append(nodeName).append("] execute timeout fail nodeTimeout=").append(nodeTimeout);
                 processResult = buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);
             } else if (cause instanceof ProcessException) {
                 logStr.append(" node [").append(nodeName).append("] execute process fail");

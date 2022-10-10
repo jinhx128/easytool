@@ -29,9 +29,9 @@ import java.util.stream.Collectors;
 public abstract class AbstractChain<T> {
 
     /**
-     * 默认超时时间，单位毫秒
+     * 默认链路超时时间，单位毫秒
      */
-    private final static long DEFAULT_TIMEOUT = 200L;
+    private final static long DEFAULT_CHAIN_TIMEOUT = 200L;
 
     /**
      * 首节点class集合
@@ -53,6 +53,7 @@ public abstract class AbstractChain<T> {
      */
     private Map<Class<? extends AbstractNode>, ChainNode> chainNodeMap = new HashMap<>();
 
+
     /**
      * 初始化并校验链路完整性
      */
@@ -67,77 +68,77 @@ public abstract class AbstractChain<T> {
         addNode(nodeClass, ChainNode.FailHandleEnum.INTERRUPT, null, null);
     }
 
-    protected void addInterruptNode(@NonNull Class<? extends AbstractNode> nodeClass, LongSupplier getTimeout) {
-        addNode(nodeClass, ChainNode.FailHandleEnum.INTERRUPT, null, getTimeout);
+    protected void addInterruptNode(@NonNull Class<? extends AbstractNode> nodeClass, LongSupplier getNodeTimeout) {
+        addNode(nodeClass, ChainNode.FailHandleEnum.INTERRUPT, null, getNodeTimeout);
     }
 
     protected void addAbandonNode(@NonNull Class<? extends AbstractNode> nodeClass) {
         addNode(nodeClass, ChainNode.FailHandleEnum.ABANDON, null, null);
     }
 
-    protected void addAbandonNode(@NonNull Class<? extends AbstractNode> nodeClass, LongSupplier getTimeout) {
-        addNode(nodeClass, ChainNode.FailHandleEnum.ABANDON, null, getTimeout);
+    protected void addAbandonNode(@NonNull Class<? extends AbstractNode> nodeClass, LongSupplier getNodeTimeout) {
+        addNode(nodeClass, ChainNode.FailHandleEnum.ABANDON, null, getNodeTimeout);
     }
 
     protected void addRetryNode(@NonNull Class<? extends AbstractNode> nodeClass, ChainNode.RetryTimesEnum retryTimes) {
         addNode(nodeClass, ChainNode.FailHandleEnum.RETRY, retryTimes, null);
     }
 
-    protected void addRetryNode(@NonNull Class<? extends AbstractNode> nodeClass, ChainNode.RetryTimesEnum retryTimes, LongSupplier getTimeout) {
-        addNode(nodeClass, ChainNode.FailHandleEnum.RETRY, retryTimes, getTimeout);
+    protected void addRetryNode(@NonNull Class<? extends AbstractNode> nodeClass, ChainNode.RetryTimesEnum retryTimes, LongSupplier getNodeTimeout) {
+        addNode(nodeClass, ChainNode.FailHandleEnum.RETRY, retryTimes, getNodeTimeout);
     }
 
     protected void addInterruptNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses) {
         addNodes(nodeClasses, ChainNode.FailHandleEnum.INTERRUPT, null, null);
     }
 
-    protected void addInterruptNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, LongSupplier getTimeout) {
-        addNodes(nodeClasses, ChainNode.FailHandleEnum.INTERRUPT, null, getTimeout);
+    protected void addInterruptNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, LongSupplier getNodeTimeout) {
+        addNodes(nodeClasses, ChainNode.FailHandleEnum.INTERRUPT, null, getNodeTimeout);
     }
 
     protected void addAbandonNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses) {
         addNodes(nodeClasses, ChainNode.FailHandleEnum.ABANDON, null, null);
     }
 
-    protected void addAbandonNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, LongSupplier getTimeout) {
-        addNodes(nodeClasses, ChainNode.FailHandleEnum.ABANDON, null, getTimeout);
+    protected void addAbandonNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, LongSupplier getNodeTimeout) {
+        addNodes(nodeClasses, ChainNode.FailHandleEnum.ABANDON, null, getNodeTimeout);
     }
 
     protected void addRetryNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, ChainNode.RetryTimesEnum retryTimes) {
         addNodes(nodeClasses, ChainNode.FailHandleEnum.RETRY, retryTimes, null);
     }
 
-    protected void addRetryNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, ChainNode.RetryTimesEnum retryTimes, LongSupplier getTimeout) {
-        addNodes(nodeClasses, ChainNode.FailHandleEnum.RETRY, retryTimes, getTimeout);
+    protected void addRetryNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, ChainNode.RetryTimesEnum retryTimes, LongSupplier getNodeTimeout) {
+        addNodes(nodeClasses, ChainNode.FailHandleEnum.RETRY, retryTimes, getNodeTimeout);
     }
 
     /**
      * 添加节点
      *
-     * @param nodeClasses nodeClasses
-     * @param failHandle  failHandle
-     * @param getTimeout  getTimeout
-     * @param retryTimes  retryTimes
+     * @param nodeClasses    nodeClasses
+     * @param failHandle     failHandle
+     * @param getNodeTimeout getNodeTimeout
+     * @param retryTimes     retryTimes
      */
-    private void addNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, ChainNode.FailHandleEnum failHandle, ChainNode.RetryTimesEnum retryTimes, LongSupplier getTimeout) {
+    private void addNodes(@NonNull Collection<Class<? extends AbstractNode>> nodeClasses, ChainNode.FailHandleEnum failHandle, ChainNode.RetryTimesEnum retryTimes, LongSupplier getNodeTimeout) {
         if (CollectionUtils.isEmpty(nodeClasses)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getSimpleName());
         }
 
         for (Class<? extends AbstractNode> nodeClass : nodeClasses) {
-            addNode(nodeClass, failHandle, retryTimes, getTimeout);
+            addNode(nodeClass, failHandle, retryTimes, getNodeTimeout);
         }
     }
 
     /**
      * 添加节点
      *
-     * @param nodeClass  nodeClass
-     * @param failHandle failHandle
-     * @param getTimeout getTimeout
-     * @param retryTimes retryTimes
+     * @param nodeClass      nodeClass
+     * @param failHandle     failHandle
+     * @param getNodeTimeout getNodeTimeout
+     * @param retryTimes     retryTimes
      */
-    private void addNode(Class<? extends AbstractNode> nodeClass, ChainNode.FailHandleEnum failHandle, ChainNode.RetryTimesEnum retryTimes, LongSupplier getTimeout) {
+    private void addNode(Class<? extends AbstractNode> nodeClass, ChainNode.FailHandleEnum failHandle, ChainNode.RetryTimesEnum retryTimes, LongSupplier getNodeTimeout) {
         if (Objects.isNull(nodeClass)) {
             throw new ProcessException(ProcessException.MsgEnum.NODE_EMPTY.getMsg() + "=" + this.getClass().getSimpleName());
         }
@@ -146,15 +147,15 @@ public abstract class AbstractChain<T> {
             throw new ProcessException(ProcessException.MsgEnum.NODE_REPEAT.getMsg() + "=" + nodeClass.getSimpleName());
         }
 
-        chainNodeMap.put(nodeClass, ChainNode.create(null, failHandle, getTimeout, retryTimes));
+        chainNodeMap.put(nodeClass, ChainNode.create(null, failHandle, getNodeTimeout, retryTimes));
     }
 
 
     /**
-     * 获取超时时间，单位毫秒
+     * 获取链路超时时间，单位毫秒
      */
-    protected long getTimeout() {
-        return DEFAULT_TIMEOUT;
+    protected long getChainTimeout() {
+        return DEFAULT_CHAIN_TIMEOUT;
     }
 
     /**
@@ -430,10 +431,10 @@ public abstract class AbstractChain<T> {
         // 等待执行完成
         String logPrefix = getLogPrefix(chainContext);
         try {
-            long timeout = getTimeout();
-            boolean awaitResult = chainParam.getCompletedNodeCountDownLatch().await(timeout, TimeUnit.MILLISECONDS);
+            long chainTimeout = getChainTimeout();
+            boolean awaitResult = chainParam.getCompletedNodeCountDownLatch().await(chainTimeout, TimeUnit.MILLISECONDS);
             if (!awaitResult) {
-                log.info(logPrefix + " execute timeout fail timeout=" + timeout);
+                log.info(logPrefix + " execute timeout fail chainTimeout=" + chainTimeout);
 
                 // 中断链路
                 chainParam.getNodeClassStatusMap().putAll(chainNodeMap.entrySet().stream().collect(Collectors.toConcurrentMap(Map.Entry::getKey, v -> ChainParam.NodeStatusEnum.COMPLETED.getCode(), (v1, v2) -> v2)));
@@ -442,7 +443,7 @@ public abstract class AbstractChain<T> {
                 }
 
                 chainParam.setTimeoutFail(true);
-                chainParam.setProcessResult(buildFailResult(ProcessResult.BaseEnum.TIMEOUT_FAIL.getCode(), ProcessException.MsgEnum.CHAIN_TIMEOUT.getMsg() + " timeout=" + timeout));
+                chainParam.setProcessResult(buildFailResult(ProcessResult.BaseEnum.TIMEOUT_FAIL.getCode(), ProcessException.MsgEnum.CHAIN_TIMEOUT.getMsg() + " chainTimeout=" + chainTimeout));
             } else {
                 log.info(logPrefix + " execute success");
             }
@@ -529,7 +530,7 @@ public abstract class AbstractChain<T> {
             nodeClasses.forEach(nodeClass -> {
                 ChainNode chainNode = chainNodeMap.get(nodeClass);
                 if (Objects.nonNull(chainNode)) {
-                    ThreadUtil.withinTime(buildNodeFuture(chainContext, executorService, nodeClass, chainParam), Duration.ofMillis(chainNode.getGetTimeout().getAsLong()))
+                    ThreadUtil.withinTime(buildNodeFuture(chainContext, executorService, nodeClass, chainParam), Duration.ofMillis(chainNode.getGetNodeTimeout().getAsLong()))
                             .thenRun(() -> startRunNode(chainContext, executorService, childNodeClassMap.get(nodeClass), chainParam))
                             .exceptionally(throwable -> {
                                 chainNode.getFailHandle().getFailHandle().dealFailNode(chainContext, executorService, nodeClass, chainParam, chainNodeMap, childNodeClassMap, this, throwable, getLogPrefix(chainContext));
