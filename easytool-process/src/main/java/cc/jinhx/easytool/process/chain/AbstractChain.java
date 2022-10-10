@@ -1,5 +1,6 @@
 package cc.jinhx.easytool.process.chain;
 
+import cc.jinhx.easytool.core.JsonUtil;
 import cc.jinhx.easytool.process.*;
 import cc.jinhx.easytool.process.monitor.Monitor;
 import cc.jinhx.easytool.process.node.AbstractNode;
@@ -417,6 +418,9 @@ public abstract class AbstractChain<T> {
      * @param executorService executorService
      */
     private ProcessResult<T> doExecute(ChainContext<T> chainContext, ExecutorService executorService) {
+        StringBuffer logStr = new StringBuffer(getLogPrefix(chainContext));
+        log.info(logStr + " start chainContext=" + JsonUtil.objectConvertToJson(chainContext));
+
         // 校验参数
         ProcessResult<T> checkParamsResult = doCheckParams(chainContext);
         if (Objects.nonNull(checkParamsResult)) {
@@ -453,45 +457,47 @@ public abstract class AbstractChain<T> {
             chainParam.setProcessResult(buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.CHAIN_UNKNOWN.getMsg() + " error=" + getExceptionLog(e)));
         }
 
-        // 失败
+        ProcessResult<T> failResult;
+        // 不为空则失败
         if (Objects.nonNull(chainParam.getProcessResult())) {
             if (chainParam.isTimeoutFail()) {
-                ProcessResult<T> onTimeoutFailResult = doOnTimeoutFail(chainContext);
-                if (Objects.nonNull(onTimeoutFailResult)) {
-                    return onTimeoutFailResult;
-                }
+                failResult = doOnTimeoutFail(chainContext);
             } else if (chainParam.isBusinessFail()) {
-                ProcessResult<T> onBusinessFailResult = doOnBusinessFail(chainContext, (BusinessException) chainParam.getFailException());
-                if (Objects.nonNull(onBusinessFailResult)) {
-                    return onBusinessFailResult;
-                }
+                failResult = doOnBusinessFail(chainContext, (BusinessException) chainParam.getFailException());
             } else {
-                ProcessResult<T> onUnknowFailResult = doOnUnknowFail(chainContext, chainParam.getFailException());
-                if (Objects.nonNull(onUnknowFailResult)) {
-                    return onUnknowFailResult;
+                failResult = doOnUnknowFail(chainContext, chainParam.getFailException());
+            }
+
+            if (Objects.nonNull(failResult)) {
+                log.info(logStr + " end processResult=" + JsonUtil.objectConvertToJson(failResult));
+                return failResult;
+            } else {
+                failResult = doAfterExecute(chainContext);
+                if (Objects.nonNull(failResult)) {
+                    log.info(logStr + " end processResult=" + JsonUtil.objectConvertToJson(failResult));
+                    return failResult;
                 }
+
+                log.info(logStr + " end processResult=" + JsonUtil.objectConvertToJson(chainParam.getProcessResult()));
+                return chainParam.getProcessResult();
+            }
+        } else {
+            failResult = doOnSuccess(chainContext);
+            if (Objects.nonNull(failResult)) {
+                log.info(logStr + " end processResult=" + JsonUtil.objectConvertToJson(failResult));
+                return failResult;
             }
 
-            ProcessResult<T> afterExecuteResult = doAfterExecute(chainContext);
-            if (Objects.nonNull(afterExecuteResult)) {
-                return afterExecuteResult;
+            failResult = doAfterExecute(chainContext);
+            if (Objects.nonNull(failResult)) {
+                log.info(logStr + " end processResult=" + JsonUtil.objectConvertToJson(failResult));
+                return failResult;
             }
 
-            return chainParam.getProcessResult();
+            ProcessResult<T> processResult = buildSuccessResult(chainContext.getContextInfo());
+            log.info(logStr + " end processResult=" + JsonUtil.objectConvertToJson(processResult));
+            return processResult;
         }
-
-        // 成功
-        ProcessResult<T> onSuccessResult = doOnSuccess(chainContext);
-        if (Objects.nonNull(onSuccessResult)) {
-            return onSuccessResult;
-        }
-
-        ProcessResult<T> afterExecuteResult = doAfterExecute(chainContext);
-        if (Objects.nonNull(afterExecuteResult)) {
-            return afterExecuteResult;
-        }
-
-        return buildSuccessResult(chainContext.getContextInfo());
     }
 
 
