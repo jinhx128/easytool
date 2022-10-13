@@ -1,7 +1,8 @@
-package cc.jinhx.easytool.process.node;
+package cc.jinhx.easytool.process.test.node;
 
-import cc.jinhx.easytool.process.context.TestContext;
-import cc.jinhx.easytool.process.service.TestService;
+import cc.jinhx.easytool.process.test.context.TestContext;
+import cc.jinhx.easytool.process.node.AbstractNode;
+import cc.jinhx.easytool.process.test.service.TestService;
 import cc.jinhx.easytool.process.BusinessException;
 import cc.jinhx.easytool.process.chain.ChainContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,13 +11,13 @@ import org.springframework.stereotype.Component;
 import java.util.Set;
 
 /**
- * TestGetBByReqNode
+ * TestGetDataBNode
  *
  * @author jinhx
  * @since 2022-03-29
  */
 @Component
-public class TestGetBByReqNode extends AbstractNode<TestContext> {
+public class TestGetDataBNode extends AbstractNode<TestContext> {
 
     @Autowired
     private TestService testService;
@@ -40,7 +41,7 @@ public class TestGetBByReqNode extends AbstractNode<TestContext> {
             throw new RuntimeException(e);
         }
         if ("req".equals(contextInfo.getReq())){
-            contextInfo.setB(testService.getB());
+            contextInfo.setDataB(testService.getDataB());
         }
     }
 

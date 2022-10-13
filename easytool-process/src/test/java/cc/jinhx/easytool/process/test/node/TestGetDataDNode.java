@@ -1,31 +1,30 @@
-package cc.jinhx.easytool.process.node;
+package cc.jinhx.easytool.process.test.node;
 
 import cc.jinhx.easytool.process.BusinessException;
 import cc.jinhx.easytool.process.chain.ChainContext;
-import cc.jinhx.easytool.process.context.TestContext;
-import cc.jinhx.easytool.process.service.TestService;
+import cc.jinhx.easytool.process.test.context.TestContext;
+import cc.jinhx.easytool.process.node.AbstractNode;
+import cc.jinhx.easytool.process.test.service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
- * TestGetEByAllNode
+ * TestGetDataDNode
  *
  * @author jinhx
  * @since 2022-03-29
  */
 @Component
-public class TestGetEByAllNode extends AbstractNode<TestContext> {
+public class TestGetDataDNode extends AbstractNode<TestContext> {
 
     @Autowired
     private TestService testService;
 
     @Override
     public Set<Class<? extends AbstractNode>> getDependsOnNodes() {
-        return new HashSet<>(Arrays.asList(TestGetAByReqNode.class, TestGetBByReqNode.class, TestGetC1ByANode.class, TestGetC2ByBNode.class, TestGetDNode.class));
+        return null;
     }
 
     @Override
@@ -35,11 +34,9 @@ public class TestGetEByAllNode extends AbstractNode<TestContext> {
 
     @Override
     protected void execute(ChainContext<TestContext> chainContext) {
+//        int i = 1/0;
         TestContext contextInfo = chainContext.getContextInfo();
-        if ("A".equals(contextInfo.getA()) && "B".equals(contextInfo.getB()) && "C1".equals(contextInfo.getC1())
-                && "C2".equals(contextInfo.getC2()) && "D".equals(contextInfo.getD())){
-            contextInfo.setE(testService.getE());
-        }
+        contextInfo.setDataD(testService.getDataD());
     }
 
     @Override

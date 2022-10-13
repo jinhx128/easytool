@@ -1,9 +1,10 @@
-package cc.jinhx.easytool.process.node;
+package cc.jinhx.easytool.process.test.node;
 
-import cc.jinhx.easytool.process.context.TestContext;
-import cc.jinhx.easytool.process.chain.ChainContext;
-import cc.jinhx.easytool.process.service.TestService;
 import cc.jinhx.easytool.process.BusinessException;
+import cc.jinhx.easytool.process.chain.ChainContext;
+import cc.jinhx.easytool.process.node.AbstractNode;
+import cc.jinhx.easytool.process.test.context.TestContext;
+import cc.jinhx.easytool.process.test.service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,20 +13,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * TestGetC1ByANode
+ * TestGetDataC2Node
  *
  * @author jinhx
  * @since 2022-03-29
  */
 @Component
-public class TestGetC2ByBNode extends AbstractNode<TestContext> {
+public class TestGetDataC2Node extends AbstractNode<TestContext> {
 
     @Autowired
     private TestService testService;
 
     @Override
     public Set<Class<? extends AbstractNode>> getDependsOnNodes() {
-        return new HashSet<>(Arrays.asList(TestGetBByReqNode.class, TestGetC1ByANode.class));
+        return new HashSet<>(Arrays.asList(TestGetDataBNode.class, TestGetDataC1Node.class));
     }
 
     @Override
@@ -47,8 +48,8 @@ public class TestGetC2ByBNode extends AbstractNode<TestContext> {
 //        int i = 1/0;
 
         System.out.println(Thread.currentThread().getName() + "start4");
-        if ("B".equals(contextInfo.getB()) && "C1".equals(contextInfo.getC1())){
-            contextInfo.setC2(testService.getC() + "2");
+        if ("dataB".equals(contextInfo.getDataB()) && "dataC1".equals(contextInfo.getDataC1())){
+            contextInfo.setDataC2(testService.getDataC2());
         } else {
 //            int i = 1/0;
 //            businessFail(-1, "出错了");

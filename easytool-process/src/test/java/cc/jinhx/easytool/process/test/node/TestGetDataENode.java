@@ -1,9 +1,10 @@
-package cc.jinhx.easytool.process.node;
+package cc.jinhx.easytool.process.test.node;
 
-import cc.jinhx.easytool.process.context.TestContext;
-import cc.jinhx.easytool.process.chain.ChainContext;
-import cc.jinhx.easytool.process.service.TestService;
 import cc.jinhx.easytool.process.BusinessException;
+import cc.jinhx.easytool.process.chain.ChainContext;
+import cc.jinhx.easytool.process.node.AbstractNode;
+import cc.jinhx.easytool.process.test.context.TestContext;
+import cc.jinhx.easytool.process.test.service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,20 +13,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * TestGetC1ByANode
+ * DemoGetDataENode
  *
  * @author jinhx
  * @since 2022-03-29
  */
 @Component
-public class TestGetC1ByANode extends AbstractNode<TestContext> {
+public class TestGetDataENode extends AbstractNode<TestContext> {
 
     @Autowired
     private TestService testService;
 
     @Override
     public Set<Class<? extends AbstractNode>> getDependsOnNodes() {
-        return new HashSet<>(Arrays.asList(TestGetAByReqNode.class));
+        return new HashSet<>(Arrays.asList(TestGetDataANode.class, TestGetDataBNode.class, TestGetDataC1Node.class, TestGetDataC2Node.class, TestGetDataDNode.class));
     }
 
     @Override
@@ -35,16 +36,10 @@ public class TestGetC1ByANode extends AbstractNode<TestContext> {
 
     @Override
     protected void execute(ChainContext<TestContext> chainContext) {
-        System.out.println(Thread.currentThread().getName() + "start1");
-        try {
-            Thread.sleep(700L);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        System.out.println(Thread.currentThread().getName() + "start2");
         TestContext contextInfo = chainContext.getContextInfo();
-        if ("A".equals(contextInfo.getA())){
-            contextInfo.setC1(testService.getC() + "1");
+        if ("dataA".equals(contextInfo.getDataA()) && "dataB".equals(contextInfo.getDataB()) && "dataC1".equals(contextInfo.getDataC1())
+                && "dataC2".equals(contextInfo.getDataC2()) && "dataD".equals(contextInfo.getDataD())){
+            contextInfo.setDataE(testService.getDataE());
         }
     }
 

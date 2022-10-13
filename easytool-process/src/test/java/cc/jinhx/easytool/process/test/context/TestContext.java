@@ -1,4 +1,4 @@
-package cc.jinhx.easytool.process.context;
+package cc.jinhx.easytool.process.test.context;
 
 import lombok.Data;
 
@@ -19,22 +19,22 @@ public class TestContext {
 
     // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 中间数据 ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 
-    private String A;
+    private String dataA;
 
-    private String B;
+    private String dataB;
 
     // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ 中间数据 ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 
 
     // ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 结果 ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
 
-    private String C1;
+    private String dataC1;
 
-    private String C2;
+    private String dataC2;
 
-    private String D;
+    private String dataD;
 
-    private String E;
+    private String dataE;
 
     // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑ 结果 ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
 

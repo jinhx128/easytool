@@ -1,9 +1,12 @@
-package cc.jinhx.easytool.process;
+package cc.jinhx.easytool.process.test;
 
+import cc.jinhx.easytool.process.ProcessResult;
+import cc.jinhx.easytool.process.SpringContextConfig;
+import cc.jinhx.easytool.process.ThreadUtil;
 import cc.jinhx.easytool.process.chain.ChainContext;
 import cc.jinhx.easytool.process.chain.ChainHandler;
-import cc.jinhx.easytool.process.chain.TestChain;
-import cc.jinhx.easytool.process.context.TestContext;
+import cc.jinhx.easytool.process.test.chain.TestChain;
+import cc.jinhx.easytool.process.test.context.TestContext;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,9 +34,9 @@ public class ProcessTest {
 
     @Test
     public void test1() {
-//        ProcessResult<TestContext> processResult = new AbstractHandler<TestContext>() {
+//        ProcessResult<DemoContext> processResult = new AbstractHandler<DemoContext>() {
 //
-//            ChainContext<TestContext> testChainContext = buildChainContext(TestContext.class);
+//            ChainContext<DemoContext> testChainContext = buildChainContext(DemoContext.class);
 //
 //            @Override
 //            protected void checkParams() {
@@ -41,7 +44,7 @@ public class ProcessTest {
 //            }
 //
 //            @Override
-//            protected ProcessResult<TestContext> process() {
+//            protected ProcessResult<DemoContext> process() {
 //                testChainContext.getContextInfo().setReq("re");
 //                return executeChain(TestChain.class, testChainContext);
 //            }
@@ -52,9 +55,9 @@ public class ProcessTest {
 
     @Test
     public void test2() {
-//        ProcessResult<TestContext> processResult = new AbstractHandler<TestContext>() {
+//        ProcessResult<DemoContext> processResult = new AbstractHandler<DemoContext>() {
 //
-//            ChainContext<TestContext> testChainContext = buildChainContext(TestContext.class);
+//            ChainContext<DemoContext> testChainContext = buildChainContext(DemoContext.class);
 //
 //            @Override
 //            protected void checkParams() {
@@ -62,7 +65,7 @@ public class ProcessTest {
 //            }
 //
 //            @Override
-//            protected ProcessResult<TestContext> process() {
+//            protected ProcessResult<DemoContext> process() {
 //                testChainContext.getContextInfo().setReq("req");
 //                return executeChain(TestChain.class, testChainContext);
 //            }
@@ -83,7 +86,7 @@ public class ProcessTest {
     public void test4() {
         ChainContext<TestContext> chainContext = ChainContext.create(TestContext.class);
         chainContext.getContextInfo().setReq("req");
-        ProcessResult<String> processResult = testChain.execute(chainContext, TestContext::getE);
+        ProcessResult<String> processResult = testChain.execute(chainContext, TestContext::getDataE);
         System.out.println(processResult);
     }
 
@@ -99,7 +102,7 @@ public class ProcessTest {
     public void test6() {
         ChainContext<TestContext> chainContext = ChainContext.create(TestContext.class);
         chainContext.getContextInfo().setReq("req");
-        ProcessResult<String> processResult = ChainHandler.execute(TestChain.class, chainContext, TestContext::getE);
+        ProcessResult<String> processResult = ChainHandler.execute(TestChain.class, chainContext, TestContext::getDataE);
         System.out.println(processResult);
     }
 
