@@ -34,7 +34,7 @@ public class RetryFailHandle extends AbstractFailHandle {
         StringBuffer logStr = new StringBuffer(logPrefix);
         ChainNode chainNode = chainNodeMap.get(nodeClass);
         boolean isLastTimes = getIsLastTimes(nodeClass, chainParam, chainNode);
-        int retryCount = chainParam.getNodeClassRetryCountMap().get(nodeClass) + 1;
+        int retryCount = chainParam.getNodeClassRetryCountMap().get(nodeClass);
         try {
             String nodeName = nodeClass.getSimpleName();
             long nodeTimeout = chainNode.getGetNodeTimeout().getAsLong();
@@ -82,11 +82,11 @@ public class RetryFailHandle extends AbstractFailHandle {
                 node.afterExecute(chainContext);
             }
 
-            logStr.append(" start retry node retryTimes=").append(retryTimes.getCode()).append(" retryCount=").append(retryCount);
             if (isLastTimes) {
-                logStr.append(" interrupt node").append(exceptionLog);
+                logStr.append(" stop retry node interrupt node retryTimes=").append(retryTimes.getCode()).append(" retryCount=").append(retryCount).append(" msg=").append(exceptionLog);
+            } else {
+                logStr.append(" start retry node retryTimes=").append(retryTimes.getCode()).append(" retryCount=").append(retryCount + 1).append(" msg=").append(exceptionLog);
             }
-            logStr.append(" msg=").append(exceptionLog);
 
         } catch (Exception e) {
             logStr.append(" retry node dealFailNode fail msg=").append(getExceptionLog(e));
@@ -95,7 +95,7 @@ public class RetryFailHandle extends AbstractFailHandle {
 
             if (!isLastTimes) {
                 // 重试次数加1
-                chainParam.getNodeClassRetryCountMap().put(nodeClass, retryCount);
+                chainParam.getNodeClassRetryCountMap().put(nodeClass, retryCount + 1);
                 chainParam.getNodeClassStatusMap().put(nodeClass, ChainParam.NodeStatusEnum.RETRYING.getCode());
                 chain.startRunNode(chainContext, executorService, Collections.singleton(nodeClass), chainParam);
             } else {

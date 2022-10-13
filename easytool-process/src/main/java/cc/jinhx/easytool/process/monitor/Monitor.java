@@ -78,7 +78,7 @@ public class Monitor {
             });
             log.info(logStr.toString());
             logStr.setLength(0);
-        }), 1200 * 1000, 1200 * 1000, TimeUnit.MILLISECONDS);
+        }), 3600 * 1000, 3600 * 1000, TimeUnit.MILLISECONDS);
     }
 
 
