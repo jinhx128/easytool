@@ -68,7 +68,6 @@ public class TestChain extends AbstractChain<TestContext> {
         return threadContextConfig;
     }
 
-
     @Override
     protected void checkParams(ChainContext<TestContext> chainContext) {
 

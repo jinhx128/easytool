@@ -62,7 +62,6 @@ public class DemoChain extends AbstractChain<DemoContext> {
         return new HashSet<>(Collections.singletonList(new KeyThreadContextConfig<>("traceId", MDC::get, MDC::put, MDC::remove)));
     }
 
-
     @Override
     protected void checkParams(ChainContext<DemoContext> chainContext) {
 
