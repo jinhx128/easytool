@@ -15,6 +15,7 @@ Easytool中的大部分方法来自开发过程中的真实需求，它既是大
 |  easytool-core   |   核心包，包括对集合处理、日期、各种Util等   |
 | easytool-crypto  | 加密解密模块，提供对称、非对称和摘要算法封装 |
 | easytool-process |        基于spring封装的任务编排小框架        |
+
 可以根据需求对每个模块单独引入，也可以通过引入easytool-all方式引入所有模块。
 
 ## 使用
