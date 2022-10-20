@@ -25,10 +25,18 @@ public class DemoTest {
 
     @Test
     public void test1() {
+        // 创建上下文
         ChainContext<DemoContext> chainContext = ChainContext.create(DemoContext.class);
+        // 设置入参
         chainContext.getContextInfo().setReq("req");
-        ProcessResult<DemoContext> processResult = ChainHandler.execute(DemoChain.class, chainContext);
-        System.out.println(processResult);
+
+        // 执行指定链路，并返回所有数据
+        ProcessResult<DemoContext> processResult1 = ChainHandler.execute(DemoChain.class, chainContext);
+        System.out.println(processResult1);
+
+        // 执行指定链路，并返回指定数据
+        ProcessResult<String> processResult2 = ChainHandler.execute(DemoChain.class, chainContext, DemoContext::getDataG);
+        System.out.println(processResult2);
     }
 
 }

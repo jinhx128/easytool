@@ -68,13 +68,17 @@ public class DemoChain extends AbstractChain<DemoContext> {
     }
 
     /**
-     * 设置节点信息
+     * 设置节点信息，链路的执行顺序跟此处的添加顺序无关
      */
     @Override
     protected void setNodeInfo() {
+        // 添加重试节点DemoGetDataANode，重试次数为1，并配置节点超时时间。执行遇到异常时重试执行该节点，达到最大重试次数后还未执行成功，则中断链路，并返回异常信息
         this.addRetryNode(DemoGetDataANode.class, ChainNode.RetryTimesEnum.ONE, DemoChain::getNodeTimeout);
+        // 添加中断节点DemoGetDataBNode，DemoGetDataCNode，并配置节点超时时间。执行遇到异常时中断链路，并返回异常信息
         this.addInterruptNodes(Arrays.asList(DemoGetDataBNode.class, DemoGetDataCNode.class), DemoChain::getNodeTimeout);
+        // 添加抛弃节点DemoGetDataDNode，并配置节点超时时间。执行遇到异常时抛弃该节点，继续执行后续节点
         this.addAbandonNode(DemoGetDataDNode.class, DemoChain::getNodeTimeout);
+        // 添加中断节点DemoGetDataENode，DemoGetDataFNode，DemoGetDataGNode，并配置节点超时时间。执行遇到异常时中断链路，并返回异常信息
         this.addInterruptNodes(Arrays.asList(DemoGetDataENode.class, DemoGetDataFNode.class, DemoGetDataGNode.class), DemoChain::getNodeTimeout);
     }
 
