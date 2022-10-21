@@ -323,6 +323,20 @@
                     </gpgArguments>
                 </configuration>
             </plugin>
+
+            <!-- auto close and release on nexus -->
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>releases</serverId>
+                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                    <stagingProgressTimeoutMinutes>60</stagingProgressTimeoutMinutes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
