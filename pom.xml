@@ -146,7 +146,7 @@
 
     <profiles>
         <profile>
-            <id>dev</id>
+            <id>release</id>
             <build>
                 <plugins>
                     <!-- gpg -->
