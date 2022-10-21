@@ -28,14 +28,13 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-          server-id: releases
-          server-username: MAVEN_CENTRAL_USERNAME
-          server-password: MAVEN_CENTRAL_PASSWORD
-          gpg-passphrase:  MAVEN_GPG_PASSPHRASE
+          server-id: ossrh
+          server-username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          server-password: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          gpg-passphrase:  ${{ secrets.MAVEN_GPG_PASSPHRASE }}
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
       # 4. 发布到Maven中央仓库
       - name: Publish to Apache Maven Central
-        # 执行maven deploy命令
         uses: samuelmeuli/action-maven-publish@v1
         with:
           gpg_private_key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
