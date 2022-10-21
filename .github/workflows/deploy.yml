@@ -17,7 +17,6 @@ jobs:
     # 任务的步骤
     steps:
       # 1. 声明 checkout 仓库代码到工作区
-      - name: Checkout Git Repo
       - uses: actions/checkout@v2
       # 2. 安装Java 环境 这里会用到的参数就是 Git Action secrets中配置的，
       - name: Set up JDK 1.8
@@ -45,3 +44,11 @@ jobs:
           MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
           # gpg短密码
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSWORD }}
+      # 5. Nexus自动部署
+      - name: Release on nexus
+        uses: jinhx128/maven-nexus-release@v1
+        with:
+          # Nexus用户名
+          maven-repo-server-username: ${{ secrets.OSSRH_USER }}
+          # Nexus密码
+          maven-repo-server-password: ${{ secrets.OSSRH_PASSWORD }}
