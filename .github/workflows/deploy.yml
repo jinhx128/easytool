@@ -39,8 +39,8 @@ jobs:
         run: mvn clean deploy -P release -Dcheckstyle.skip
         env:
           # Nexus用户名
-          MAVEN_USERNAME: ${{ MAVEN_CENTRAL_USERNAME }}
+          MAVEN_USERNAME: MAVEN_CENTRAL_USERNAME
           # Nexus密码
-          MAVEN_CENTRAL_TOKEN: ${{ MAVEN_CENTRAL_TOKEN }}
+          MAVEN_CENTRAL_TOKEN: MAVEN_CENTRAL_TOKEN
           # gpg短密码
-          MAVEN_GPG_PASSPHRASE: ${{ MAVEN_GPG_PASSPHRASE }}
+          MAVEN_GPG_PASSPHRASE: MAVEN_GPG_PASSPHRASE
