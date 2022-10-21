@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-          # 设置Maven中央仓库配置
+      # 3. 设置Maven中央仓库配置
       - name: Set up Apache Maven Central
         uses: actions/setup-java@v1
         with:
@@ -33,10 +33,10 @@ jobs:
           server-password: ${{ secrets.OSSRH_PASSWORD }}
           gpg-passphrase:  ${{ secrets.GPG_PASSWORD }}
           gpg-private-key: ${{ secrets.GPG_SECRET }}
-      # 3. 发布到Maven中央仓库
+      # 4. 发布到Maven中央仓库
       - name: Publish to Apache Maven Central
         # 执行maven deploy命令
-        run: mvn clean deploy -Dcheckstyle.skip
+        run: mvn clean deploy -P release -Dcheckstyle.skip
         env:
           # Nexus用户名
           MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
@@ -44,11 +44,3 @@ jobs:
           MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
           # gpg短密码
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSWORD }}
-            # Nexus自动部署
-      - name: Release on nexus
-        uses: monkeyWie/maven-nexus-release@v1
-        with:
-          # Nexus用户名
-          maven-repo-server-username: ${{ secrets.OSSRH_USER }}
-          # Nexus密码
-          maven-repo-server-password: ${{ secrets.OSSRH_PASSWORD }}
