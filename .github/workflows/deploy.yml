@@ -44,3 +44,11 @@ jobs:
           MAVEN_CENTRAL_TOKEN: ${{ secrets.OSSRH_PASSWORD }}
           # gpg短密码
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSWORD }}
+      # 5. Nexus自动部署
+      - name: Release on nexus
+        uses: jinhx128/maven-nexus-release@v1
+        with:
+          # Nexus用户名
+          maven-repo-server-username: ${{ secrets.OSSRH_USER }}
+          # Nexus密码
+          maven-repo-server-password: ${{ secrets.OSSRH_PASSWORD }}
