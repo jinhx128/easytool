@@ -184,13 +184,6 @@
                             <autoReleaseAfterClose>true</autoReleaseAfterClose>
                             <stagingProgressTimeoutMinutes>60</stagingProgressTimeoutMinutes>
                         </configuration>
-                        <dependencies>
-                            <dependency>
-                                <groupId>com.thoughtworks.xstream</groupId>
-                                <artifactId>xstream</artifactId>
-                                <version>1.4.15</version> <!-- apparently this needs to be exactly this version -->
-                            </dependency>
-                        </dependencies>
                     </plugin>
                 </plugins>
             </build>
@@ -234,13 +227,6 @@
                             <autoReleaseAfterClose>true</autoReleaseAfterClose>
                             <stagingProgressTimeoutMinutes>60</stagingProgressTimeoutMinutes>
                         </configuration>
-                        <dependencies>
-                            <dependency>
-                                <groupId>com.thoughtworks.xstream</groupId>
-                                <artifactId>xstream</artifactId>
-                                <version>1.4.15</version> <!-- apparently this needs to be exactly this version -->
-                            </dependency>
-                        </dependencies>
                     </plugin>
 
                 </plugins>
@@ -314,29 +300,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!-- gpg -->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-gpg-plugin</artifactId>-->
-<!--                <version>1.6</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>sign-artifacts</id>-->
-<!--                        <phase>verify</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>sign</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            &lt;!&ndash; 这个configuration必须配置，用于gpg非交互式密码输入 &ndash;&gt;-->
-<!--                            <gpgArguments>-->
-<!--                                <arg>&#45;&#45;pinentry-mode</arg>-->
-<!--                                <arg>loopback</arg>-->
-<!--                            </gpgArguments>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
         </plugins>
     </build>
 
