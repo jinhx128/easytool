@@ -28,19 +28,16 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-          server-id: releases
-          server-username: MAVEN_CENTRAL_USERNAME
-          server-password: MAVEN_CENTRAL_TOKEN
-          gpg-passphrase:  MAVEN_GPG_PASSPHRASE
+          server-id: ossrh
+          server-username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          server-password: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          gpg-passphrase:  ${{ secrets.MAVEN_GPG_PASSPHRASE }}
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
       # 4. 发布到Maven中央仓库
       - name: Publish to Apache Maven Central
-        # 执行maven deploy命令
-        run: mvn clean deploy -P release -Dcheckstyle.skip
-        env:
-          # Nexus用户名
-          MAVEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          # Nexus密码
-          MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
-          # gpg短密码
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        uses: samuelmeuli/action-maven-publish@v1
+        with:
+          gpg_private_key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg_passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          nexus_username: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          nexus_password: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}

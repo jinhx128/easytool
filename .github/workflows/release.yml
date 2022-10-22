@@ -1,0 +1,16 @@
+name: release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'pom.xml'
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: release-drafter/release-drafter@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
