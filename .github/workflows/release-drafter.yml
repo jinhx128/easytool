@@ -1,15 +1,15 @@
-name: release
+name: release-drafter
 
 on:
+  # 支持手动触发构建
+  workflow_dispatch:
   push:
     branches:
       - main
-    paths:
-      - 'pom.xml'
-jobs:
-  release:
-    runs-on: ubuntu-latest
 
+jobs:
+  update_release_draft:
+    runs-on: ubuntu-latest
     steps:
       - uses: release-drafter/release-drafter@v5
         env:
