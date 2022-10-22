@@ -11,28 +11,20 @@
         <version>1.1.17</version>
     </parent>
 
-    <artifactId>easytool-process</artifactId>
+    <artifactId>easytool-extra</artifactId>
     <name>${artifactId}</name>
     <description>${artifactId}</description>
 
+    <properties>
+        <commons-net>3.6</commons-net>
+    </properties>
+
     <dependencies>
+        <!-- FTP依赖包 -->
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <optional>true</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <optional>true</optional>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>cc.jinhx</groupId>
-            <artifactId>easytool-core</artifactId>
-            <version>${project.parent.version}</version>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>${commons-net}</version>
             <optional>true</optional>
         </dependency>
     </dependencies>
