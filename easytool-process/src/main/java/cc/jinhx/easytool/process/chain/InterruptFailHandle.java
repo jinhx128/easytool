@@ -43,7 +43,6 @@ public class InterruptFailHandle extends AbstractFailHandle {
                 cause = throwable.getCause();
             }
 
-
             if (cause instanceof TimeoutException) {
                 logStr.append(" node [").append(nodeName).append("] execute timeout fail nodeTimeout=").append(nodeTimeout);
                 processResult = buildFailResult(ProcessResult.BaseEnum.TIMEOUT_FAIL.getCode(), ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);
@@ -57,6 +56,8 @@ public class InterruptFailHandle extends AbstractFailHandle {
                 logStr.append(" node [").append(nodeName).append("]").append(" execute unknown fail");
                 processResult = buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
             }
+
+            logStr.append(" interrupt node msg=").append(exceptionLog).append("\n");
 
             chainParam.setFailException((Exception) cause);
 
@@ -75,9 +76,6 @@ public class InterruptFailHandle extends AbstractFailHandle {
             chainParam.setProcessResult(processResult);
 
             node.afterExecute(chainContext);
-
-            logStr.append(" interrupt node msg=").append(exceptionLog);
-
         } catch (Exception e) {
             logStr.append(" interrupt node dealFailNode fail msg=").append(getExceptionLog(e));
         } finally {

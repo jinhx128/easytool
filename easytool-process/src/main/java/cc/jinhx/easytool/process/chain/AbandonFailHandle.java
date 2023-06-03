@@ -41,7 +41,6 @@ public class AbandonFailHandle extends AbstractFailHandle {
                 cause = throwable.getCause();
             }
 
-
             if (cause instanceof TimeoutException) {
                 logStr.append(" node [").append(nodeName).append("] execute timeout fail nodeTimeout=").append(nodeTimeout);
             } else if (cause instanceof ProcessException) {
@@ -51,6 +50,8 @@ public class AbandonFailHandle extends AbstractFailHandle {
             } else {
                 logStr.append(" node [").append(nodeName).append("] execute unknown fail");
             }
+
+            logStr.append(" abandon node msg=").append(exceptionLog).append("\n");
 
             if (cause instanceof TimeoutException) {
                 node.onTimeoutFail(chainContext);
@@ -63,9 +64,6 @@ public class AbandonFailHandle extends AbstractFailHandle {
             }
 
             node.afterExecute(chainContext);
-
-            logStr.append(" abandon node msg=").append(exceptionLog);
-
         } catch (Exception e) {
             logStr.append(" abandon node dealFailNode fail msg=").append(getExceptionLog(e));
         } finally {

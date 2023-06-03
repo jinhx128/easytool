@@ -47,7 +47,6 @@ public class RetryFailHandle extends AbstractFailHandle {
                 cause = throwable.getCause();
             }
 
-
             if (cause instanceof TimeoutException) {
                 logStr.append(" node [").append(nodeName).append("] execute timeout fail nodeTimeout=").append(nodeTimeout);
                 processResult = buildFailResult(ProcessResult.BaseEnum.TIMEOUT_FAIL.getCode(), ProcessException.MsgEnum.NODE_TIMEOUT.getMsg() + "=" + nodeName);
@@ -60,6 +59,12 @@ public class RetryFailHandle extends AbstractFailHandle {
             } else {
                 logStr.append(" node [").append(nodeName).append("] execute unknown fail");
                 processResult = buildFailResult(ProcessResult.BaseEnum.UNKNOW_FAIL.getCode(), ProcessException.MsgEnum.NODE_UNKNOWN.getMsg() + "=" + nodeName + " error=" + exceptionLog);
+            }
+
+            if (isLastTimes) {
+                logStr.append(" stop retry node interrupt node retryTimes=").append(retryTimes.getCode()).append(" retryCount=").append(retryCount).append(" msg=").append(exceptionLog).append("\n");
+            } else {
+                logStr.append(" start retry node retryTimes=").append(retryTimes.getCode()).append(" retryCount=").append(retryCount + 1).append(" msg=").append(exceptionLog).append("\n");
             }
 
             if (isLastTimes) {
@@ -81,13 +86,6 @@ public class RetryFailHandle extends AbstractFailHandle {
 
                 node.afterExecute(chainContext);
             }
-
-            if (isLastTimes) {
-                logStr.append(" stop retry node interrupt node retryTimes=").append(retryTimes.getCode()).append(" retryCount=").append(retryCount).append(" msg=").append(exceptionLog);
-            } else {
-                logStr.append(" start retry node retryTimes=").append(retryTimes.getCode()).append(" retryCount=").append(retryCount + 1).append(" msg=").append(exceptionLog);
-            }
-
         } catch (Exception e) {
             logStr.append(" retry node dealFailNode fail msg=").append(getExceptionLog(e));
         } finally {
