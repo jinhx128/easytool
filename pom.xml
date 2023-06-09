@@ -7,7 +7,7 @@
 
     <groupId>cc.jinhx</groupId>
     <artifactId>easytool-parent</artifactId>
-    <version>1.1.18</version>
+    <version>1.1.19</version>
 
     <name>easytool</name>
     <description>easytool</description>
@@ -120,6 +120,7 @@
         <module>easytool-core</module>
         <module>easytool-process</module>
         <module>easytool-crypto</module>
+        <module>easytool-extra</module>
     </modules>
 
     <developers>

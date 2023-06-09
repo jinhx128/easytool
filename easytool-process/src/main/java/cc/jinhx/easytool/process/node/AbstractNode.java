@@ -65,6 +65,8 @@ public abstract class AbstractNode<T> {
 
         long time = System.currentTimeMillis() - startTime;
 
+        chainContext.getNodeTimeMap().put(this.getClass(), time);
+
         logInfo.append(" time=").append(time);
         log.info(logInfo.toString());
         logInfo.setLength(0);

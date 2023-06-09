@@ -1,5 +1,6 @@
 package cc.jinhx.easytool.process.chain;
 
+import cc.jinhx.easytool.process.node.AbstractNode;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +8,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.util.Map;
 
 /**
  * 链路上下文
@@ -29,6 +31,12 @@ public class ChainContext<T> implements Serializable {
      * 日志
      */
     protected String logStr;
+
+    /**
+     * 节点耗时map
+     */
+    protected Map<Class<? extends AbstractNode>, Long> nodeTimeMap;
+
 
     private ChainContext(T contextInfo, String logStr) {
         this.contextInfo = contextInfo;
