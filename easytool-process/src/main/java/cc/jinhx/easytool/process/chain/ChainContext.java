@@ -8,6 +8,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -35,7 +36,7 @@ public class ChainContext<T> implements Serializable {
     /**
      * 节点耗时map
      */
-    protected Map<Class<? extends AbstractNode>, Long> nodeTimeMap;
+    protected Map<Class<? extends AbstractNode>, Long> nodeTimeMap = new HashMap<>();
 
 
     private ChainContext(T contextInfo, String logStr) {
